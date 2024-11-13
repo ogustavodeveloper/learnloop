@@ -11,6 +11,9 @@ from docx import Document
 from sqlalchemy import desc
 import google.generativeai as genai
 from openai import AzureOpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),  

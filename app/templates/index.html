@@ -34,7 +34,7 @@
     padding: 15px;
     font-weight: 700;
     font-size: 16px;
-    background-color: #aeff00;
+    background-color: var(--corDestaque);
     color: #000;
     border-radius: 6px;
     position: relative;
@@ -84,7 +84,7 @@
     text-align: center;
     margin-top: 40px;
     padding: 10px;
-    background-color: #aeff00;
+    background-color: var(--corDestaque);
     color: black;
   }
 
@@ -108,15 +108,19 @@
 {% block content %}
 
 <div class="container">
-  <section> 
-    <a href="https://instagram.com/ogustavo.developer">
-      <img src="{{url_for('static', filename='img/ads-3.png')}}"> 
-    </a>
-  </section> 
+  <h3><span id="username-placeholder"></span></h3>
+  <h3>O que você quer fazer agora?</h3>
+  <div class="mapa-btn">
+    <button onclick="window.location.href='/feed/duvidas'"><span>Fórum de Dúvidas</span></button>
+    <button onclick="window.location.href='/feed/artigos'"><span>Feed de Artigos</span></button>
+    <button onclick="window.location.href='/avaliar-redacao'"><span>Corretor de Redação</span></button>
+    <button onclick="window.location.href='/session'"><span>Sessão de Estudos</span></button>
+    <button onclick="window.location.href='/feciba-mostra'"><span>Projetos FECIBA</span></button>
+  </div>
 </div>
 
 <div class="container">
-  <h3><span id="username-placeholder"></span></h3>
+
   <p>Explore os mais recentes conteúdos do LearnLoop!</p>
   <div id="ultimos-artigos" class="list-artigos">
     {% for artigo in artigos %}
@@ -128,17 +132,6 @@
   </div>
   <button onclick="window.location.href='/feed/artigos'">Ver Todos os Conteúdos...</button>
   <p>Siga nosso Instagram para ficar por dentro das atualizações, tirar dúvidas e ver tutoriais sobre o site: <a href="https://instagram.com/learnloop.of" style="color: #fff;">@learnloop.of clique aqui para ir direto para nosso perfil</a></p>
-</div>
-
-<div class="container">
-  <h3>Escolha uma opção:</h3>
-  <div class="mapa-btn">
-    <button onclick="window.location.href='/feed/duvidas'"><span>Fórum de Dúvidas</span></button>
-    <button onclick="window.location.href='/feed/artigos'"><span>Feed de Artigos</span></button>
-    <button onclick="window.location.href='/avaliar-redacao'"><span>Corretor de Redação</span></button>
-    <button onclick="window.location.href='/session'"><span>Sessão de Estudos</span></button>
-    <button onclick="window.location.href='/feciba-mostra'"><span>Projetos FECIBA</span></button>
-  </div>
 </div>
 
 
