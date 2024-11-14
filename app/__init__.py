@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data-2024-learnloop-6.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data-learnloop-5.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '123'
 app.config["PERMANENT_SESSION_LIFETIME"] = 3600 * 24 * 7  # 7 dias
