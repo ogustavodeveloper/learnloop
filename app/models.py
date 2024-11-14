@@ -22,8 +22,9 @@ class Artigo(db.Model):
   categoria = db.Column(db.String(64))
   tags = db.Column(db.String(64))
   likes = db.Column(db.Integer)
+  views = db.Column(db.Integer)
 
-  def __init__(self, titulo, texto, autor, data, categoria, tags, likes, id):
+  def __init__(self, titulo, texto, autor, data, categoria, tags, likes, id, views):
     self.titulo = titulo
     self.texto = texto
     self.autor = autor
@@ -32,55 +33,13 @@ class Artigo(db.Model):
     self.tags = tags
     self.likes = likes
     self.id = id
+    self.views = views
 
 class Material(db.Model):
   id = db.Column(db.String(), primary_key=True)
   nome = db.Column(db.String(255))
   link = db.Column(db.String())
   autor = db.Column(db.String())
-
-
-class Complementos(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  autor = db.Column(db.String())
-  text = db.Column(db.String())
-  artigo = db.Column(db.String())
-
-class Duvidas(db.Model):
-    __tablename__ = 'duvidas'
-    id = db.Column(db.String(), primary_key=True)
-    texto = db.Column(db.String())
-    autor = db.Column(db.String())
-
-    def __init__ (self, id, texto, autor):
-        self.id = id
-        self.texto = texto
-        self.autor = autor
-
-
-class Respostas(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  texto = db.Column(db.String())
-  autor = db.Column(db.String())
-  referencia = db.Column(db.String())
-
-  def __init__(self, id, texto, autor, referencia):
-    self.id = id
-    self.texto = texto
-    self.autor = autor
-    self.referencia = referencia 
-
-class LearnPlan(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  titulo = db.Column(db.String())
-  texto = db.Column(db.String())
-  autor = db.Column(db.String())
-
-  def __init__(self, id, titulo, texto, autor):
-    self.id = id
-    self.titulo = titulo
-    self.texto = texto 
-    self.autor = autor
 
 class buscas(db.Model):
   user = db.Column(db.String())
@@ -90,34 +49,6 @@ class buscas(db.Model):
   def __init__(self, user, termo):
     self.user = user
     self.termo = termo
-
-class Grupo(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  nome = db.Column(db.String(64))
-  descricao = db.Column(db.String(128))
-  membros = db.Column(db.String(64))
-  prazo = db.Column(db.DateTime())
-  organizacao = db.Column(db.String())
-  wikis = db.Column(db.String())
-
-  def __init__(self, id, nome, descricao, membros, organizacao, wikis, prazo):
-    self.id = id
-    self.nome = nome
-    self.descricao = descricao
-    self.membros = membros
-    self.organizacao = organizacao
-    self.wikis = wikis
-    self.prazo = prazo
-
-class Files(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  nome = db.Column(db.String(64))
-  group = db.Column(db.String())
-
-  def __init__(self, id, nome, group):
-    self.id = id
-    self.nome = nome
-    self.group = group
 
 class SessionStudie(db.Model):
   user = db.Column(db.String())
@@ -172,6 +103,32 @@ class Correcoes(db.Model):
     self.titulo = titulo 
     self.texto = texto
     self.correcao = correcao 
+
+class Corrections(db.Model):
+  id = db.Column(db.String())
+  user = db.Column(db.String())
+  tema = db.Column(db.String())
+  texto = db.Column(db.String(), primary_key=True)
+  cp1 = db.Column(db.String())
+  cp2 = db.Column(db.String())
+  cp3 = db.Column(db.String())
+  cp4 = db.Column(db.String())
+  cp5 = db.Column(db.String())
+  final = db.Column(db.String())
+  data = db.Column(db.String())
+
+  def __init__(self, id, user, tema, texto, cp1, cp2, cp3, cp4, cp5, final, data):
+    self.id = id
+    self.user = user
+    self.tema = tema
+    self.texto = texto
+    self.cp1 = cp1
+    self.cp2 = cp2 
+    self.cp3 = cp3 
+    self.cp4 = cp4
+    self.cp5 = cp5
+    self.final = final
+    self.data = data 
 
 
 with app.app_context():

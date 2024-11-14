@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}LearnLoop One{% endblock %}
+
+{% block styled %}
+<style>
+.tema{
+    border: 0.5px solid #fff;
+    border-radius: 6px;
+    padding: 10px;
+    color: #fff;
+}
+
+.tema a {
+    color: #fff;
+    text-decoration: none;
+}
+
+
+.redacoes {
+    display: flex;
+   
+    gap: 0.6em;
+    flex-wrap: wrap;
+
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <h3>Corretor de Redações</h3>
+
+    <button onclick='window.location.href="/avaliar-redacao"'>Corrigir Nova Redação</button>
+
+    <div class="redacoes">
+        {% for redacao in redacoes %}
+
+        <div class="tema">
+            <a href="/correcao/{{redacao.id}}">
+                <p>{{redacao.tema}}</p>
+            </a>
+        </div>
+
+        {% endfor %}
+
+     
+    </div>
+</div>
+
+{% endblock %}

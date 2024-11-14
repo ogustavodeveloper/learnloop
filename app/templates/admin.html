@@ -183,27 +183,6 @@
             <button type="submit">Excluir</button>
         </form>
 
-        <h3>Grupos</h3>
-      <details>
-        <summary>Abrir infos</summary>
-        <ul>
-            {% for group in groups %}
-                <li>{{ group.nome }} - {{ group.descricao }} / {{group.id}}</li>
-            {% endfor %}
-        </ul>
-      </details>
-
-        <h3>Arquivos</h3>
-      <details>
-        <summary>Abrir infos</summary>
-        <ul>
-            {% for file in files %}
-                <li>{{ file.nome }} - {{ file.group }}</li>
-            {% endfor %}
-        </ul>
-
-      </details>
-
        <details>
          <summary>Correções do LearnLoop</summary>
          <ul>

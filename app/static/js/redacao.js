@@ -11,9 +11,9 @@ function redacao() {
     tema: document.getElementById("tema").value
   }).then((r) => {
     if (r.data.msg === "success") {
-      document.getElementById("resposta").innerHTML = r.data.response;
+      window.location.href = '/correcao/'+r.data.response
     } else {
-      document.getElementById("resposta").innerHTML = "Houve um erro ao corrigir sua redação, tente novamente! Se o erro persistir, entre em contato pelo nosso Instagram: @learnloop.site e informe que deu erro ao corrigir sua redação que vamos te dar todo o suporte necessário e o mais rápido possível!";
+      document.getElementById("resposta").innerHTML = r.data.details;
     }
   }).catch((error) => {
     document.getElementById("resposta").innerHTML = "Houve um erro ao corrigir sua redação, tente novamente! Se o erro persistir, entre em contato pelo nosso Instagram: @learnloop.of e informe que deu erro ao corrigir sua redação que vamos te dar todo o suporte necessário e o mais rápido possível!";

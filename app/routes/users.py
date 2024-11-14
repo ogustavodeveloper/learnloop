@@ -1,7 +1,7 @@
 from flask import render_template, request, session, jsonify, redirect, url_for, make_response, Response
 from flask.json import jsonify
 from app.routes import users_bp
-from app.models import User, Files, Duvidas, Respostas, Complementos, buscas, Grupo, Artigo, Redacao, Correcoes
+from app.models import User, buscas, Artigo, Redacao, Correcoes
 from passlib.hash import bcrypt_sha256
 from app import db
 import uuid
@@ -111,10 +111,8 @@ def admin_panel():
     users = User.query.all()
     searches = buscas.query.all()
     articles = Artigo.query.all()
-    groups = Grupo.query.all()
-    files = Files.query.all()
     corrections = Correcoes.query.all()
-    return render_template('admin.html', users=users, searches=searches, articles=articles, groups=groups, files=files, correcoes=corrections)
+    return render_template('admin.html', users=users, searches=searches, articles=articles, correcoes=corrections)
 
 # Rota para excluir um artigo
 @users_bp.route('/delete_article')

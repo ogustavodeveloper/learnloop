@@ -34,16 +34,6 @@ def homepage():
     except:
         return render_template("index.html")
 
-
-@artigos_bp.route("/avaliar-redacao")
-def redacion():
-    try:
-        user = session["user"]
-        redacoes = Correcoes.query.filter_by(user=user).all()
-        return render_template("treino-redacao.html", redacoes=redacoes)
-    except Exception as e:
-        return render_template("treino-redacao.html", redacoes=[])
-
 # Rota para criar um artigo (pode ser acessada via POST ou GET)
 @artigos_bp.route("/create-artigo", methods=["POST", "GET"])
 def criarArtigo():
@@ -214,35 +204,7 @@ def feed_artigos():
     artigos = Artigo.query.all()
     return render_template("feed.html", artigos=artigos, feciba_results=None)
 
-@artigos_bp.route("/learn-ai/redacao", methods=["POST"])
-def gerarAvaliacaoPorIa():
-    try:
-        user = session["user"]
-        data = request.get_json()
-        print(data["nivel"])
 
-        # Fazendo a chamada à API do Azure OpenAI
-        chat_completion = client.chat.completions.create(
-            model="gpt-4o",  # Nome do deployment configurado no Azure
-            messages=[
-                {"role": "system", "content": f"Você é uma IA que avalia redações, foque nas informações do usuário, e forneça insights com base em redações nota mil no ENEM. Corrija com base nas 5 competências do ENEM e atribua notas para cada competência e uma nota final, e seja gentil e elogie bastante para motivar o estudante a continuar aprimorando. Mostre cada erro(se tiver) e sugira melhorias e exemplos. O nível de conhecimento dos usuários é: {data['nivel']} e o tema proposto é: {data['tema']}. Não coloque nenhum subtítulo na redação, nem título, só negrito e itálico quando necessário."},
-                {"role": "user", "content": f"Título: {data['title']}. Redação: {data['content']}"}
-            ]
-        )
-
-        assistant_response = chat_completion.choices[0].message.content
-
-        newCorrecao = Correcoes(user, data["tema"], data["content"], markdown.markdown(assistant_response))
-        db.session.add(newCorrecao)
-        db.session.commit()
-
-        return jsonify({
-            "msg": "success",
-            "response": markdown.markdown(assistant_response)
-        })
-
-    except Exception as e:
-        return redirect('/login')
 
 @artigos_bp.route("/api/gerar-artigo-ai", methods=["POST"])
 def gerarArtigoPorIa():

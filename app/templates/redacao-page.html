@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+    <style>
+        .competencia { margin-bottom: 1.5em; }
+        .competencia strong { display: block; margin-bottom: 0.5em; }
+        .nota, .analise { margin-left: 1em; }
+        .descricao { font-style: italic; color: #555; }
+        h3{
+            line-height: 0.9em;
+        }
+    </style>
+
+    {% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h3>Correção Detalhada</h3>
+
+        {% if error %}
+            <p>{{ error }}</p>
+        {% else %}
+            <h3>Tema: {{ correcao.tema }}</h3>
+            <p><strong>Texto:</strong> {{ correcao.texto }}</p>
+            
+            <h4>Análise de Competências</h4>
+
+            {% set competencias = [correcao.cp1, correcao.cp2, correcao.cp3, correcao.cp4, correcao.cp5] %}
+            {% set descricoes = [
+                "Competência 1: Demonstrar o domínio da norma culta da língua escrita.",
+                "Competência 2: Compreender a proposta de redação e aplicar conceitos de várias áreas para desenvolver o tema.",
+                "Competência 3: Selecionar, relacionar, organizar e interpretar informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
+                "Competência 4: Demonstrar conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
+                "Competência 5: Elaborar proposta de intervenção para o problema abordado, respeitando os direitos humanos."
+            ] %}
+
+            {% for i in range(competencias|length) %}
+                {% if competencias[i] %}
+                    {% set nota, analise = competencias[i].split('\\') %}
+                    <div class="competencia">
+                        <strong>{{ descricoes[i] }}</strong>
+                        <p class="nota"><strong>Nota:</strong> {{ nota }}</p>
+                        <p class="analise"><strong>Análise:</strong> {{ analise }}</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            
+            <h4>Nota Final</h4>
+            {% set final_nota, final_analise = correcao.final.split('\\') %}
+            <p><strong>Nota Final:</strong> {{ final_nota }}</p>
+            <p><strong>Análise Final:</strong> {{ final_analise }}</p>
+        {% endif %}
+    </div>
+
+
+    {% endblock %}
