@@ -103,9 +103,12 @@ def gerarAvaliacaoPorIa():
 
 @redacao_bp.route('/redacao')
 def redacaoPage():
-    correcoes = Corrections.query.filter_by(user=session['user']).all()
+    try:
+      correcoes = Corrections.query.filter_by(user=session['user']).all()
 
-    return render_template('redacoes.html', redacoes=correcoes)
+      return render_template('redacoes.html', redacoes=correcoes)
+    except Exception as e:
+        return redirect("/login")
 
 @redacao_bp.route("/correcao/<id>")
 def correcaoPage(id):
