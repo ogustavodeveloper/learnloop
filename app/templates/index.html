@@ -17,7 +17,8 @@
   .mapa-btn {
     display: flex;
     gap: 0.6em;
-    flex-wrap: wrap;
+    flex-direction: row;
+    overflow: scroll;
   }
 
   .mapa-btn button {
@@ -83,9 +84,14 @@
     color: black;
   }
 
+  .mapa-btn img {
+    width: 40%;
+    border-radius: 6px;
+  }
+
   /* Estilos responsivos */
   @media screen and (max-width: 1000px) {
-    .mapa-btn button {
+    .mapa-btn img {
       width: 100%;
     }
 
@@ -113,15 +119,26 @@
   <h3>O que você quer fazer agora?</h3>
   <div class="mapa-btn">
 
-    
+    <img src="../static/img/corretor.png">
+
+    <img src="../static/img/corretor.png">
+
+    <img src="../static/img/corretor.png">
+
+    <img src="../static/img/corretor.png">
+
+    <img src="../static/img/corretor.png">
 
 
 
+<!--
     <button onclick="window.location.href='/feed/duvidas'"><span>Fórum de Dúvidas</span></button>
     <button onclick="window.location.href='/feed/artigos'"><span>Feed de Artigos</span></button>
     <button onclick="window.location.href='/redacao'"><span>Corretor de Redação</span></button>
     <button onclick="window.location.href='/session'"><span>Sessão de Estudos</span></button>
     <button onclick="window.location.href='/feciba-mostra'"><span>Projetos FECIBA</span></button>
+
+  -->
   </div>
 </div>
 
