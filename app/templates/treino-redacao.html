@@ -44,33 +44,9 @@
     <textarea id="conteudo" placeholder="Digite sua redação"></textarea>
   </div>
   <button onclick="redacao()">Enviar</button>
-  <button onclick="carregarFoto()">Carregar Foto do Caderno</button>
-  <button onclick="salvarRedacao()">Salvar Redação em sua conta</button>
+  <!-- <button onclick="carregarFoto()">Carregar Foto do Caderno</button> -->
 </div>
 
-<div class="container">
-  <p id="resposta" style="display: flex; flex-direction: column; gap: 0.5em;"</p>
-</div>
-
-<div class="container">
-  <h3>Suas Redações Corrigidas</h3>
-  {% if redacoes is not defined or redacoes.length == 0 %}
-  <p>Nenhuma Redação Salva.</p>
-  {% else %}
-  <div>
-    {% for redacao in redacoes %}
-    <details>
-      <summary>{{redacao.titulo}}</summary>
-      {{redacao.texto | safe}}
-      <br><br>
-      <strong>Correção:</strong>
-      {{redacao.correcao | safe}}
-    </details>
-{% endfor %}
-    
-  </div>
-  {% endif %}
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
