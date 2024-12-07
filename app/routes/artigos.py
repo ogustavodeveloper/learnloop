@@ -57,7 +57,7 @@ def criarArtigo():
 
         data = "sla"
 
-        newArtigo = Artigo(titulo=title, texto=markdown.markdown(conteudo), autor=user, data=data, categoria=categoria, tags=tags, likes=0, id=str(uuid.uuid4()))
+        newArtigo = Artigo(titulo=title, texto=markdown.markdown(conteudo), autor=user, data=data, categoria=categoria, tags=tags, likes=0, id=str(uuid.uuid4()), views=0)
         db.session.add(newArtigo)
         db.session.commit()
 
@@ -117,6 +117,7 @@ def artigoPage(id):
         user = 'visit'
 
     artigo = Artigo.query.filter_by(id=id).first()
+    artigo.views = artigo.views + 1
     autor = User.query.filter_by(id=artigo.autor).first()
     if artigo:
         return render_template("post.html", artigo=artigo, autor=autor)
