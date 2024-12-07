@@ -89,6 +89,26 @@
     border-radius: 6px;
   }
 
+@keyframes slide-hint {
+    0% {
+      transform: translateX(0);
+    }
+            
+    50% {
+      transform: translateX(-40px);
+                  
+    }
+                    
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .mapa-btn img{
+    animation: slide-hint 2s ease-in-out;
+  }
+
+
   /* Estilos responsivos */
   @media screen and (max-width: 1000px) {
     .mapa-btn img {
@@ -119,15 +139,15 @@
   <h3>O que você quer fazer agora?</h3>
   <div class="mapa-btn">
 
-    <img src="../static/img/corretor.png">
+    <img src="../static/img/corretor.png" onclick="location.href='/redacao'">
 
-    <img src="../static/img/corretor.png">
+    <img src="../static/img/conteudos.png" onclick="location.href='/feed/artigos'">
 
-    <img src="../static/img/corretor.png">
+    <img src="../static/img/sessoes.png" onclick="location.href='/session'">
 
-    <img src="../static/img/corretor.png">
+    <img src="../static/img/mostra.png" onclick="location.href='/feciba-mostra'">
 
-    <img src="../static/img/corretor.png">
+    
 
 
 
