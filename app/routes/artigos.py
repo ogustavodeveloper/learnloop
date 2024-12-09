@@ -118,6 +118,8 @@ def artigoPage(id):
 
     artigo = Artigo.query.filter_by(id=id).first()
     artigo.views = artigo.views + 1
+    
+    db.session.commit()
     autor = User.query.filter_by(id=artigo.autor).first()
     if artigo:
         return render_template("post.html", artigo=artigo, autor=autor)
