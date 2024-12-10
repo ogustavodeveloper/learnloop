@@ -49,7 +49,7 @@ function carregarFoto() {
         }
       }).then((f) => {
         if (f.data.msg === "success") {
-          document.getElementById("conteudo").value = f.data.redacao;
+          document.getElementById("conteudo").value += f.data.redacao;
         }
       }).catch((error) => {
         console.error("Erro ao carregar a foto:", error);
