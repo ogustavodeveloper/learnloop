@@ -2,7 +2,11 @@ function redacao() {
   var title = document.getElementById("titulo");
   var conteudo = document.getElementById("conteudo");
 
-  document.getElementById("resposta").innerHTML = "<p>Esperando resposta...</p>";
+  Swal.fire({
+    title: "Corrigindo sua redação...",
+    text: "Aguarde, em instantes você será redirecionado para uma página com a correção detalhada.",
+    icon: "info"
+  })
   
   axios.post("/learn-ai/redacao", {
     title: title.value,
