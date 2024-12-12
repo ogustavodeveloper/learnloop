@@ -53,7 +53,8 @@ def gerarAvaliacaoPorIa():
             messages=[
                 {"role": "system", "content": "Você é um assistente de IA especializado em correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação e responder exclusivamente em um formato JSON, com base em redações nota MIL do ENEM, seguindo este modelo: {'competencia1': {'nota': 100, 'analise': 'Descrição detalhada do desempenho na competência 1'}, 'competencia2': {'nota': 120, 'analise': 'Descrição detalhada do desempenho na competência 2'}, ..., 'notaFinal': {'nota': 500, 'analise': 'Descrição geral do desempenho'}}. Inclua a nota e uma análise detalhada para cada competência, sem adicionar explicações ou textos fora desse modelo JSON."},
                 {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
-            ]
+            ],
+            temperature=0.2
         )
 
         assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')

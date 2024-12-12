@@ -20,11 +20,13 @@
 {% endblock %}
 
 {% block content %}
+<!--
 <div class="container">
   <section onclick="window.location.href='https://instagram.com/ogustavo.developer">
     <img src="{{url_for('static', filename='img/ads-3.png')}}" alt="Anúncio">
   </section>
 </div>
+-->
 <div class="container">
   <h3>Corretor de Redação</h3>
   {% if not session["user"] %}
@@ -43,8 +45,8 @@
   </select>
     <textarea id="conteudo" placeholder="Digite sua redação"></textarea>
   </div>
-  <button onclick="redacao()">Enviar</button>
-  <button onclick="carregarFoto()">Carregar Foto do Caderno</button> 
+  <button onclick="redacao()">Enviar para Correção</button>
+  <button onclick="carregarFoto()">Digitalizar Redação Manuscrita</button> 
 </div>
 
 
