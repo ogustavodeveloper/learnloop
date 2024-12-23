@@ -20,7 +20,11 @@ function redacao() {
       document.getElementById("resposta").innerHTML = r.data.details;
     }
   }).catch((error) => {
-    document.getElementById("resposta").innerHTML = "Houve um erro ao corrigir sua redação, tente novamente! Se o erro persistir, entre em contato pelo nosso Instagram: @learnloop.of e informe que deu erro ao corrigir sua redação que vamos te dar todo o suporte necessário e o mais rápido possível!";
+    Swal.fire({
+      title: "Houve um erro ao corrigir a sua redacão.",
+      text: "Verifique se você preencheu todos os campos corretamente, e lembrando que o site não corrige redações iguais!",
+      icon: "error"
+    })
     console.error("Erro:", error);
   });
 }
@@ -52,7 +56,11 @@ function carregarFoto() {
           document.getElementById("conteudo").value += f.data.redacao;
         }
       }).catch((error) => {
-        console.error("Erro ao carregar a foto:", error);
+        Swal.fire({
+          title: "Erro ao carregar sua foto",
+          text: "Verifique se o arquivo está nos formatos: '.png, .jpeg, jpg' e tente novamente.",
+          icon: "error"
+        })
       });
     }
   });
