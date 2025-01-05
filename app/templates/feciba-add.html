@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    LearnLoop One
+    LearnLoop One | Submissão de Projetos
 {% endblock %}
 
 {% block content %}
@@ -10,6 +10,13 @@
 
     <form action="/api/postar-projeto" method="POST" enctype="multipart/form-data">
         <input type="text" name="title" placeholder="Digite aqui o titulo do seu projeto" id="title"></input>
+
+        <input type="text" name="participantes" placeholder="Digite aqui os participantes do seu projeto" id="participantes"></input>
+
+        <input type="text" name="tags" placeholder="Digite aqui as tags do seu projeto(separadas por vírgula)" id="tags"></input>
+        
+        
+        
         <textarea name="resumo" placeholder="Digite aqui o resumo do seu projeto" id="resumo"></textarea>
         
         <input type="file" name="imagem"></input>

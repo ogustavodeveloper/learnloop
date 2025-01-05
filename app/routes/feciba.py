@@ -38,6 +38,8 @@ def postarProjeto():
         print(nome_arquivo)
         projeto = request.files["projeto"]
         nome_projeto = projeto.filename if projeto else None
+        participantes = request.form["participantes"]
+        tags = request.form["tags"]
 
         if not imagem or not projeto:
             return jsonify({"error": "Imagem ou projeto não foram fornecidos."}), 400
@@ -52,7 +54,7 @@ def postarProjeto():
         projeto_az = upload_to_azure_blob("learnloop-projetos", caminho_projeto_temp, nome_projeto)
 
         # Salvar tudo no banco de dados 
-        feciba = Feciba(title=request.form["title"], resumo=markdown.markdown(request.form["resumo"]), id=str(uuid.uuid4()), image_url=imagem_az, project_url=projeto_az, author=session["user"])
+        feciba = Feciba(title=request.form["title"], resumo=markdown.markdown(request.form["resumo"]), id=str(uuid.uuid4()), image_url=imagem_az, project_url=projeto_az, author=session["user"], participantes=participantes, tags=tags)
         db.session.add(feciba)
         db.session.commit()
 

@@ -83,14 +83,19 @@ class Feciba(db.Model):
   image_url = db.Column(db.String())
   project_url = db.Column(db.String())
   author = db.Column(db.String())
+  participantes = db.Column(db.String())
+  tags = db.Column(db.String())
+  
 
-  def __init__(self, title, resumo, id, image_url, project_url, author):
+  def __init__(self, title, resumo, id, image_url, project_url, author, participantes, tags):
     self.title = title 
     self.resumo = resumo 
     self.id = id 
     self.image_url = image_url
     self.project_url = project_url 
-    self.author = author 
+    self.author = author
+    self.participantes = participantes
+    self.tags = tags
 
 class Correcoes(db.Model):
   user = db.Column(db.String())
