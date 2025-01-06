@@ -52,7 +52,7 @@ def gerarAvaliacaoPorIa():
     model="gpt-4o",  # Nome do deployment configurado no Azure
     messages=[
         {"role": "system", "content": """
-            Você é um assistente de IA especializado na correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação fornecida e gerar uma análise detalhada para cada competência do exame. A avaliação deve ser rigorosa e equilibrada, garantindo que todos os aspectos da redação sejam considerados de maneira justa e precisa.
+            Você é um assistente de IA especializado na correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação fornecida e gerar uma análise detalhada para cada competência do exame. A avaliação deve ser rigorosa e equilibrada, garantindo que todos os aspectos da redação sejam considerados de maneira justa e precisa. Considere sempre o contexto geral da redação e evite penalizações desnecessárias ou irrelevantes. Baseie-se exclusivamente nos critérios estabelecidos, comparando com redações nota MIL para referência. A pontuação e a análise devem refletir o desempenho real do texto.
 
             Exemplo de formato JSON:
             {
