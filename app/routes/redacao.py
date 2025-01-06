@@ -49,13 +49,44 @@ def gerarAvaliacaoPorIa():
 
         # Fazendo a chamada à API do Azure OpenAI
         chat_completion = client.chat.completions.create(
-            model="gpt-4o",  # Nome do deployment configurado no Azure
-            messages=[
-                {"role": "system", "content": "Você é um assistente de IA especializado em correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação e responder exclusivamente em um formato JSON, com base em redações nota MIL do ENEM, seguindo este modelo: {'competencia1': {'nota': 100, 'analise': 'Descrição detalhada do desempenho na competência 1'}, 'competencia2': {'nota': 120, 'analise': 'Descrição detalhada do desempenho na competência 2'}, ..., 'notaFinal': {'nota': 500, 'analise': 'Descrição geral do desempenho'}}. Inclua a nota e uma análise detalhada para cada competência, sem adicionar explicações ou textos fora desse modelo JSON."},
-                {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
-            ],
-            temperature=0.2
-        )
+    model="gpt-4o",  # Nome do deployment configurado no Azure
+    messages=[
+        {"role": "system", "content": """
+            Você é um assistente de IA especializado na correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação fornecida e gerar uma análise detalhada para cada competência do exame. A avaliação deve ser rigorosa e equilibrada, garantindo que todos os aspectos da redação sejam considerados de maneira justa e precisa.
+
+            Exemplo de formato JSON:
+            {
+                "competencia1": {
+                    "nota": 100,
+                    "analise": "Análise do domínio da modalidade escrita formal da língua portuguesa. Penalize se houver erros de ortografia, concordância verbal e nominal, pontuação inadequada ou uso incorreto da norma culta."
+                },
+                "competencia2": {
+                    "nota": 120,
+                    "analise": "Análise da capacidade de compreender a proposta de redação e desenvolver o tema de maneira clara, dentro dos limites do formato dissertativo-argumentativo. Penalize se o tema não for abordado de forma adequada ou se o desenvolvimento for superficial."
+                },
+                "competencia3": {
+                    "nota": 140,
+                    "analise": "Análise da organização e interpretação das informações, fatos, opiniões e argumentos. A argumentação deve ser clara, bem estruturada e coerente. Penalize falhas na lógica ou na articulação das ideias."
+                },
+                "competencia4": {
+                    "nota": 120,
+                    "analise": "Análise do uso adequado dos mecanismos linguísticos, como coesão, coerência e conectivos. Penalize se a redação apresentar falhas de coesão ou desconexão entre as ideias."
+                },
+                "competencia5": {
+                    "nota": 100,
+                    "analise": "Análise da proposta de intervenção. A proposta deve ser clara, viável e detalhada, respeitando os direitos humanos. Penalize se a proposta for vaga, irrealista ou não abordar adequadamente a solução do problema."
+                },
+                "notaFinal": {
+                    "nota": 500,
+                    "analise": "Descrição geral do desempenho da redação, considerando as cinco competências. A nota final deve refletir a soma das notas das competências, com penalizações para falhas em aspectos essenciais como coesão, argumentação, adequação ao tema e proposta de intervenção."
+                }
+            }
+        """},
+        {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
+    ],
+    temperature=0.2,
+    top_p=0.7
+)
 
         assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
         print(assistant_response)
