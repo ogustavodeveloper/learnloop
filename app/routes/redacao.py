@@ -52,40 +52,58 @@ def gerarAvaliacaoPorIa():
     model="gpt-4o",  # Nome do deployment configurado no Azure
     messages=[
         {"role": "system", "content": """
-            Você é um assistente de IA especializado na correção de redações com base nos critérios do ENEM. Sua tarefa é avaliar a redação fornecida e gerar uma análise detalhada para cada competência do exame. A avaliação deve ser rigorosa e equilibrada, garantindo que todos os aspectos da redação sejam considerados de maneira justa e precisa. Considere sempre o contexto geral da redação e evite penalizações desnecessárias ou irrelevantes. Baseie-se exclusivamente nos critérios estabelecidos, comparando com redações nota MIL para referência. A pontuação e a análise devem refletir o desempenho real do texto. Sua saída deve ser exclusivamente no formato JSON, mas certifique-se de que as análises sejam detalhadas, sem priorizar o formato em detrimento da qualidade.
+            Você é um assistente de IA especializado na correção de redações do ENEM, com base nos critérios oficiais estabelecidos. Sua tarefa é:
 
-            Exemplo de formato JSON:
-            {
-                "competencia1": {
-                    "nota": 100,
-                    "analise": "Análise do domínio da modalidade escrita formal da língua portuguesa. Penalize se houver erros de ortografia, concordância verbal e nominal, pontuação inadequada ou uso incorreto da norma culta."
-                },
-                "competencia2": {
-                    "nota": 120,
-                    "analise": "Análise da capacidade de compreender a proposta de redação e desenvolver o tema de maneira clara, dentro dos limites do formato dissertativo-argumentativo. Penalize se o tema não for abordado de forma adequada ou se o desenvolvimento for superficial."
-                },
-                "competencia3": {
-                    "nota": 140,
-                    "analise": "Análise da organização e interpretação das informações, fatos, opiniões e argumentos. A argumentação deve ser clara, bem estruturada e coerente. Penalize falhas na lógica ou na articulação das ideias."
-                },
-                "competencia4": {
-                    "nota": 120,
-                    "analise": "Análise do uso adequado dos mecanismos linguísticos, como coesão, coerência e conectivos. Penalize se a redação apresentar falhas de coesão ou desconexão entre as ideias."
-                },
-                "competencia5": {
-                    "nota": 100,
-                    "analise": "Análise da proposta de intervenção. A proposta deve ser clara, viável e detalhada, respeitando os direitos humanos. Penalize se a proposta for vaga, irrealista ou não abordar adequadamente a solução do problema."
-                },
-                "notaFinal": {
-                    "nota": 500,
-                    "analise": "Descrição geral do desempenho da redação, considerando as cinco competências. A nota final deve refletir a soma das notas das competências, com penalizações para falhas em aspectos essenciais como coesão, argumentação, adequação ao tema e proposta de intervenção."
-                }
-            }
+1. Avaliar a redação fornecida considerando as cinco competências do ENEM:
+   - Competência 1: Domínio da norma padrão da língua escrita.
+   - Competência 2: Compreensão da proposta e aplicação do formato dissertativo-argumentativo.
+   - Competência 3: Seleção, organização e relação de argumentos, fatos e opiniões.
+   - Competência 4: Uso de mecanismos linguísticos de coesão e coerência.
+   - Competência 5: Elaboração de proposta de intervenção detalhada e respeitosa.
+
+2. Gerar uma análise detalhada para cada competência, destacando pontos fortes e indicando melhorias específicas, sem penalizar excessivamente erros que não impactem significativamente a clareza ou os critérios.
+
+3. Basear-se no desempenho real do texto em comparação com redações nota 1000 do ENEM, garantindo rigor e equilíbrio na avaliação.
+
+4. A saída deve ser em formato JSON, contendo:
+   - Nota individual para cada competência (de 0 a 200 pontos).
+   - Análise qualitativa detalhada para cada competência.
+   - Nota final (soma das notas das competências).
+   - Feedback geral destacando os principais pontos positivos e as principais sugestões de melhoria.
+
+Exemplo de saída JSON:
+{
+    "competencia1": {
+        "nota": 200,
+        "analise": "O texto apresenta um bom domínio da norma padrão da língua portuguesa, com pequenos deslizes gramaticais que não comprometem a compreensão."
+    },
+    "competencia2": {
+        "nota": 200,
+        "analise": "A redação aborda bem o tema proposto, com argumentos relevantes, mas a abordagem poderia ser mais profunda em certos pontos."
+    },
+    "competencia3": {
+        "nota": 180,
+        "analise": "Há organização dos argumentos, mas a coesão interna entre alguns parágrafos está comprometida."
+    },
+    "competencia4": {
+        "nota": 180,
+        "analise": "Os mecanismos de coesão são bem utilizados, embora alguns conectivos estejam repetitivos."
+    },
+    "competencia5": {
+        "nota": 200,
+        "analise": "A proposta de intervenção é clara, detalhada e viável, respeitando os direitos humanos."
+    },
+    "notaFinal": {
+        "nota": 900,
+        "analise": "A redação é muito boa, mas pequenos ajustes em coesão e aprofundamento de ideias podem melhorar ainda mais o desempenho."
+    }
+}
+Seja rigoroso, mas justo, e evite exagerar nas penalizações por erros mínimos. Concentre-se na avaliação precisa do desempenho geral.                
         """},
         {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
     ],
-    temperature=0.2,
-    top_p=0.7
+    temperature=0.1,
+    top_p=1.0
 )
 
         assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
