@@ -112,3 +112,43 @@ function salvarRedacao() {
     }
   });
 }
+
+function redacaoGuiada() {
+  var tema = document.getElementById("tema").value;
+  var texto = document.getElementById("conteudo").value;
+
+  // Exibir alerta de carregamento
+  Swal.fire({
+    title: 'Carregando...',
+    text: 'Aguarde enquanto processamos sua redação.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  axios.post("/api/redacao-guiada", {
+    tema: tema,
+    texto: texto
+  }).then((response) => {
+    var data = response.data;
+    // Fechar o alerta de carregamento
+    Swal.close();
+
+    if (data.msg === "success") {
+      Swal.fire({
+        title: "Redação Guiada",
+        text: data.guia
+      });
+    }
+  }).catch((error) => {
+    // Fechar o alerta de carregamento em caso de erro
+    Swal.close();
+
+    Swal.fire({
+      title: 'Erro!',
+      text: 'Ocorreu um erro ao processar sua solicitação.',
+      icon: 'error'
+    });
+  });
+}

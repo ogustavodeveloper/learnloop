@@ -176,3 +176,42 @@ def correcaoPage(id):
         # Em caso de erro, exibe uma mensagem apropriada
         print(f"Erro ao carregar a correção: {e}")
         return render_template("redacao-page.html", error="Erro ao carregar a correção.")
+
+@redacao_bp.route("/api/redacao-guiada", methods=["POST"])
+def redacaoGuiada():
+    try:
+        user = session.get("user")
+        if not user:
+            return redirect('/login')
+        
+        data = request.get_json()
+        
+        texto = data.get("texto")
+        
+        tema = data.get("tema")
+
+        # Verifica se todos os campos necessários foram preenchidos
+        if not all([texto, tema]):
+            return jsonify({"msg": "error", "details": "Dados insuficientes para avaliação"}), 400
+
+        # Fazendo a chamada à API do Azure OpenAI
+        chat_completion = client.chat.completions.create(
+                model="gpt-4o-mini",  # Nome do deployment configurado no Azure
+                messages=[
+                    {"role": "system", "content": "Você é um assistente na produção de redações para o ENEM, e irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema. Não coloque informações excessivas, apenas as próximas linhas, por exemplo: Se está no começo, ajuda na introdução, identifique em qual parte ele está(introdução, desenvolvimento ou conclusão). Lembre-se: o estudante está perdido! Exemplo de resposta: 'Nas próximas linhas, tente pensar tais coisas...', ofereça um repertório bacana."},
+                    {"role": "user", "content": f"Tema: {tema}. Redação: {texto}"}
+                ]
+            )
+
+        assistant_response = chat_completion.choices[0].message.content
+        print(assistant_response)
+        return jsonify({
+            "msg": "success",
+            "guia": assistant_response 
+        })
+    except Exception as e:
+        print(str(e))
+        return jsonify({
+            "msg": "error",
+            "error": str(e)
+        })
