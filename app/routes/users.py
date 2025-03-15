@@ -42,8 +42,9 @@ def signup():
 
   username = request.form["username"]
   password = crip(request.form["password"])
+  email = request.form["email"]
 
-  newUser = User(username=username, password=password, id=str(uuid.uuid4()))
+  newUser = User(username=username, email=email, password=password, id=str(uuid.uuid4()))
   db.session.add(newUser)
   db.session.commit()
   session["user"] = newUser.id 

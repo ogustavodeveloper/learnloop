@@ -4,12 +4,14 @@ from app import db, app
 class User(db.Model):
   id = db.Column(db.String(), primary_key=True)
   username = db.Column(db.String(64), index=True, unique=True)
+  email = db.Column(db.String())
   password = db.Column(db.String())
   
 
-  def __init__(self, id, username, password):
+  def __init__(self, id, username, email, password):
     self.id = id
     self.username = username
+    self.email = email
     self.password = password
 
 
