@@ -13,7 +13,12 @@ def termosDeUso():
 
 @users_bp.route("/politica-de-privacidade")
 def politicaPrivacidade():
+    
     return render_template("privacidade.html")
+
+@users_bp.route("/sobre")
+def sobrePage():
+   return render_template("sobre.html")
 
 @users_bp.route("/guia")
 def guia():
