@@ -20,6 +20,10 @@ def politicaPrivacidade():
 def sobrePage():
    return render_template("sobre.html")
 
+@users_bp.route("/contato")
+def contatoPage():
+   return render_template("contato.html")
+
 @users_bp.route("/guia")
 def guia():
   return render_template("guia.html")
