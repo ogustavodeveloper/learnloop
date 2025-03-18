@@ -1,112 +1,131 @@
-from flask import render_template, request, session, jsonify, redirect, url_for, make_response, Response
-from flask.json import jsonify
-from app.routes import users_bp
-from app.models import User, buscas, Artigo, Redacao, Correcoes
-from passlib.hash import bcrypt_sha256
+from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, make_response, Response
 from app import db
+from app.models import User, Artigo, Redacao, Correcoes
+from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
+from app.routes import users_bp
 
+
+# Função que será executada antes de cada requisição dentro deste Blueprint
+@users_bp.before_request
+def before_request():
+    print("Esta função será chamada antes de cada requisição no Blueprint de 'users'.")
+
+# Rota para termos de uso
 @users_bp.route("/termos-de-uso")
 def termosDeUso():
     return render_template("termos.html")
 
+# Rota para política de privacidade
 @users_bp.route("/politica-de-privacidade")
 def politicaPrivacidade():
-    
     return render_template("privacidade.html")
 
+# Rota sobre a página
 @users_bp.route("/sobre")
 def sobrePage():
-   return render_template("sobre.html")
+    return render_template("sobre.html")
 
+# Rota de contato
 @users_bp.route("/contato")
 def contatoPage():
-   return render_template("contato.html")
+    return render_template("contato.html")
 
+# Rota guia
 @users_bp.route("/guia")
 def guia():
-  return render_template("guia.html")
+    return render_template("guia.html")
 
-# Rota para criar um novo usuário
+# Rota para o cadastro de usuário
 @users_bp.route("/cadastro")
 def cadastroPage():
     return render_template("signup.html")
 
+# Rota para login de usuário
 @users_bp.route("/login")
 def loginPage():
     return render_template("login.html")
 
+# Rota para listar todos os usuários
 @users_bp.route('/listar')
 def listar_usuarios():
     usuarios = User.query.all()
     return render_template('users/listar.html', usuarios=usuarios)
 
+# Função de criptografia de senha
 def crip(dado):
-  dado_criptografado = bcrypt_sha256.hash(dado)
-  return str(dado_criptografado)
+    dado_criptografado = bcrypt_sha256.hash(dado)
+    return str(dado_criptografado)
 
+# Rota para o cadastro de um novo usuário via API
 @users_bp.route('/api/signup', methods=["POST"])
 def signup():
+    username = request.form["username"]
+    password = crip(request.form["password"])
+    email = request.form["email"]
 
-  username = request.form["username"]
-  password = crip(request.form["password"])
-  email = request.form["email"]
-
-  newUser = User(username=username, email=email, password=password, id=str(uuid.uuid4()))
-  db.session.add(newUser)
-  db.session.commit()
-  session["user"] = newUser.id 
-
-  
-  return redirect("/")
-
-@users_bp.route("/api/login", methods=["GET"])
-def login():
-  username = request.args.get("username")
-  password = request.args.get("password")
-  user = User.query.filter_by(username=username).first()
-  if user and bcrypt_sha256.verify(password, user.password):
-    session["user"] = user.id
+    newUser = User(username=username, email=email, password=password, id=str(uuid.uuid4()))
+    db.session.add(newUser)
+    db.session.commit()
+    session["user"] = newUser.id
+    session.permanent = True
 
     return redirect("/")
-  else:
-    return "<h1>Usuário ou senha incorreto</h1>"
 
+# Rota de login de usuário via API
+@users_bp.route("/api/login", methods=["GET"])
+def login():
+    username = request.args.get("username")
+    password = request.args.get("password")
+    user = User.query.filter_by(username=username).first()
+    if user and bcrypt_sha256.verify(password, user.password):
+        session["user"] = user.id
+        session.permanent = True
+
+        return redirect("/")
+    else:
+        return "<h1>Usuário ou senha incorretos</h1>"
+
+# Rota para logout
 @users_bp.route("/api/logout")
 def logout():
-  session.clear()
-  return redirect("/login")
+    session.clear()
+    return redirect("/login")
 
+# Rota para obter informações do usuário logado
 @users_bp.route("/api/user")
 def user():
-  user_id = session.get("user")
-  user = User.query.filter_by(id=user_id).first()
-  return jsonify({"user": user})
+    user_id = session.get("user")
+    user = User.query.filter_by(id=user_id).first()
+    return jsonify({"user": user})
 
+# Rota para excluir o usuário
 @users_bp.route("/api/delete-user", methods=["POST"])
 def delete_user():
-  user_id = session.get("user")
-  user = User.query.filter_by(id=user_id).first()
-  senha = request.get_json()["senha"]
-  if bcrypt_sha256.verify(senha, user.password):
-    db.session.delete(user)
-    db.session.commit()
-    session.clear()
-    return jsonify({"msg": "usuario deletado com sucesso"})
-  else:
-    return jsonify({"msg": "Senha incorreta"})
+    user_id = session.get("user")
+    user = User.query.filter_by(id=user_id).first()
+    senha = request.get_json()["senha"]
+    if bcrypt_sha256.verify(senha, user.password):
+        db.session.delete(user)
+        db.session.commit()
+        session.clear()
+        return jsonify({"msg": "usuário deletado com sucesso"})
+    else:
+        return jsonify({"msg": "Senha incorreta"})
 
+# Rota para atualizar os dados do usuário
 @users_bp.route("/api/update-user", methods=["POST"])
 def update_user():
-  data = request.get_json()
-  user_id = session.get("user")
-  user = User.query.filter_by(id=user_id).first()
-  user.username = data["username"]
-  user.password = data["password"]
-  db.session.commit()
-  return jsonify({"msg": "usuario atualizado com sucesso"})
+    data = request.get_json()
+    user_id = session.get("user")
+    user = User.query.filter_by(id=user_id).first()
+    user.username = data["username"]
+    user.password = data["password"]
+    db.session.commit()
+    return jsonify({"msg": "usuário atualizado com sucesso"})
 
+# Rota do Sitemap
 @users_bp.route('/sitemap.xml')
 def sitemap():
     artigos = Artigo.query.all()
@@ -116,6 +135,7 @@ def sitemap():
     response.headers['Content-Type'] = 'application/xml'
     return response
 
+# Rota para o painel de administração
 @users_bp.route('/admin/28092007')
 def admin_panel():
     users = User.query.all()
@@ -153,6 +173,7 @@ def delete_group():
         db.session.commit()
     return redirect("/admin/28092007")
 
+# Rota para o arquivo robots.txt
 @users_bp.route('/robots.txt')
 def robots_txt():
     robots_txt_content = """
@@ -169,6 +190,7 @@ def robots_txt():
     """
     return Response(robots_txt_content, mimetype='text/plain')
 
+# Rota para salvar redações
 @users_bp.route("/api/save-redacao", methods=["POST"])
 def SalvarRedacoes():
     data = request.get_json()
@@ -180,4 +202,3 @@ def SalvarRedacoes():
     return jsonify({
         "msg": "success"
     })
-
