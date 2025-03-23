@@ -17,7 +17,7 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python version
         uses: actions/setup-python@v5
@@ -68,9 +68,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_D53E20E8E0CD4A54A556EB74255A648E }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_33A5928AE5FB4B9E8CACA94DA1823E5D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BA2BB9C5272C492486414973428DA624 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BE66590B3EBA4778924E0EEC82DF8CFB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7D7AF312370E4D68BEF3888540F53ED6 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_010643F6A9C641B29B795A55220FC457 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
