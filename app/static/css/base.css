@@ -133,6 +133,18 @@ img {
   border-radius: 6px;
 }
 
+footer {
+  text-align: center;
+  margin-top: 40px;
+  padding: 10px;
+  background-color: var(--corDestaque);
+  color: black;
+}
+
+footer a {
+  color: black;
+}
+
 @media screen and (max-width: 1000px) {
   .container{
     width: 100%;
