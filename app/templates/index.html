@@ -3,42 +3,46 @@
 {% block title %}LearnLoop | Página Inicial{% endblock %}
 
 {% block metas %}
-<title>LearnLoop | Página Inicial</title>
 <meta name="description" content="A LearnLoop é uma plataforma de estudos impulsionada pela Inteligência Artificial, criada para transformar a educação no Brasil. Junte-se à nossa revolução educacional!">
 <meta name="keywords" content="plataforma de estudos, inteligência artificial, aprendizado online, recursos educacionais">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
      crossorigin="anonymous"></script>
-
 {% endblock %}
 
 {% block styled %}
 <style>
-  /* Estilos dos botões e artigos */
+
+
+  /* Layout dos botões */
   .mapa-btn {
     display: flex;
     gap: 0.6em;
-    flex-direction: row;
-    overflow: scroll;
+    overflow-x: auto;
+    padding-bottom: 10px;
   }
 
-  .mapa-btn button {
+  .mapa-btn img {
     width: 40%;
-    padding: 15px;
-    font-weight: 700;
-    font-size: 16px;
-    background-color: var(--corDestaque);
-    color: #000;
     border-radius: 6px;
-    position: relative;
-    overflow: hidden;
-    /* Removido o efeito de transição */
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
   }
 
-  .mapa-btn button span {
-    position: relative;
-    z-index: 1;
+  .mapa-btn img:hover {
+    transform: scale(1.05);
   }
 
+  /* Efeito de animação para as imagens */
+  @keyframes slide-hint {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-40px); }
+  }
+
+  .mapa-btn img:first-child {
+    animation: slide-hint 2s ease-in-out;
+  }
+
+  /* Estilização de artigos */
   .list-artigos {
     display: flex;
     flex-wrap: wrap;
@@ -46,8 +50,7 @@
   }
 
   .artigo {
-    padding: 7px;
-    border: none;
+    padding: 10px;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
@@ -55,41 +58,40 @@
     background-color: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     width: 40%;
+    transition: background 0.3s;
   }
 
   .artigo:hover {
     background-color: rgba(255, 255, 255, 0.3);
   }
 
-  .list-videos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5em;
-  }
-
-  iframe {
-    border: none;
-    border-radius: 16px;
-  }
-
-  footer {
-    text-align: center;
-    margin-top: 40px;
+  /* Botão de Ver Todos */
+  .btn-ver-todos {
     padding: 10px;
     background-color: var(--corDestaque);
     color: black;
-  }
-
-  footer a {
-    color: black;
-  }
-
-  .mapa-btn img {
-    width: 40%;
+    font-weight: bold;
+    border: none;
     border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
   }
 
-@keyframes slide-hint {
+  .btn-ver-todos:hover {
+    opacity: 0.8;
+  }
+
+  /* Responsividade */
+  @media screen and (max-width: 1000px) {
+    .mapa-btn img,
+    .artigo {
+      width: 100%;
+    }
+  }
+
+  
+
+  @keyframes slide-hint {
     0% {
       transform: translateX(0);
     }
@@ -108,87 +110,60 @@
     animation: slide-hint 2s ease-in-out;
   }
 
-
-  /* Estilos responsivos */
-  @media screen and (max-width: 1000px) {
-    .mapa-btn img {
-      width: 100%;
-    }
-
-    .artigo {
-      width: 100%;
-    }
+  a{
+    color: #fff;
   }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!--
 <div class="container">
-  <section onclick="window.location.href='https://instagram.com/ogustavo.developer">
-    <img src="{{url_for('static', filename='img/ads-3.png')}}" alt="Anúncio">
-  </section>
-</div>
--->
-<div class="container">
-  <h3>
-   <!--<span id="username-placeholder"></span> -->
-   Olá, Estudante!
-  </h3>
+  <h3>Olá, Estudante!</h3>
   <h3>O que você quer fazer agora?</h3>
+
   <div class="mapa-btn">
-
-    <img src="../static/img/corretor.png" onclick="location.href='/redacao'">
-
-    <img src="../static/img/conteudos.png" onclick="location.href='/feed/artigos'">
-
-    <img src="../static/img/sessoes.png" onclick="location.href='/session'">
-
-    <img src="../static/img/mostra.png" onclick="location.href='/feciba-mostra'">
-
+    <img src="{{ url_for('static', filename='img/corretor.png') }}" alt="Corretor de Redação" data-link="/redacao">
+    <img src="{{ url_for('static', filename='img/conteudos.png') }}" alt="Conteúdos Educacionais" data-link="/feed/artigos">
+    <img src="{{ url_for('static', filename='img/sessoes.png') }}" alt="Sessões de Estudos" data-link="/session">
     
-
-
-
-<!--
-    <button onclick="window.location.href='/feed/duvidas'"><span>Fórum de Dúvidas</span></button>
-    <button onclick="window.location.href='/feed/artigos'"><span>Feed de Artigos</span></button>
-    <button onclick="window.location.href='/redacao'"><span>Corretor de Redação</span></button>
-    <button onclick="window.location.href='/session'"><span>Sessão de Estudos</span></button>
-    <button onclick="window.location.href='/feciba-mostra'"><span>Projetos FECIBA</span></button>
-
-  -->
   </div>
 </div>
 
 <div class="container">
-
-  <p>Explore os mais recentes conteúdos do LearnLoop!</p>
+  <p>Explore os mais recentes conteúdos do Estudaê!</p>
+  
   <div id="ultimos-artigos" class="list-artigos">
     {% for artigo in artigos %}
-    <div onclick="window.location.href = '/artigo/{{artigo.id}}'" class="artigo">
-      <strong>{{artigo.titulo}}</strong>
-      <small>{{artigo.categoria}}</small>
-    </div>
+      <div class="artigo" data-link="/artigo/{{ artigo.id }}">
+        <strong>{{ artigo.titulo }}</strong>
+        <small>{{ artigo.categoria }}</small>
+      </div>
     {% endfor %}
   </div>
-  <button onclick="window.location.href='/feed/artigos'">Ver Todos os Conteúdos...</button>
-  <p>Siga nosso Instagram para ficar por dentro das atualizações, tirar dúvidas e ver tutoriais sobre o site: <a href="https://instagram.com/learnloop.of" style="color: #fff;">@learnloop.of clique aqui para ir direto para nosso perfil</a></p>
+
+  <button class="btn-ver-todos" onclick="window.location.href='/feed/artigos'">Explorar Novos Conteúdos</button>
+
+  
 </div>
-
-
-<footer>
-  <p>&copy; 2024 LearnLoop. Todos os direitos reservados.</p>
-  <p><a href="/politica-de-privacidade">Política de Privacidade</a> | <a href="/termos-de-uso">Termos de Uso</a></p>
-</footer>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    const elementosClicaveis = document.querySelectorAll('[data-link]');
+    
+    elementosClicaveis.forEach(elemento => {
+      elemento.addEventListener('click', () => {
+        window.location.href = elemento.getAttribute('data-link');
+      });
+    });
+
+    // Exibição do nome do usuário
     const usernameElement = document.getElementById('username-placeholder');
-    const username = '{{user.username}}' || 'Visitante';
-    const greeting = `Olá, ${username}`;
-    usernameElement.textContent = greeting;
+    if (usernameElement) {
+      const username = '{{ user.username }}' || 'Visitante';
+      usernameElement.textContent = `Olá, ${username}`;
+    }
   });
 </script>
+
 {% endblock %}
