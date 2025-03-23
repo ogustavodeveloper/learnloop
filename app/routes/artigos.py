@@ -34,7 +34,8 @@ def homepage():
     except:
         return render_template("index.html")
 
-# Rota para criar um artigo (pode ser acessada via POST ou GET)
+from datetime import datetime
+
 @artigos_bp.route("/create-artigo", methods=["POST", "GET"])
 def criarArtigo():
     if request.method == "POST":
@@ -43,7 +44,6 @@ def criarArtigo():
         categoria = request.form["category"]
         tags = request.form["tags"]
     
-
         if title == "" or title == " " or len(conteudo) < 1:
             return "Digite algo válido!"
 
@@ -55,13 +55,24 @@ def criarArtigo():
         if user == "visit":
             return "Você precisa estar logado."
 
-        data = "sla"
+        # Captura a data e hora atuais e formata para o padrão do sitemap.xml
+        data = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+00:00')
 
-        newArtigo = Artigo(titulo=title, texto=markdown.markdown(conteudo), autor=user, data=data, categoria=categoria, tags=tags, likes=0, id=str(uuid.uuid4()), views=0)
+        newArtigo = Artigo(
+            titulo=title, 
+            texto=markdown.markdown(conteudo), 
+            autor=user, 
+            data=data,  # Salvando a data formatada
+            categoria=categoria, 
+            tags=tags, 
+            likes=0, 
+            id=str(uuid.uuid4()), 
+            views=0
+        )
         db.session.add(newArtigo)
         db.session.commit()
 
-        return redirect("/artigo/"+newArtigo.id)
+        return redirect("/artigo/" + newArtigo.id)
 
     try:
         user = session['user']
