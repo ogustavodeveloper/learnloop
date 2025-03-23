@@ -5,6 +5,7 @@ from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
 from app.routes import users_bp
+from datetime import datetime
 
 
 # Função que será executada antes de cada requisição dentro deste Blueprint
@@ -126,11 +127,28 @@ def update_user():
     return jsonify({"msg": "usuário atualizado com sucesso"})
 
 # Rota do Sitemap
+
+
 @users_bp.route('/sitemap.xml')
 def sitemap():
     artigos = Artigo.query.all()
-    urls = [f"https://learnloop.site/artigo/{artigo.id}" for artigo in artigos]
+    
+    # Gerar as URLs e incluir a data formatada para cada artigo
+    urls = []
+    for artigo in artigos:
+        # Formatar a data de criação do artigo no formato ISO 8601
+        data_criacao = datetime.strptime(artigo.data, '%Y-%m-%dT%H:%M:%S+00:00').strftime('%Y-%m-%dT%H:%M:%S+00:00')
+        
+        # Adicionar a URL e a data formatada à lista de URLs
+        urls.append({
+            'loc': f"https://learnloop.site/artigo/{artigo.id}",
+            'lastmod': data_criacao
+        })
+
+    # Renderizar o sitemap.xml usando o template, passando as URLs
     sitemap_xml = render_template('sitemap.xml', urls=urls)
+    
+    # Criar a resposta e definir o cabeçalho Content-Type para 'application/xml'
     response = make_response(sitemap_xml)
     response.headers['Content-Type'] = 'application/xml'
     return response
