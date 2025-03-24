@@ -141,7 +141,7 @@ def sitemap():
         
         # Adicionar a URL e a data formatada à lista de URLs
         urls.append({
-            'loc': f"https://learnloop.site/artigo/{artigo.id}",
+            'loc': f"https://learnloop.com.br/artigo/{artigo.id}",
             'lastmod': data_criacao
         })
 
