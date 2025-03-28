@@ -22,7 +22,7 @@ function redacao() {
   }).catch((error) => {
     Swal.fire({
       title: "Houve um erro ao corrigir a sua redacão.",
-      text: "Verifique se você preencheu todos os campos corretamente, e lembrando que o site não corrige redações iguais!",
+      text: `${r.data.response}`,
       icon: "error"
     })
     console.error("Erro:", error);
