@@ -5,7 +5,7 @@
 <meta name="description" content="Leia esse artigo incrível sobre {{artigo.titulo}} com uma linguagem descontraída, leve e inovadora e saia daqui aprendendo de fato.">
 <meta name="keywords" content="{{artigo.tags.replace(' ', ',')}}">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://learnloop.com.br/artigo/{{artigo.id}}">
+<link rel="canonical" href="https://estudae.site/artigo/{{artigo.id}}">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
      crossorigin="anonymous"></script>
 {% endblock %}
@@ -70,7 +70,7 @@
     {% if session['user'] == artigo.autor %}
     <button onclick="deleteArtigo()" style="margin-top: 1em;">Deletar Artigo</button>
     {% endif %}
-    <button style="margin-top: 1em;" onclick="copiarToken('https://learnloop.com.br/artigo/{{artigo.id}}')">Copiar Link do artigo</button>
+    <button style="margin-top: 1em;" onclick="copiarToken('https://estudae.site/artigo/{{artigo.id}}')">Copiar Link do artigo</button>
   </div>
 </article>
 

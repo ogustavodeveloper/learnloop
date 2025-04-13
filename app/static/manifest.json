@@ -1,10 +1,10 @@
 {
-  "name": "LearnLoop",
-  "short_name": "LearnLoop",
+  "name": "Estudaê",
+  "short_name": "Estudaê",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f1f1f1",
-  "theme_color": "#000029",
+  "theme_color": "#000",
   "description": "Aplicativo de aprendizado colaborativo",
   "icons": [
     {
