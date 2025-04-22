@@ -137,6 +137,13 @@ class Corrections(db.Model):
     self.final = final
     self.data = data 
 
+class Video(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  titulo = db.Column(db.String())
+  link = db.Column(db.String())
+  resumo = db.Column(db.String())
+  embed = db.Column(db.String())
+  views = db.Column(db.String())
 
 with app.app_context():
   db.create_all()
