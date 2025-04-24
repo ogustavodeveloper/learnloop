@@ -16,8 +16,12 @@ function redacao() {
   }).then((r) => {
     if (r.data.msg === "success") {
       window.location.href = '/correcao/'+r.data.response
-    } else {
-      document.getElementById("resposta").innerHTML = r.data.details;
+    } else if(r.data.msg === "error") {
+      Swal.fire({
+        title: "Erro ao corrigir sua redação",
+        text: r.data.details,
+        icon: 'error'
+      })
     }
   }).catch((error) => {
     Swal.fire({
@@ -31,7 +35,7 @@ function redacao() {
 
 Swal.fire({
   title: "Conheça o Corretor de Redação",
-  text: "Envie sua redação para receber orientações do Learn.Ai, a inteligência artificial do LearnLoop. Você pode digitar ou enviar uma foto da redação manuscrita. Se quiser, pode salvar a redação na sua conta, mas isso é opcional. Não se preocupe, sua redação só será armazenada se você optar por isso. Estamos aqui para ajudar você a se preparar para o ENEM. 💡",
+  text: "Envie sua redação para receber orientações do Learn.Ai, a inteligência artificial do Estudaê. Você pode digitar ou enviar uma foto da redação manuscrita. Se quiser, pode salvar a redação na sua conta, mas isso é opcional. Não se preocupe, sua redação só será armazenada se você optar por isso. Estamos aqui para ajudar você a se preparar para o ENEM. 💡",
   icon: 'info'
 });
 
