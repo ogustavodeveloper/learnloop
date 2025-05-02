@@ -46,6 +46,9 @@ def gerarAvaliacaoPorIa():
         # Verifica se todos os campos necessários foram preenchidos
         if not all([nivel, tema, conteudo]):
             return jsonify({"msg": "error", "details": "Dados insuficientes para avaliação"}), 400
+        
+        if len(conteudo) < 60:
+            return jsonify({"msg": "error", "details": "Sua redação precisa ser maior!"})
 
         # Fazendo a chamada à API do Azure OpenAI
         chat_completion = client.chat.completions.create(
@@ -108,6 +111,9 @@ Seja rigoroso, mas justo, e evite exagerar nas penalizações por erros mínimos
 
         assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
         print(assistant_response)
+
+
+
         # Converte o JSON de resposta em um dicionário de forma segura
         try:
             response_data = json.loads(assistant_response)
