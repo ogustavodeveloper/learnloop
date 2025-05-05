@@ -59,14 +59,16 @@ class SessionStudie(db.Model):
   id = db.Column(db.String(), primary_key=True)
   data = db.Column(db.String())
   tempo = db.Column(db.String())
+  documento = db.Column(db.String())
 
-  def __init__(self, user, assunto, resumo, data, tempo, id):
+  def __init__(self, user, assunto, resumo, data, tempo, id, documento):
     self.user = user
     self.assunto = assunto
     self.resumo = resumo 
     self.data = data
     self.tempo = tempo
     self.id = id
+    self.documento = documento 
 
 class Redacao(db.Model):
   user = db.Column(db.String())

@@ -77,9 +77,11 @@ textarea {
             </div>
         </div>
         <textarea id="resumo" placeholder="Digite aqui suas anotações"></textarea>
+        <input type="file" id="documento">
         <div class="group-bottons">
             <button id="aprimorar">Aprimorar Anotação com IA</button>
             <button id="salvar">Salvar Sessão de estudos</button>
+            
         </div>
     </div>
 </div>
@@ -88,7 +90,7 @@ textarea {
     <h3>Suas últimas sessões de estudos</h3>
     <div class="session-list">
         {% for session in sessions %}
-        <div class="sessao-estudos" data-assunto="{{ session.assunto }}" data-dia="{{ session.data }}" data-resumo="{{ session.resumo }}" data-tempo="{{ session.tempo }}">
+        <div class="sessao-estudos" data-assunto="{{ session.assunto }}" data-dia="{{ session.data }}" data-resumo="{{ session.resumo }}" data-tempo="{{ session.tempo }}" data-documento="{{ session.documento }}">
             <p><strong>{{ session.assunto }} - {{ session.tempo }}</strong></p>
             <span class="material-symbols-outlined" onclick="window.location.href = '/api/delete-session/{{ session.id }}'">delete</span>
         </div>
@@ -215,15 +217,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const assunto = document.getElementById('assunto').value;
         const tempo = formatarTempo(tempoEstudado);
         const resumo = document.getElementById('resumo').value;
+        const documento = document.getElementById("documento").files[0];
+
+        const formData = new FormData();
+
+        formData.append("assunto", assunto)
+        formData.append("tempo", tempo)
+        formData.append("resumo", resumo)
+        formData.append("documento", documento)
 
         if (assunto && resumo) {
-            axios.post('/api/salvar-sessao', { assunto, tempo, resumo })
+            axios.post('/save-session', formData, {
+                        headers: {
+                                  'Content-Type': 'multipart/form-data'
+                                          }
+                                                
+            })
                 .then(response => {
-                    Swal.fire('Sessão Salva!', response.data.mensagem, 'success');
-                    window.location.reload();
+                    Swal.fire('Sessão Salva!', response.data.msg, 'success');
+                    
                 })
-                .catch(() => {
-                    Swal.fire('Erro', 'Não foi possível salvar a sessão', 'error');
+                .catch((error) => {
+                    Swal.fire('Erro', 'Não foi possível salvar a sessão:' + error , 'error');
                 });
         } else {
             Swal.fire('Erro', 'Por favor, preencha todos os campos.', 'error');
@@ -236,10 +251,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const dia = this.getAttribute('data-dia');
             const resumo = this.getAttribute('data-resumo');
             const tempo = this.getAttribute('data-tempo');
+            const documento = this.getAttribute("data-documento");
 
             Swal.fire({
                 title: `${assunto} - ${tempo}`,
-                html: `<p><strong>Data:</strong> ${dia}</p><p>${resumo}</p>`,
+                html: `<p><strong>Data:</strong> ${dia}</p><p>${resumo}</p><br><br><a style="color: #fff;" href="${documento}">Clique aqui para baixar o documento dessa sessão de estudos.</a>`,
                 icon: 'info'
             });
         });
