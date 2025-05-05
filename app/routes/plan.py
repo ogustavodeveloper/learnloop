@@ -8,12 +8,36 @@ import markdown
 import os
 import datetime
 from openai import AzureOpenAI
+from azure.storage.blob import BlobServiceClient
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version="2024-07-01-preview",
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
 )
+
+def upload_to_azure_blob(container_name, file_path, blob_name):
+        try:
+                # Obter a connection string dos segredos (variável de ambiente)
+            connection_string = os.getenv('CONECTION')
+            if not connection_string:
+                raise ValueError("Connection string não encontrada nos segredos.")
+
+                                                    # Conectar ao serviço Blob e ao container
+            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+                                                                            
+                                                                                    # Fazer upload do arquivo
+            with open(file_path, "rb") as data:
+                blob_client.upload_blob(data, overwrite=True)
+                                                                                                                
+                                                                                                                        # Gerar e retornar o link de acesso ao blob
+            blob_url = blob_client.url
+            return blob_url
+
+        except Exception as e:
+            print(f"Erro ao enviar o arquivo: {e}")
+            return None
 
 @iaplan_bp.route("/session")
 def planPage():
@@ -29,7 +53,7 @@ def download_file():
     # Diretório onde os documentos do Word estão localizados
     directory_path = os.path.abspath("instance")
 
-    file_path = os.path.join(directory_path, "data-learn.db")
+    file_path = os.path.join(directory_path, "data-learn2.db")
 
     # Verifica se o arquivo existe e retorna-o para download
     if os.path.exists(file_path):
@@ -43,16 +67,22 @@ def saveSession():
         user = session["user"]
         user_db = User.query.filter_by(id=user).first()
         if user_db:
-            data = request.get_json()
-            tempo = data["tempo"]
+            
+            tempo = request.form.get("tempo")
             data_session = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            resumo = markdown.markdown(data["resumo"])
-            assunto = data["assunto"]
-            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resumo, data=data_session, tempo=tempo, id=str(uuid.uuid4()))
+            resumo = markdown.markdown(request.form.get("resumo"))
+            assunto = request.form.get("assunto")
+            documento = request.files.get("documento")
+            print(documento.filename)
+            caminho_doc_temp = os.path.join("/tmp", documento.filename)
+            documento.save(caminho_doc_temp)
+            projeto_az = upload_to_azure_blob("learnloop-projetos", caminho_doc_temp, documento.filename)
+
+            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resumo, data=data_session, tempo=tempo, id=str(uuid.uuid4()), documento=projeto_az)
             db.session.add(newSession)
             db.session.commit()
 
-            return jsonify({"msg": "success"})
+            return jsonify({"msg": "success", "msg": documento.filename})
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
