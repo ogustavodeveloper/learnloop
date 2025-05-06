@@ -55,53 +55,18 @@ def gerarAvaliacaoPorIa():
     model="gpt-4o",  # Nome do deployment configurado no Azure
     messages=[
         {"role": "system", "content": """
-            Você é um assistente de IA especializado na correção de redações do ENEM, com base nos critérios oficiais estabelecidos. Sua tarefa é:
+           Você é um corretor de redações do ENEM. Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 2 frases) por competência.
 
-1. Avaliar a redação fornecida considerando as cinco competências do ENEM:
-   - Competência 1: Domínio da norma padrão da língua escrita.
-   - Competência 2: Compreensão da proposta e aplicação do formato dissertativo-argumentativo.
-   - Competência 3: Seleção, organização e relação de argumentos, fatos e opiniões.
-   - Competência 4: Uso de mecanismos linguísticos de coesão e coerência.
-   - Competência 5: Elaboração de proposta de intervenção detalhada e respeitosa.
-
-2. Gerar uma análise detalhada para cada competência, destacando pontos fortes e indicando melhorias específicas, sem penalizar excessivamente erros que não impactem significativamente a clareza ou os critérios.
-
-3. Basear-se no desempenho real do texto em comparação com redações nota 1000 do ENEM, garantindo rigor e equilíbrio na avaliação.
-
-4. A saída deve ser em formato JSON, contendo:
-   - Nota individual para cada competência (de 0 a 200 pontos).
-   - Análise qualitativa detalhada para cada competência.
-   - Nota final (soma das notas das competências).
-   - Feedback geral destacando os principais pontos positivos e as principais sugestões de melhoria.
-
-Exemplo de saída JSON:
+Retorne o resultado em JSON com este formato:
 {
-    "competencia1": {
-        "nota": 200,
-        "analise": "O texto apresenta um bom domínio da norma padrão da língua portuguesa, com pequenos deslizes gramaticais que não comprometem a compreensão."
-    },
-    "competencia2": {
-        "nota": 200,
-        "analise": "A redação aborda bem o tema proposto, com argumentos relevantes, mas a abordagem poderia ser mais profunda em certos pontos."
-    },
-    "competencia3": {
-        "nota": 180,
-        "analise": "Há organização dos argumentos, mas a coesão interna entre alguns parágrafos está comprometida."
-    },
-    "competencia4": {
-        "nota": 180,
-        "analise": "Os mecanismos de coesão são bem utilizados, embora alguns conectivos estejam repetitivos."
-    },
-    "competencia5": {
-        "nota": 200,
-        "analise": "A proposta de intervenção é clara, detalhada e viável, respeitando os direitos humanos."
-    },
-    "notaFinal": {
-        "nota": 900,
-        "analise": "A redação é muito boa, mas pequenos ajustes em coesão e aprofundamento de ideias podem melhorar ainda mais o desempenho."
-    }
+  "competencia1": {"nota": int, "analise": str},
+  "competencia2": {"nota": int, "analise": str},
+  "competencia3": {"nota": int, "analise": str},
+  "competencia4": {"nota": int, "analise": str},
+  "competencia5": {"nota": int, "analise": str},
+  "notaFinal": {"nota": int, "analise": str}
 }
-Seja rigoroso, mas justo, e evite exagerar nas penalizações por erros mínimos. Concentre-se na avaliação precisa do desempenho geral.                
+Seja direto e objetivo.                
         """},
         {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
     ],
