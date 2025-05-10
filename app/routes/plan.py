@@ -45,7 +45,7 @@ def planPage(id):
         user = session['user']
     except:
         return render_template("plan.html", sessions=[])
-    sessao = SessionStudie.query.filter_by(user=session["user"]).first()
+    sessao = SessionStudie.query.filter_by(id=id).first()
     documentos = Documento.query.filter_by(sessao=id).all()
     return render_template("session.html", documentos=documentos, sessao=sessao)
 
@@ -103,7 +103,24 @@ def saveSession():
             resumo = markdown.markdown(request.form.get("resumo"))
             assunto = request.form.get("assunto")
 
-            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resumo, data=data_session, id=str(uuid.uuid4()), revisao=0)
+            user_message = {"role": "user", "content": f"Tema: {assunto}. Minhas anotações: {resumo}"}
+
+                    # Usando o Azure OpenAI para gerar o resumo
+            chat_completion = client.chat.completions.create(
+                                        model="gpt-4o",  # model = "deployment_name"
+                                        messages=[
+                                            {"role": "system", "content": "Você é uma Inteligência Artificial voltada para auxiliar nos estudos. "
+                                                            "Quando o usuário fornecer anotações, reestruture o conteúdo de forma clara, coerente e bem organizada, sem usar markdown. "
+                                                                            "Caso o conteúdo esteja em branco, identifique o tema indicado e crie uma nova anotação explicativa. "
+                                                                                            "Essa nova anotação deve ensinar os conceitos fundamentais que o estudante precisa saber para compreender o assunto, "
+                                                                                                            "e também incluir uma parte dedicada especificamente ao tema central proposto."},
+                                            user_message
+                                        ]
+                                    )
+
+            resposta = chat_completion.choices[0].message.content
+
+            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resposta, data=data_session, id=str(uuid.uuid4()), revisao=0)
             db.session.add(newSession)
             db.session.commit()
 
@@ -111,6 +128,18 @@ def saveSession():
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
+
+@iaplan_bp.route("/update-anotacao", methods=["POST"])
+def updateAnotacao():
+    id = request.form.get("sessao")
+    anotado = request.form.get("anotacao")
+    sessao = SessionStudie.query.filter_by(id=id).first()
+    sessao.resumo = anotado 
+    db.session.commit()
+
+    return jsonify({
+        "msg": "success"
+    })
 
 @iaplan_bp.route("/api/delete-session/<id>")
 def removeSession(id):
