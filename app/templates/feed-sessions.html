@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+<style>
+#list-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+#session {
+    padding: 9px;
+    border: 0.5px solid #fff;
+    border-radius: 6px;
+    color: #fff;
+}
+
+a{
+    color: #fff;
+    text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+   <button onclick="addSession()">Registrar Nova Sessão</button>
+   <br> 
+   <h3>Lista de Sessões</h3>
+   <div id="list-sessions">
+    {% for session in sessions %}
+      <div id="session">
+        <a href="/session/{{session.id}}">{{session.assunto}}</a>
+      </div>
+    {% endfor %}
+   </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" integrity="sha512-WrdC3CE9vf1nBf58JHepuWT4x24uTacky9fuzw2g/3L9JkihgwZ6Cfv+JGTtNyosOhEmttMtEZ6H3qJWfI7gIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+ <script>
+    function addSession() {
+        Swal.fire({
+            title: "Adicionar Sessão de Estudos",
+            html: `
+              <input type="text" placeholder="Digite o assunto" id="assunto">
+              <input type="text placeholder="Digite o que entendeu rapidamente" id="resumo">
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+                const assunto = document.getElementById("assunto").value;
+                const resumo = document.getElementById("resumo").value; 
+
+                const formData = new FormData()
+
+                formData.append("assunto", assunto)
+                formData.append("resumo", resumo)
+
+                return axios.post("/save-session", formData).then(response => {
+                    Swal.fire("Sessão salva com sucesso!", "Recarregue a página", "success")
+                })
+            }
+        })
+    }
+ </script>
+
+{% endblock %}

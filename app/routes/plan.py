@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, send_file
 from app.routes import iaplan_bp
-from app.models import SessionStudie, User
+from app.models import SessionStudie, User, Documento
 from app import db
 import uuid
 import markdown
@@ -39,14 +39,44 @@ def upload_to_azure_blob(container_name, file_path, blob_name):
             print(f"Erro ao enviar o arquivo: {e}")
             return None
 
-@iaplan_bp.route("/session")
-def planPage():
+@iaplan_bp.route("/session/<id>")
+def planPage(id):
     try:
         user = session['user']
     except:
         return render_template("plan.html", sessions=[])
-    sessoes = SessionStudie.query.filter_by(user=session["user"]).all()
-    return render_template("plan.html", sessions=sessoes)
+    sessao = SessionStudie.query.filter_by(user=session["user"]).first()
+    documentos = Documento.query.filter_by(sessao=id).all()
+    return render_template("session.html", documentos=documentos, sessao=sessao)
+
+@iaplan_bp.route("/add-doc", methods=["POST"])
+def addDoc():
+    try:
+      documento = request.files.get("documento")
+      sessao = request.form.get("assunto")
+      caminho_doc_temp = os.path.join("/tmp", documento.filename)
+      documento.save(caminho_doc_temp)
+      filename = documento.filename 
+      projeto_az = upload_to_azure_blob("learnloop-projetos", caminho_doc_temp, documento.filename)
+
+      new_doc = Documento(id=str(uuid.uuid4()), filename=filename, url=projeto_az, sessao=sessao)
+      db.session.add(new_doc)
+      db.session.commit()
+
+      return jsonify({
+        "msg": "success"
+    })
+
+    except Exception as e:
+      return jsonify({"msg": f"deu erro: {e}"})
+    
+
+    
+
+@iaplan_bp.route("/feed-session")
+def feedSession():
+    sessions = SessionStudie.query.filter_by(user=session["user"])
+    return render_template("feed-sessions.html", sessions=sessions)
 
 @iaplan_bp.route("/download-db")
 def download_file():
@@ -68,17 +98,12 @@ def saveSession():
         user_db = User.query.filter_by(id=user).first()
         if user_db:
             
-            tempo = request.form.get("tempo")
+            
             data_session = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             resumo = markdown.markdown(request.form.get("resumo"))
             assunto = request.form.get("assunto")
-            documento = request.files.get("documento")
-            print(documento.filename)
-            caminho_doc_temp = os.path.join("/tmp", documento.filename)
-            documento.save(caminho_doc_temp)
-            projeto_az = upload_to_azure_blob("learnloop-projetos", caminho_doc_temp, documento.filename)
 
-            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resumo, data=data_session, tempo=tempo, id=str(uuid.uuid4()), documento=projeto_az)
+            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resumo, data=data_session, id=str(uuid.uuid4()), revisao=0)
             db.session.add(newSession)
             db.session.commit()
 
@@ -93,7 +118,7 @@ def removeSession(id):
     db.session.delete(session)
     db.session.commit()
 
-    return redirect("/session")
+    return redirect("/feed-session")
 
 @iaplan_bp.route("/api/get-resumo-ia", methods=["POST"])
 def getResumo():

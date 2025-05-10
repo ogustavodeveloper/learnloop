@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+<style>
+#documentos {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5em;
+}
+
+#doc {
+   padding: 9px;
+   border: 0.5px solid #fff;
+   border-radius: 6px;
+}
+
+a{
+   color: #fff;
+   text-decoration: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+   <h3>{{sessao.assunto}}</h3>
+   <small>Criada: {{sessao.data}}</small>
+   <p><strong>Resumo:</strong> {{sessao.resumo | safe }}</p>
+<br>
+   <div class="add-doc">
+      <h2>Adicione um arquivo a sua sessão de estudos:</h2>
+      <input type="file" id="documento-novo" data-sessao="{{sessao.id}}">
+      <button onclick="sendArquivo('{{sessao.id}}')">Adicionar</button>
+   </div>
+<br>
+   <div id="documentos">
+      <h2>Documentos salvos na sessão:</h2>
+      {% if documentos %}
+      {% for documento in documentos %}
+      <a id="doc" href="{{documento.url}}">{{documento.filename}}</a>
+      {% endfor %}
+
+      {% else %}
+      <p>Nenhum.</p>
+      {% endif %}
+   </div>
+
+   <br><br>
+   <button onclick="window.location.href='/api/delete-session/{{sessao.id}}'">Deletar Sessão de Estudos</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" integrity="sha512-WrdC3CE9vf1nBf58JHepuWT4x24uTacky9fuzw2g/3L9JkihgwZ6Cfv+JGTtNyosOhEmttMtEZ6H3qJWfI7gIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+<script src="{{ url_for('static', filename='js/session.js') }}"></script>
+{% endblock %}
