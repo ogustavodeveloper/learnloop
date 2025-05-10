@@ -59,23 +59,9 @@ textarea {
   {% endif %}
     <div>
         <input id="assunto" type="text" placeholder="Qual o assunto que você está estudando?">
-        <div>
-            <label for="metodo-estudo"><strong>Método de Estudo:</strong></label>
-            <select id="metodo-estudo">
-                <option value="tradicional">Técnica Tradicional</option>
-                <option value="pomodoro">Técnica Pomodoro</option>
-                <option value="feynman">Técnica de Feynman</option>
-                <option value="intervalos">Estudo com Intervalos</option>
-            </select>
-        </div>
-        <div id="cronometro">
-            <strong>Tempo estudado</strong>
-            <p id="tempo-estudado">00:00:00</p>
-            <div class="group-bottons">
-                <button id="iniciar">Iniciar</button>
-                <button id="parar">Parar</button>
-            </div>
-        </div>
+        
+
+
         <textarea id="resumo" placeholder="Digite aqui suas anotações"></textarea>
         <input type="file" id="documento">
         <div class="group-bottons">
@@ -103,163 +89,72 @@ textarea {
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    Swal.fire({
-        title: 'Conheça o Sessão de Estudos',
-        text: "Preparado para elevar sua organização e produtividade nos estudos? Aqui, você tem controle total sobre o que estuda. Inicie o cronômetro, faça anotações e, se necessário, clique em 'Aprimorar anotação com IA' para uma versão mais estruturada. Salve suas sessões de estudo, revise suas anotações e compartilhe seu progresso. Aproveite ao máximo!",
-        icon: 'info'
-    });
-
-    let tempoEstudado = 0;
-    let cronometroInterval;
-    let cronometroRodando = false;
-
-    function formatarTempo(segundos) {
-        const horas = Math.floor(segundos / 3600);
-        const minutos = Math.floor((segundos % 3600) / 60);
-        const segundosRestantes = segundos % 60;
-        return `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundosRestantes.toString().padStart(2, '0')}`;
-    }
-
-    function iniciarCronometro(metodo) {
-        let tempoEstudo, tempoDescanso;
-
-        switch (metodo) {
-            case 'pomodoro':
-                tempoEstudo = 25 * 60; // 25 minutos
-                tempoDescanso = 5 * 60; // 5 minutos
-                break;
-            case 'tradicional':
-                tempoEstudo = 60 * 60; // 60 minutos
-                tempoDescanso = 10 * 60; // 10 minutos
-                break;
-            case 'feynman':
-                tempoEstudo = 30 * 60; // 30 minutos
-                tempoDescanso = 10 * 60; // 10 minutos
-                break;
-            case 'intervalos':
-                tempoEstudo = 40 * 60; // 40 minutos
-                tempoDescanso = 10 * 60; // 10 minutos
-                break;
-            default:
-                tempoEstudo = 60; // 1 minuto como fallback
-        }
-
-        let tempoRestante = tempoEstudo;
-
-        cronometroInterval = setInterval(function() {
-            if (tempoRestante > 0) {
-                tempoRestante--;
-                tempoEstudado++;
-                document.getElementById('tempo-estudado').innerText = formatarTempo(tempoEstudado);
-            } else {
-                clearInterval(cronometroInterval);
-                Swal.fire({
-                    title: 'Tempo de Estudo Acabou!',
-                    text: 'Agora, é hora de descansar!',
-                    icon: 'success'
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: 'Conheça o Sessão de Estudos',
+            text: "Aqui você pode controlar seu tempo de estudo, salvar anotações e revisar seu progresso. Seu cronômetro continuará rodando mesmo se a página for fechada. Apenas será interrompido se for pausado manualmente.",
+            icon: 'info'
+        })
+    })
+    
+        document.getElementById('aprimorar').addEventListener('click', function() {
+            const anotacoes = document.getElementById('resumo').value;
+            axios.post('/api/aprimorar-anotacao', { anotações: anotacoes })
+                .then(response => {
+                    document.getElementById('resumo').value = response.data.resultado;
+                    Swal.fire('Anotação Aprimorada!', response.data.resultado, 'success');
+                })
+                .catch(() => {
+                    Swal.fire('Erro', 'Não foi possível aprimorar a anotação', 'error');
                 });
-                iniciarDescanso(tempoDescanso);
-            }
-        }, 1000);
-    }
-
-    function iniciarDescanso(tempoDescanso) {
-        let tempoRestante = tempoDescanso;
-        cronometroInterval = setInterval(function() {
-            if (tempoRestante > 0) {
-                tempoRestante--;
-                document.getElementById('tempo-estudado').innerText = formatarTempo(tempoEstudado);
-            } else {
-                clearInterval(cronometroInterval);
-                Swal.fire({
-                    title: 'Tempo de Descanso Acabou!',
-                    text: 'Volte aos estudos!',
-                    icon: 'success'
-                });
-                iniciarCronometro(document.querySelector('#metodo-estudo').value); // Reiniciar o ciclo
-            }
-        }, 1000);
-    }
-
-    function pausarCronometro() {
-        clearInterval(cronometroInterval);
-        cronometroRodando = false;
-    }
-
-    function pararCronometro() {
-        pausarCronometro(); 
-    }
-
-    document.querySelector('#iniciar').addEventListener('click', function() {
-        if (!cronometroRodando) {
-            cronometroRodando = true;
-            const metodo = document.querySelector('#metodo-estudo').value;
-            iniciarCronometro(metodo);
-        }
-    });
-
-    document.querySelector('#parar').addEventListener('click', pausarCronometro);
-
-    document.getElementById('aprimorar').addEventListener('click', function() {
-        const anotacoes = document.getElementById('resumo').value;
-        axios.post('/api/aprimorar-anotacao', { anotações: anotacoes })
-            .then(response => {
-                document.getElementById('resumo').value = response.data.resultado;
-                Swal.fire('Anotação Aprimorada!', response.data.resultado, 'success');
-            })
-            .catch(() => {
-                Swal.fire('Erro', 'Não foi possível aprimorar a anotação', 'error');
-            });
-    });
-
-    document.getElementById('salvar').addEventListener('click', function() {
-        const assunto = document.getElementById('assunto').value;
-        const tempo = formatarTempo(tempoEstudado);
-        const resumo = document.getElementById('resumo').value;
-        const documento = document.getElementById("documento").files[0];
-
-        const formData = new FormData();
-
-        formData.append("assunto", assunto)
-        formData.append("tempo", tempo)
-        formData.append("resumo", resumo)
-        formData.append("documento", documento)
-
-        if (assunto && resumo) {
-            axios.post('/save-session', formData, {
-                        headers: {
-                                  'Content-Type': 'multipart/form-data'
-                                          }
-                                                
-            })
+        });
+    
+        document.getElementById('salvar').addEventListener('click', function() {
+            const assunto = document.getElementById('assunto').value;
+            const tempo = formatarTempo(tempoEstudado);
+            const resumo = document.getElementById('resumo').value;
+            const documento = document.getElementById("documento").files[0];
+    
+            const formData = new FormData();
+    
+            formData.append("assunto", assunto);
+            formData.append("tempo", tempo);
+            formData.append("resumo", resumo);
+            formData.append("documento", documento);
+    
+            if (assunto && resumo) {
+                axios.post('/save-session', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
                 .then(response => {
                     Swal.fire('Sessão Salva!', response.data.msg, 'success');
-                    
                 })
                 .catch((error) => {
-                    Swal.fire('Erro', 'Não foi possível salvar a sessão:' + error , 'error');
+                    Swal.fire('Erro', 'Não foi possível salvar a sessão: ' + error, 'error');
                 });
-        } else {
-            Swal.fire('Erro', 'Por favor, preencha todos os campos.', 'error');
-        }
-    });
-
-    document.querySelectorAll('.sessao-estudos').forEach(function(item) {
-        item.addEventListener('click', function() {
-            const assunto = this.getAttribute('data-assunto');
-            const dia = this.getAttribute('data-dia');
-            const resumo = this.getAttribute('data-resumo');
-            const tempo = this.getAttribute('data-tempo');
-            const documento = this.getAttribute("data-documento");
-
-            Swal.fire({
-                title: `${assunto} - ${tempo}`,
-                html: `<p><strong>Data:</strong> ${dia}</p><p>${resumo}</p><br><br><a style="color: #fff;" href="${documento}">Clique aqui para baixar o documento dessa sessão de estudos.</a>`,
-                icon: 'info'
+            } else {
+                Swal.fire('Erro', 'Por favor, preencha todos os campos.', 'error');
+            }
+        });
+    
+        document.querySelectorAll('.sessao-estudos').forEach(function(item) {
+            item.addEventListener('click', function() {
+                const assunto = this.getAttribute('data-assunto');
+                const dia = this.getAttribute('data-dia');
+                const resumo = this.getAttribute('data-resumo');
+                const tempo = this.getAttribute('data-tempo');
+                const documento = this.getAttribute("data-documento");
+    
+                Swal.fire({
+                    title: `${assunto} - ${tempo}`,
+                    html: `<p><strong>Data:</strong> ${dia}</p><p>${resumo}</p><br><br><a style="color: #fff;" href="${documento}">Clique aqui para baixar o documento dessa sessão de estudos.</a>`,
+                    icon: 'info'
+                });
             });
         });
     });
-});
-</script>
+    </script>
+    
 {% endblock %}

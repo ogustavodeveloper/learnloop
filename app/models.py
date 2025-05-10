@@ -58,17 +58,15 @@ class SessionStudie(db.Model):
   resumo = db.Column(db.String())
   id = db.Column(db.String(), primary_key=True)
   data = db.Column(db.String())
-  tempo = db.Column(db.String())
-  documento = db.Column(db.String())
+  revisao = db.Column(db.Integer())
 
-  def __init__(self, user, assunto, resumo, data, tempo, id, documento):
+  def __init__(self, user, assunto, resumo, data, id, revisao):
     self.user = user
     self.assunto = assunto
     self.resumo = resumo 
     self.data = data
-    self.tempo = tempo
     self.id = id
-    self.documento = documento 
+    self.revisao = revisao 
 
 class Redacao(db.Model):
   user = db.Column(db.String())
@@ -146,6 +144,18 @@ class Video(db.Model):
   resumo = db.Column(db.String())
   embed = db.Column(db.String())
   views = db.Column(db.String())
+
+class Documento(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  filename = db.Column(db.String())
+  url = db.Column(db.String())
+  sessao = db.Column(db.String())
+
+  def __init__(self, id, filename, url, sessao):
+    self.id = id 
+    self.filename = filename 
+    self.url = url 
+    self.sessao = sessao 
 
 with app.app_context():
   db.create_all()

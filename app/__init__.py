@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data-learn2.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data-learn3.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '123'
 app.config['SESSION_PERMANENT'] = True  # Sessão permanente
