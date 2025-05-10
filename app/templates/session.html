@@ -25,7 +25,9 @@ a{
 <div class="container">
    <h3>{{sessao.assunto}}</h3>
    <small>Criada: {{sessao.data}}</small>
-   <p><strong>Resumo:</strong> {{sessao.resumo | safe }}</p>
+   <textarea id="resumo" placeholder="Digite aqui suas anotações">{{sessao.resumo}}</textarea>
+   <button onclick="updateAnotacao('{{sessao.id}}')">Atualizar Anotação</button>
+
 <br>
    <div class="add-doc">
       <h2>Adicione um arquivo a sua sessão de estudos:</h2>

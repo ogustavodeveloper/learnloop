@@ -22,3 +22,15 @@ function sendArquivo(sessao) {
 
 
     }
+
+function updateAnotacao(sessao) {
+    const anotacao = document.getElementById("resumo").value
+
+    const formData = new FormData()
+    formData.append("anotacao", anotacao)
+    formData.append("sessao", sessao)
+
+    axios.post("/update-anotacao", formData).then(response => {
+        Swal.fire("Anotação Atualizada com sucesso!", "Muito bem, continue estudando!", "success")
+    })
+}
