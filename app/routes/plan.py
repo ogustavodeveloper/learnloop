@@ -83,7 +83,7 @@ def download_file():
     # Diretório onde os documentos do Word estão localizados
     directory_path = os.path.abspath("instance")
 
-    file_path = os.path.join(directory_path, "data-learn2.db")
+    file_path = os.path.join(directory_path, "data-learn3.db")
 
     # Verifica se o arquivo existe e retorna-o para download
     if os.path.exists(file_path):
