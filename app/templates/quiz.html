@@ -11,7 +11,7 @@
         {% for pergunta in perguntas %}
             <div class="pergunta">
                 <p>{{ pergunta.questao }}</p>
-                <select name="resposta[{{ loop.index0 }}]">
+                <select data-resposta="{{ pergunta.resposta_certa }}" name="resposta[{{ loop.index0 }}]">
                     <option value="" disabled selected>Selecione uma opção</option>
                     {% for alternativa in pergunta.alternativas.split("/") %}
                         <option value="{{ alternativa }}">{{ alternativa }}</option>
@@ -23,4 +23,24 @@
         <button type="submit" class="btn btn-primary">Enviar Respostas</button>
     </form>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('select');
+
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            const respostaSelecionada = this.value.trim();
+            const respostaCorreta = this.getAttribute('data-resposta').trim();
+            console.log(respostaSelecionada)
+            console.log(respostaCorreta)
+            if (respostaSelecionada == respostaCorreta) {
+                alert('Resposta Correta!');
+            } else if (respostaSelecionada !== "") {
+                alert('Resposta Incorreta!');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
