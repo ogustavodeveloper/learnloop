@@ -271,13 +271,18 @@ def gerarQuiz():
 
 
         return jsonify({
-            "msg": "success"
+            "msg": "success",
+            "id": newQuiz.id
         })
     except Exception as e:
-        return f"deu erro: {e}"
+        return jsonify({
+            "msg": "error",
+            "details": str(e)
+        })
 
 @iaplan_bp.route("/quiz/<id>")
 def pageQuiz(id):
+
     quiz = Quiz.query.filter_by(id=id).first()
 
     if not quiz:

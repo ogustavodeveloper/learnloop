@@ -43,9 +43,34 @@ function gerarQuiz(session){
     formData.append("anotacao", anotacao)
     formData.append("assunto", assunto)
 
+    let timerInterval;
+Swal.fire({
+  title: "Quiz sendo criado!",
+  html: "Aguarde alguns segundos, você vai ser direcionado automaticamente para o seu quiz exclusivo!",
+  timer: 2000,
+  timerProgressBar: true,
+  didOpen: () => {
+    Swal.showLoading();
+    const timer = Swal.getPopup().querySelector("b");
+    timerInterval = setInterval(() => {
+      timer.textContent = `${Swal.getTimerLeft()}`;
+    }, 100);
+  },
+  willClose: () => {
+    clearInterval(timerInterval);
+  }
+}).then((result) => {
+  /* Read more about handling dismissals below */
+  if (result.dismiss === Swal.DismissReason.timer) {
+    console.log("I was closed by the timer");
+  }
+});
     axios.post("/api/gerar-quiz", formData).then(response => {
         if(response.data.msg == "success") {
-            Swal.fire("Quiz Criado", "sucesso", "success")
+            Swal.fire("Quiz Criado!", "Aproveite!", "success")
+            window.location.href = `/quiz/${response.data.id}`
+        } else {
+            Swal.fire("Ocorreu um erro! Tente novamente.", `Detalhes do erro: ${response.data.details}`,"error")
         }
     })
 }
