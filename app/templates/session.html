@@ -23,7 +23,7 @@ a{
 
 {% block content %}
 <div class="container">
-   <h3>{{sessao.assunto}}</h3>
+   <h3 id="assunto">{{sessao.assunto}}</h3>
    <small>Criada: {{sessao.data}}</small>
    <textarea id="resumo" placeholder="Digite aqui suas anotações">{{sessao.resumo}}</textarea>
    <button onclick="updateAnotacao('{{sessao.id}}')">Atualizar Anotação</button>
@@ -45,6 +45,22 @@ a{
       {% else %}
       <p>Nenhum.</p>
       {% endif %}
+   </div>
+
+   <div id="documentos">
+      <h2>Quizzes criados na sessão:</h2>
+      {% if quizzes %}
+      {% for quiz in quizzes %}
+      <a id="doc" href="/quiz/{{quiz.id}}">{{quiz.titulo}}</a>
+      {% endfor %}
+
+      {% else %}
+      <p>Nenhum.</p>
+      {% endif %}
+   </div>
+
+   <div>
+      <button onclick="gerarQuiz('{{sessao.id}}')">Gerar Quiz</button>
    </div>
 
    <br><br>
