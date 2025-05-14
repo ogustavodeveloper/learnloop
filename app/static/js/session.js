@@ -34,3 +34,18 @@ function updateAnotacao(sessao) {
         Swal.fire("Anotação Atualizada com sucesso!", "Muito bem, continue estudando!", "success")
     })
 }
+
+function gerarQuiz(session){
+    const formData = new FormData()
+    const anotacao = document.getElementById("resumo").value
+    const assunto = document.getElementById("assunto").textContent
+    formData.append("sessao", session)
+    formData.append("anotacao", anotacao)
+    formData.append("assunto", assunto)
+
+    axios.post("/api/gerar-quiz", formData).then(response => {
+        if(response.data.msg == "success") {
+            Swal.fire("Quiz Criado", "sucesso", "success")
+        }
+    })
+}

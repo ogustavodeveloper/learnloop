@@ -37,12 +37,6 @@ class Artigo(db.Model):
     self.id = id
     self.views = views
 
-class Material(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  nome = db.Column(db.String(255))
-  link = db.Column(db.String())
-  autor = db.Column(db.String())
-
 class buscas(db.Model):
   user = db.Column(db.String())
   termo = db.Column(db.String())
@@ -78,39 +72,6 @@ class Redacao(db.Model):
     self.titulo = titulo 
     self.texto = texto
 
-class Feciba(db.Model):
-  title = db.Column(db.String())
-  resumo = db.Column(db.String())
-  id = db.Column(db.String(), primary_key=True)
-  image_url = db.Column(db.String())
-  project_url = db.Column(db.String())
-  author = db.Column(db.String())
-  participantes = db.Column(db.String())
-  tags = db.Column(db.String())
-  
-
-  def __init__(self, title, resumo, id, image_url, project_url, author, participantes, tags):
-    self.title = title 
-    self.resumo = resumo 
-    self.id = id 
-    self.image_url = image_url
-    self.project_url = project_url 
-    self.author = author
-    self.participantes = participantes
-    self.tags = tags
-
-class Correcoes(db.Model):
-  user = db.Column(db.String())
-  titulo = db.Column(db.String())
-  texto = db.Column(db.String())
-  correcao = db.Column(db.String(), primary_key=True)
-
-  def __init__(self, user, titulo, texto, correcao):
-    self.user = user 
-    self.titulo = titulo 
-    self.texto = texto
-    self.correcao = correcao 
-
 class Corrections(db.Model):
   id = db.Column(db.String())
   user = db.Column(db.String())
@@ -137,13 +98,6 @@ class Corrections(db.Model):
     self.final = final
     self.data = data 
 
-class Video(db.Model):
-  id = db.Column(db.String(), primary_key=True)
-  titulo = db.Column(db.String())
-  link = db.Column(db.String())
-  resumo = db.Column(db.String())
-  embed = db.Column(db.String())
-  views = db.Column(db.String())
 
 class Documento(db.Model):
   id = db.Column(db.String(), primary_key=True)
@@ -156,6 +110,32 @@ class Documento(db.Model):
     self.filename = filename 
     self.url = url 
     self.sessao = sessao 
+
+class Quiz(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  titulo = db.Column(db.String())
+  sessao = db.Column(db.String())
+
+  def __init__(self, id, titulo, sessao):
+    self.id = id
+    self.titulo = titulo
+    self.sessao = sessao 
+  
+class Pergunta(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  questao = db.Column(db.String())
+  resposta_certa = db.Column(db.String())
+  alternativas = db.Column(db.String())
+  quiz = db.Column(db.String())
+
+  def __init__(self, id, questao, resposta_certa, alternativas, quiz):
+    self.id = id
+    self.questao = questao 
+    self.resposta_certa = resposta_certa
+    self.alternativas = alternativas 
+    self.quiz = quiz
+
+
 
 with app.app_context():
   db.create_all()

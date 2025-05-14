@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, make_response, Response
 from app import db
-from app.models import User, Artigo, Redacao, Correcoes, buscas 
+from app.models import User, Artigo, Redacao, buscas 
 from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
@@ -159,8 +159,8 @@ def admin_panel():
     users = User.query.all()
     searches = buscas.query.all()
     articles = Artigo.query.all()
-    corrections = Correcoes.query.all()
-    return render_template('admin.html', users=users, searches=searches, articles=articles, correcoes=corrections)
+    
+    return render_template('admin.html', users=users, searches=searches, articles=articles)
 
 # Rota para excluir um artigo
 @users_bp.route('/delete_article')

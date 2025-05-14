@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, make_response, send_file
 from app.routes import artigos_bp
-from app.models import Artigo, User, buscas, Redacao, Correcoes
+from app.models import Artigo, User, buscas
 from app import db
 from passlib.hash import bcrypt_sha256
 import uuid

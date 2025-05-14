@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>Quiz sobre {{ quiz.titulo }}</h3>
+
+    <form method="POST" action="/enviar_respostas/{{ quiz.id }}">
+        {% for pergunta in perguntas %}
+            <div class="pergunta">
+                <p>{{ pergunta.questao }}</p>
+                <select name="resposta[{{ loop.index0 }}]">
+                    <option value="" disabled selected>Selecione uma opção</option>
+                    {% for alternativa in pergunta.alternativas.split("/") %}
+                        <option value="{{ alternativa }}">{{ alternativa }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <br>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Enviar Respostas</button>
+    </form>
+</div>
+{% endblock %}

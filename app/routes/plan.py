@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, send_file
 from app.routes import iaplan_bp
-from app.models import SessionStudie, User, Documento
+from app.models import SessionStudie, User, Documento, Quiz, Pergunta
 from app import db
 import uuid
 import markdown
@@ -9,6 +9,7 @@ import os
 import datetime
 from openai import AzureOpenAI
 from azure.storage.blob import BlobServiceClient
+import json 
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -27,11 +28,11 @@ def upload_to_azure_blob(container_name, file_path, blob_name):
             blob_service_client = BlobServiceClient.from_connection_string(connection_string)
             blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
                                                                             
-                                                                                    # Fazer upload do arquivo
+                                                                                    
             with open(file_path, "rb") as data:
                 blob_client.upload_blob(data, overwrite=True)
                                                                                                                 
-                                                                                                                        # Gerar e retornar o link de acesso ao blob
+                                                                                                                    
             blob_url = blob_client.url
             return blob_url
 
@@ -47,7 +48,8 @@ def planPage(id):
         return render_template("plan.html", sessions=[])
     sessao = SessionStudie.query.filter_by(id=id).first()
     documentos = Documento.query.filter_by(sessao=id).all()
-    return render_template("session.html", documentos=documentos, sessao=sessao)
+    quizzes = Quiz.query.filter_by(sessao=id).all()
+    return render_template("session.html", documentos=documentos, sessao=sessao, quizzes=quizzes)
 
 @iaplan_bp.route("/add-doc", methods=["POST"])
 def addDoc():
@@ -172,3 +174,115 @@ def getResumo():
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
+    
+@iaplan_bp.route("/api/gerar-quiz", methods=["POST"])
+def gerarQuiz():
+    try:
+        
+        sessao = request.form.get("sessao")
+        print(sessao)
+        sessaodb = SessionStudie.query.filter_by(id=sessao).first()
+        anotacao = request.form.get("anotacao")
+        assunto = request.form.get("assunto")
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-4o",  # Nome do deployment configurado no Azure
+            messages=[
+                {"role": "system", "content": """
+                Você é um gerador de simulado para ENEM, sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON:
+                 
+                 {
+                    "pergunta1": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
+                    "pergunta2": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
+                    "pergunta3": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
+                 }
+                    ...
+                 
+                """},
+                {"role": "user", "content": f"Assunto: {assunto}. Anotação: {anotacao}"}
+            ],
+            temperature=0.1,
+            top_p=1.0
+        )
+
+        assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
+        assistant_response = json.loads(assistant_response)
+
+
+        newQuiz = Quiz(id=str(uuid.uuid4()), titulo=assunto, sessao=sessao)
+        db.session.add(newQuiz)
+        db.session.commit()
+        
+        new_pergunta = Pergunta(
+            id=str(uuid.uuid4()),
+            questao=assistant_response["pergunta1"]["pergunta"],
+            resposta_certa=assistant_response["pergunta1"]["respostaCerta"],
+            alternativas=assistant_response["pergunta1"]["alternativas"],
+            quiz=newQuiz.id
+        )
+
+        db.session.add(new_pergunta)
+        db.session.commit()
+
+        new_pergunta = Pergunta(
+            id=str(uuid.uuid4()),
+            questao=assistant_response["pergunta2"]["pergunta"],
+            resposta_certa=assistant_response["pergunta2"]["respostaCerta"],
+            alternativas=assistant_response["pergunta2"]["alternativas"],
+            quiz=newQuiz.id
+        )
+
+        db.session.add(new_pergunta)
+        db.session.commit()
+
+        new_pergunta = Pergunta(
+            id=str(uuid.uuid4()),
+            questao=assistant_response["pergunta3"]["pergunta"],
+            resposta_certa=assistant_response["pergunta3"]["respostaCerta"],
+            alternativas=assistant_response["pergunta3"]["alternativas"],
+            quiz=newQuiz.id
+        )
+
+        db.session.add(new_pergunta)
+        db.session.commit()
+
+        new_pergunta = Pergunta(
+            id=str(uuid.uuid4()),
+            questao=assistant_response["pergunta4"]["pergunta"],
+            resposta_certa=assistant_response["pergunta4"]["respostaCerta"],
+            alternativas=assistant_response["pergunta4"]["alternativas"],
+            quiz=newQuiz.id
+        )
+
+        db.session.add(new_pergunta)
+        db.session.commit()
+
+        new_pergunta = Pergunta(
+            id=str(uuid.uuid4()),
+            questao=assistant_response["pergunta5"]["pergunta"],
+            resposta_certa=assistant_response["pergunta5"]["respostaCerta"],
+            alternativas=assistant_response["pergunta5"]["alternativas"],
+            quiz=newQuiz.id
+        )
+
+        db.session.add(new_pergunta)
+        db.session.commit()
+
+
+
+        return jsonify({
+            "msg": "success"
+        })
+    except Exception as e:
+        return f"deu erro: {e}"
+
+@iaplan_bp.route("/quiz/<id>")
+def pageQuiz(id):
+    quiz = Quiz.query.filter_by(id=id).first()
+
+    if not quiz:
+        return "Quiz não encontrado", 404
+
+    perguntas = Pergunta.query.filter_by(quiz=quiz.id).all()
+
+    return render_template("quiz.html", perguntas=perguntas, quiz=quiz)
