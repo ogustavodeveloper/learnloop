@@ -34,8 +34,8 @@ function redacao() {
 }
 
 Swal.fire({
-  title: "Conheça o Corretor de Redação",
-  text: "Envie sua redação para receber orientações do Learn.Ai, a inteligência artificial do Estudaê. Você pode digitar ou enviar uma foto da redação manuscrita. Se quiser, pode salvar a redação na sua conta, mas isso é opcional. Não se preocupe, sua redação só será armazenada se você optar por isso. Estamos aqui para ajudar você a se preparar para o ENEM. 💡",
+  title: "Corretor de Redação",
+  text: "Envie sua redação digitada ou por foto e receba orientações do Learn.Ai. Se ficar travado, clique em Redação Guiada para receber uma dica personalizada.",
   icon: 'info'
 });
 
