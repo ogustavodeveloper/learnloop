@@ -4,10 +4,7 @@ venv/
 *.pyc
 __pycache__/
 
-# Ignorar arquivos de logs e cache
-*.log
-logs/
-instance/
+
 
 # Ignorar dependências do Python
 pip-log.txt

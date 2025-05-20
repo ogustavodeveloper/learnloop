@@ -17,8 +17,9 @@
   .mapa-btn {
     display: flex;
     gap: 0.6em;
-    overflow-x: auto;
+
     padding-bottom: 10px;
+    flex-wrap: wrap;
   }
 
   .mapa-btn img {
@@ -81,6 +82,32 @@
     opacity: 0.8;
   }
 
+  .mapa-btn div {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    height: 10em; /* Garante que ocupe toda a altura disponível */
+  }
+
+  .mapa-btn div a {
+    text-decoration: none;
+    color: #09ff00;
+    font-weight: bold;
+    margin-top: auto; /* Empurra o link para o final da div */
+    display: inline-block;
+  }
+
+  .mapa-btn div h4{
+    margin: 0;
+    font-size: 1.2em;
+  }
+
+  
+
   /* Responsividade */
   @media screen and (max-width: 1000px) {
     .mapa-btn img,
@@ -123,12 +150,25 @@
 
   <img src="{{ url_for('static', filename='img/ads-3_20250516_112345_0000.png') }}" alt="Redes Sociais">
      
-  <h3>O que você quer fazer agora?</h3>
+  <h3>Explore nossos recursos</h3>
 
   <div class="mapa-btn">
+    <!--
     <img src="{{ url_for('static', filename='img/corretor.png') }}" alt="Corretor de Redação" data-link="/redacao">
     <img src="{{ url_for('static', filename='img/conteudos.png') }}" alt="Conteúdos Educacionais" data-link="/feed/artigos">
     <img src="{{ url_for('static', filename='img/sessoes.png') }}" alt="Sessões de Estudos" data-link="/feed-session">
+  -->
+    <div>
+      <h4>Corretor de Redações</h4>
+      <p>Corrija sua redação com a ajuda da IA! E conte com o apoio em tempo real da Redação Guiada!</p>
+      <a href="/redacao">Acesse agora  ⟶</a>
+    </div>
+
+    <div>
+      <h4>Sessões de Estudos</h4>
+      <p>Guarde o que você estudou de forma fácil! Será criada uma página exclusiva onde você poderá guardar documentos e gerar quiz com base em sua anotação para testar conhecimento e fazer revisões</p>
+      <a href="/feed-session">Acesse agora  ⟶</a>
+    </div>    
     
   </div>
 </div>
