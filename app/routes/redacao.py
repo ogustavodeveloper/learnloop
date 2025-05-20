@@ -119,7 +119,6 @@ Seja direto e objetivo.
 
     except Exception as e:
         # Log da exceção para depuração
-        print(f"Erro ao gerar avaliação: {e}")
         return jsonify({"msg": "error", "details": str(e)}), 500
 
 @redacao_bp.route('/redacao')

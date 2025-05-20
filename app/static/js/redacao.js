@@ -16,17 +16,17 @@ function redacao() {
   }).then((r) => {
     if (r.data.msg === "success") {
       window.location.href = '/correcao/'+r.data.response
-    } else if(r.data.msg === "error") {
+    } else {
       Swal.fire({
         title: "Erro ao corrigir sua redação",
-        text: r.data.details,
+        text: `Tire um print da mensagem ao lado e mande para o Instagram do Estudaê (@estudae.of) para podermos resolver este erro: ${r.data.details}`,
         icon: 'error'
       })
     }
   }).catch((error) => {
     Swal.fire({
       title: "Houve um erro ao corrigir a sua redacão.",
-      text: `${r.data.response}`,
+      text: `Tire um print da mensagem ao lado e mande para o Instagram do Estudaê (@estudae.of) para podermos resolver este erro: ${error}`,
       icon: "error"
     })
     console.error("Erro:", error);

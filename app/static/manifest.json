@@ -3,9 +3,9 @@
   "short_name": "Estudaê",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f1f1f1",
+  "background_color": "#ffffff",
   "theme_color": "#000",
-  "description": "Aplicativo de aprendizado colaborativo",
+  "description": "Plataforma de estudos",
   "icons": [
     {
       "src": "/static/img/logo.png",
