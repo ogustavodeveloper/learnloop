@@ -16,10 +16,10 @@
   /* Layout dos botões */
   .mapa-btn {
     display: flex;
-    gap: 0.6em;
-
-    padding-bottom: 10px;
+    gap: 1em;
     flex-wrap: wrap;
+    justify-content: space-between;
+    padding-bottom: 10px;
   }
 
   .mapa-btn img {
@@ -84,13 +84,19 @@
 
   .mapa-btn div {
     background-color: rgba(255, 255, 255, 0.1);
-    padding: 12px;
-    border: none;
+    padding: 16px;
     border-radius: 8px;
-    width: 40%;
+    flex: 1 1 320px; /* Cresce, encolhe, largura mínima */
+    min-width: 260px;
+    max-width: 48%;
     display: flex;
     flex-direction: column;
-    height: 10em; /* Garante que ocupe toda a altura disponível */
+    margin-bottom: 1em;
+    box-sizing: border-box;
+  }
+
+  .mapa-btn div:not(:last-child) {
+    margin-right: 1em;
   }
 
   .mapa-btn div a {
@@ -102,7 +108,7 @@
   }
 
   .mapa-btn div h4{
-    margin: 0;
+    margin: 0 0 0.5em 0;
     font-size: 1.2em;
   }
 
@@ -114,9 +120,46 @@
     .artigo {
       width: 100%;
     }
+
+    .mapa-btn div {
+      padding-bottom: 0;
+      width: 100%; 
+    }
   }
 
-  
+  @media screen and (max-width: 800px) {
+    .mapa-btn {
+      flex-direction: column;
+      gap: 0.7em;
+    }
+    .mapa-btn div {
+      max-width: 100%;
+      min-width: 0;
+      margin-right: 0;
+      padding: 10px 8px;
+      margin-bottom: 0.5em;
+      height: 100%;
+      flex: 1 1 auto;
+      
+      
+    }
+    .mapa-btn div:last-child {
+      margin-bottom: 0;
+    }
+    .mapa-btn div h4 {
+      font-size: 1em;
+      margin-bottom: 0.3em;
+    }
+    .mapa-btn div p {
+      font-size: 0.95em;
+      margin-bottom: 0.5em;
+    }
+    .mapa-btn div a {
+      margin-top: 0.5em;
+      /* Remover o margin-top: auto para evitar espaço extra */
+      margin-top: 0.5em !important;
+    }
+  }
 
   @keyframes slide-hint {
     0% {
