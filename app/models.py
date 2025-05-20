@@ -58,7 +58,7 @@ class SessionStudie(db.Model):
     self.user = user
     self.assunto = assunto
     self.resumo = resumo 
-    self.data = data
+    self.data = data 
     self.id = id
     self.revisao = revisao 
 
