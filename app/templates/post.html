@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %} {{artigo.titulo}} {% endblock %}
+{% block title %}{{artigo.titulo}} | Estudaê{% endblock %}
 {% block metas %}
-<meta name="description" content="Leia esse artigo incrível sobre {{artigo.titulo}} com uma linguagem descontraída, leve e inovadora e saia daqui aprendendo de fato.">
+<meta name="description" content="Descubra tudo sobre {{artigo.titulo}}. Artigo inovador, linguagem leve e descontraída. Aprenda de verdade!">
 <meta name="keywords" content="{{artigo.tags.replace(' ', ',')}}">
 <meta name="robots" content="index, follow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="canonical" href="https://estudae.site/artigo/{{artigo.id}}">
+<!-- Open Graph -->
+<meta property="og:title" content="{{artigo.titulo}} | Estudaê">
+<meta property="og:description" content="Descubra tudo sobre {{artigo.titulo}}. Artigo inovador, linguagem leve e descontraída.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://estudae.site/artigo/{{artigo.id}}">
+<meta property="og:image" content="{{url_for('static', filename='img/ads-3_20250516_112345_0000.png')}}">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{artigo.titulo}} | Estudaê">
+<meta name="twitter:description" content="Descubra tudo sobre {{artigo.titulo}}. Artigo inovador, linguagem leve e descontraída.">
+<meta name="twitter:image" content="{{url_for('static', filename='img/ads-3_20250516_112345_0000.png')}}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{artigo.titulo}}",
+  "description": "Descubra tudo sobre {{artigo.titulo}}. Artigo inovador, linguagem leve e descontraída.",
+  "author": {
+    "@type": "Person",
+    "name": "{{autor.username}}"
+  },
+  "datePublished": "{{artigo.data}}",
+  "image": "{{url_for('static', filename='img/ads-3_20250516_112345_0000.png')}}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://estudae.site/artigo/{{artigo.id}}"
+  }
+}
+</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
      crossorigin="anonymous"></script>
 {% endblock %}
@@ -26,51 +56,67 @@
   li {
     margin-left: 1.2em;
   }
+  /* Breadcrumbs */
+  .breadcrumb {
+    margin-bottom: 1em;
+    font-size: 0.95em;
+    color:rgb(187, 187, 187);
+  }
+  .breadcrumb a, .breadcrumb .breadcrumb-current {
+    text-decoration: underline;
+    color:rgb(187, 187, 187);
+    font-size: inherit;
+  }
+  .breadcrumb span {
+    margin: 0 0.3em;
+  }
+  /* Botões com feedback visual */
+  .btns button {
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer;
+  }
+  .btns button:hover {
+    background: #0ce201;
+  
+  }
+  @media (max-width: 600px) {
+    .container h1 {
+      font-size: 1.2em;
+    }
+    .breadcrumb {
+      font-size: 0.85em;
+    }
+  }
 </style>
+<meta itemprop="datePublished" content="{{artigo.data}}">
 {% endblock %}
 
 {% block content %}
-<article class="container">
-  <h1>{{artigo.titulo}}</h1>
-  <small>Criado por: {{autor.username}}</small>
+<article class="container" itemscope itemtype="https://schema.org/Article">
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a href="/">Início</a> <span>&gt;</span>
+    <a href="/feed/artigos">Artigos</a> <span>&gt;</span>
+    <span class="breadcrumb-current" aria-current="page">{{artigo.titulo}}</span>
+  </nav>
+  <h1 itemprop="headline">{{artigo.titulo}}</h1>
+  <small>Criado por: <span itemprop="author">{{autor.username}}</span></small>
   <small style="margin-top: -0.7em;"><strong>Visualizações:</strong> {{artigo.views}}</small>
-<!--
-  <div class="container">
-  <section> 
-    <a href="https://instagram.com/ogustavo.developer">
-      <img src="{{url_for('static', filename='img/ads-3.png')}}"> 
-    </a>
-  </section> 
-  </div>
--->
-<!--
-  <ins
-	class="adupeex"
-	data-ad-client="up-ba-332046"
-	data-ad-slot="37599"
-	data-ad-display="horizontal"
-	style="display:block;background-color:#FFF;"
->
-</ins> 
-<script src="https://upeex.com.br/adsupeex.js" async>
-</script>-->
-  <div id="conteudo">
+  
+  <div id="conteudo" itemprop="articleBody">
     <p>{{artigo.texto | safe}}</p>
     <p><strong>Ficou com dúvida? Clique no botão "Tirar Dúvida" e tenha resposta instantânea </strong></p>
   </div>
-
   <div class="btns">
-    <button onclick="window.location.href = '/add-like/{{artigo.id}}'">
+    <button onclick="window.location.href = '/add-like/{{artigo.id}}'" aria-label="Curtir artigo">
       <span class="material-symbols-outlined">thumb_up</span> ({{artigo.likes}})
     </button>
-
-    <button style='margin-top: 1em;' onclick="tiraDuvida()">
+    <button style='margin-top: 1em;' onclick="tiraDuvida()" aria-label="Tirar dúvida">
       Tirar Dúvida
     </button>
     {% if session['user'] == artigo.autor %}
-    <button onclick="deleteArtigo()" style="margin-top: 1em;">Deletar Artigo</button>
+    <button onclick="deleteArtigo()" style="margin-top: 1em;" aria-label="Deletar artigo">Deletar Artigo</button>
     {% endif %}
-    <button style="margin-top: 1em;" onclick="copiarToken('https://estudae.site/artigo/{{artigo.id}}')">Copiar Link do artigo</button>
+    <button style="margin-top: 1em;" onclick="copiarToken('https://estudae.site/artigo/{{artigo.id}}')" aria-label="Copiar link do artigo">Copiar Link do artigo</button>
   </div>
 </article>
 
@@ -109,7 +155,6 @@ function tiraDuvida() {
 }
 
 function deleteArtigo() {
-  alert('ok')
   var senha = prompt("Digite a senha para deletar o artigo:");
   if (senha === false) {
     return;
@@ -117,6 +162,12 @@ function deleteArtigo() {
     axios.get("/delete-artigo/{{artigo.id}}?senha="+senha).then((r) => {
       if (r.data.msg === "success") {
         window.location.href='/'
+      } else {
+        Swal.fire({
+          title: 'Erro',
+          text: 'Senha incorreta ou erro ao deletar.',
+          icon: 'error'
+        });
       }
     });
   }
@@ -130,7 +181,14 @@ function copiarToken(link) {
   tempInput.setSelectionRange(0, 99999);
   document.execCommand("copy");
   document.body.removeChild(tempInput);
-  alert("O link do artigo foi copiado");
+  Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: 'Link copiado!',
+    showConfirmButton: false,
+    timer: 1500
+  });
 }
 </script>
 {% endblock %}
