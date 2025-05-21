@@ -1,44 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
-
-    <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "jhgb83crkv");
-    </script>
-  <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
-
-<meta name="google-site-verification" content="v6NiONjH3eadLLRS1gTIK-PYOJgGygwT5tNjxB27UTY" />
-
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-BX1W7ZDH2L"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-BX1W7ZDH2L');
-</script>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
-     crossorigin="anonymous"></script>
-    
-   <title>{% block title %}{% endblock %}</title>
-  
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <link rel="stylesheet" href="{{url_for('static', filename='css/base.css')}}">
-    <link rel="icon" href="{{url_for('static', filename='img/logo.png')}}" type="image/png">
-    <link rel="manifest" href="{{url_for('static', filename='manifest.json')}}">
-
-    
-    {% block metas %}
-
-    {% endblock %}
+    <meta name="description" content="Estudaê: Compartilhe e encontre artigos, dúvidas e conhecimento de forma colaborativa.">
     <meta name="robots" content="index, follow">
     <meta name="revisit-after" content="7 days">
     <meta name="language" content="Portuguese">
@@ -46,57 +11,101 @@
     <meta name="distribution" content="global">
     <meta name="googlebot" content="index, follow">
     <meta name="author" content="Gustavo">
+    <meta name="google-site-verification" content="v6NiONjH3eadLLRS1gTIK-PYOJgGygwT5tNjxB27UTY" />
 
+    <title>{% block title %}Estudaê{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" type="image/png">
+    <link rel="manifest" href="{{url_for('static', filename='manifest.json')}}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="{{url_for('static', filename='css/base.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css" />
 
-    {% block styled %}
-    {% endblock %}
+    {% block metas %}{% endblock %}
+    {% block styled %}{% endblock %}
+
+    <!-- Google Analytics e Clarity -->
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "jhgb83crkv");
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BX1W7ZDH2L"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-BX1W7ZDH2L');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
+     crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{{url_for('static', filename='js/duvidas.js')}}"></script>
+    <style>
+      /* Footer fixo */
+      footer {
+        position: relative;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background: var(--corDestaque);
+        color: #000;
+        text-align: center;
+        padding: 1em 0;
+        z-index: 100;
+      }
+      main {
+        padding-bottom: 80px; /* espaço para o footer */
+      }
+    </style>
   </head>
   <body class='dark-mode'>
     <header>
       <span>Estudaê</span>
-      <nav>
-        <a href="/">
+      <nav aria-label="Navegação principal">
+        <a href="/" title="Início">
           <span class="material-symbols-outlined">home</span>
         </a>
-        <a href="/create-artigo">
+        <a href="/create-artigo" title="Criar artigo">
           <span class="material-symbols-outlined">add_circle</span>
         </a>
-        <a href="/feed/artigos">
+        <a href="/feed/artigos" title="Feed de artigos">
           <span class="material-symbols-outlined">list</span>
         </a>
         {% if session['user'] %}
-          
-
-              
-          <a onclick="excluirConta()">
+          <a onclick="excluirConta()" title="Excluir conta">
             <span class="material-symbols-outlined">person_remove</span>
           </a>
-          <a href="/api/logout">
+          <a href="/api/logout" title="Sair">
             <span class="material-symbols-outlined">logout</span>
           </a>
         {% else %}
-          <a href="/login">
+          <a href="/login" title="Entrar">
             <span class="material-symbols-outlined">login</span>
           </a>
         {% endif %}
       </nav>
       <form action="/search/artigos" method="GET" style="display: flex; flex-direction: row; margin-top: 1em;">
-        <input style="padding: 4px;" type="text" name="pesquisa" placeholder="Digite sua pesquisa" required>
-        <button>
+        <input style="padding: 4px;" type="text" name="pesquisa" placeholder="Digite sua pesquisa" required aria-label="Pesquisar artigos">
+        <button aria-label="Pesquisar">
           <span class="material-symbols-outlined">search</span>
         </button>
       </form>
     </header>
-    <body>
-    {% block content %}
-
-    {% endblock %}
-
+    <main>
+      {% block content %}{% endblock %}
+    </main>
     <footer>
       <p>&copy; 2025 Estudaê. Todos os direitos reservados.</p>
-      <p><a href="/politica-de-privacidade">Política de Privacidade</a> | <a href="/termos-de-uso">Termos de Uso</a> | <a href="sobre">Sobre</a> | <a href="/contato">Contato</a></p>
+      <p>
+        <a href="/politica-de-privacidade">Política de Privacidade</a> |
+        <a href="/termos-de-uso">Termos de Uso</a> |
+        <a href="/sobre">Sobre</a> |
+        <a href="/contato">Contato</a>
+      </p>
     </footer>
-
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -110,9 +119,5 @@
         });
       }
     </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@5/dark.css" />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" integrity="sha512-WrdC3CE9vf1nBf58JHepuWT4x24uTacky9fuzw2g/3L9JkihgwZ6Cfv+JGTtNyosOhEmttMtEZ6H3qJWfI7gIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="{{url_for('static', filename='js/duvidas.js')}}"></script>
   </body>
 </html>
