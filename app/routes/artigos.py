@@ -273,37 +273,51 @@ def tiraDuvidaArtigo():
     except Exception as e:
         return jsonify({"msg": f"Houve um erro: {e}"})
 
-from PIL import Image  # Adicionado
+from PIL import Image
 import base64
+import io
+
+def image_to_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
+
 @artigos_bp.route("/api/carregar-redacao", methods=["POST"])
 def carregar_redacao():
     try:
-        # Verificar se o arquivo foi enviado
         if 'foto' not in request.files or not request.files['foto'].filename:
             return jsonify({"msg": "Nenhum arquivo enviado"}), 400
 
         foto = request.files['foto']
         filename = foto.filename
-        print(filename)
-        # Gerar um caminho seguro para a imagem temporária
         image_path = os.path.join('/tmp', filename)
-
-        # Salvar a imagem temporariamente
         foto.save(image_path)
 
-        # Configurar a API do Gemini
-        genai.configure(api_key=os.environ["API_KEY"])
-        img = Image.open(image_path)
+        img_base64 = image_to_base64(image_path)
 
-        # Utilizar o modelo Gemini para extrair o texto
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro",
-                                     system_instruction="Você é uma Inteligência Artificial que digitaliza redações manuscritas que o usuário enviar.")
-        response = model.generate_content(["Digitalize a redação manuscrita pelo usuário.", img])
+        chat_completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Transcreva apenas o texto da redação manuscrita da imagem enviada, sem comentários, explicações ou introduções. Retorne somente o texto."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Transcreva o texto da imagem."},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_base64}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
 
-        # Obter o texto da resposta
-        texto_extraido = response.text
+        texto_extraido = chat_completion.choices[0].message.content.strip()
 
-        # Retornar o texto extraído
         return jsonify({"msg": "success", "redacao": texto_extraido})
 
     except Exception as e:
@@ -311,7 +325,6 @@ def carregar_redacao():
         return jsonify({"msg": "error", "error": str(e)}), 500
 
     finally:
-        # Remover a imagem temporária
         if os.path.exists(image_path):
             os.remove(image_path)
 
@@ -326,18 +339,32 @@ def gerar_artigo():
         image_path = os.path.join('/tmp', filename)
         foto.save(image_path)
 
-        genai.configure(api_key=os.environ["API_KEY"])
-        img = Image.open(image_path)
+        img_base64 = image_to_base64(image_path)
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-pro")
-        response = model.generate_content(["Como a IA Learn.Ai, você gera artigos autônomos longos e bem estruturados, com base no conteúdo do caderno do usuário no qual ele enviou imagem. Os artigos devem ser descontraídos e autênticos, permitindo referências externas de forma moderada e uma linguagem informal. Acrescente informações relevantes para evitar superficialidade, com orientação para estudantes do Ensino Médio. Use emojis de forma atrativa e incentive os leitores a clicar no botão 'Tirar Dúvida' em caso de questionamentos.", img])
+        chat_completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Gere apenas o artigo completo, estruturado e informal, a partir do conteúdo manuscrito da imagem enviada. Não inclua comentários, explicações ou introduções. Retorne somente o artigo."
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Gere o artigo a partir do texto manuscrito da imagem."},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_base64}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        )
 
-        texto_extraido = response.text
+        texto_extraido = chat_completion.choices[0].message.content.strip()
 
-        # Supondo que o modelo gere um artigo baseado no conteúdo extraído
-        
-
-        
         return jsonify({"msg": "success", "artigo": texto_extraido})
 
     except Exception as e:
