@@ -296,7 +296,7 @@ def carregar_redacao():
         img = Image.open(image_path)
 
         # Utilizar o modelo Gemini para extrair o texto
-        model = genai.GenerativeModel(model_name="gemini-2.0-flash",
+        model = genai.GenerativeModel(model_name="gemini-1.5-pro",
                                      system_instruction="Você é uma Inteligência Artificial que digitaliza redações manuscritas que o usuário enviar.")
         response = model.generate_content(["Digitalize a redação manuscrita pelo usuário.", img])
 
