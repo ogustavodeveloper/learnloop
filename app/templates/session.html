@@ -39,7 +39,12 @@ a{
       <h2>Documentos salvos na sessão:</h2>
       {% if documentos %}
       {% for documento in documentos %}
-      <a id="doc" href="{{documento.url}}">{{documento.filename}}</a>
+         <a id="doc" href="{{documento.url}}" target="_blank">{{documento.filename}}</a>
+         {% if documento.filename.endswith('.pdf') %}
+            <embed src="{{documento.url}}" type="application/pdf" width="100%" height="600px" style="border-radius:8px; margin-bottom:1em;" />
+         {% else %}
+            <iframe src="{{documento.url}}" width="100%" height="600px" style="border-radius:8px; margin-bottom:1em;"></iframe>
+         {% endif %}
       {% endfor %}
 
       {% else %}

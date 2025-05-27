@@ -9,16 +9,19 @@ import markdown
 import os
 from docx import Document
 from sqlalchemy import desc
-import google.generativeai as genai
 from openai import AzureOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+if azure_endpoint is None:
+    raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is not set.")
+
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
     api_version="2024-07-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_endpoint=azure_endpoint
 )
 
 @artigos_bp.route("/")
@@ -85,6 +88,8 @@ def criarArtigo():
 @artigos_bp.route("/delete-artigo/<id>", methods=["GET"])
 def deleteArtigo(id):
     artigo = Artigo.query.filter_by(id=id).first()
+    if not artigo:
+        return "Artigo Não Existe"
     user = User.query.filter_by(id=artigo.autor).first()
 
     if artigo:
@@ -346,7 +351,7 @@ def gerar_artigo():
             messages=[
                 {
                     "role": "system",
-                    "content": "Gere apenas o artigo completo, estruturado e informal, a partir do conteúdo manuscrito da imagem enviada. Não inclua comentários, explicações ou introduções. Retorne somente o artigo."
+                    "content": "Gere apenas o artigo completo, estruturado e informal, a partir do conteúdo manuscrito da imagem enviada. Não inclua comentários, explicações ou introduções. Retorne somente o artigo. Não deixe referências a imagem, ou seja, apenas o conteúdo do artigo, faz de conta que nem te enviaram uma imagem."
                 },
                 {
                     "role": "user",
@@ -363,7 +368,8 @@ def gerar_artigo():
             ]
         )
 
-        texto_extraido = chat_completion.choices[0].message.content.strip()
+        content = chat_completion.choices[0].message.content
+        texto_extraido = content.strip() if content else ""
 
         return jsonify({"msg": "success", "artigo": texto_extraido})
 

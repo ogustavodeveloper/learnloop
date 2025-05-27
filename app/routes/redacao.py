@@ -1,23 +1,25 @@
 from app.routes import redacao_bp
 from app import db
-from flask import render_template, redirect, session, jsonify, request, url_for, make_response
+from flask import render_template, redirect, session, jsonify, request
 
 from openai import AzureOpenAI
-from dotenv import load_dotenv
 import uuid
-import markdown
+
 import os
 
-from app.models import Artigo, User, buscas, Redacao, Corrections
+from app.models import Corrections
 import uuid
 import json
 from datetime import datetime
-import markdown
+
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+if azure_endpoint is None:
+    raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is not set.")
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
     api_version="2024-07-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_endpoint=azure_endpoint
 )
 
 @redacao_bp.route("/avaliar-redacao")
@@ -74,7 +76,10 @@ Seja direto e objetivo.
     top_p=1.0
 )
 
-        assistant_response = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
+        content = chat_completion.choices[0].message.content
+        if content is None:
+            return jsonify({"msg": "error", "details": "A resposta da IA está vazia."}), 500
+        assistant_response = content.replace('\n', '').replace('json', '').replace('`','')
         print(assistant_response)
 
 

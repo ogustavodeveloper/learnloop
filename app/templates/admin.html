@@ -1,204 +1,215 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Administração</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Reem+Kufi+Fun:wght@400;600;700&family=Roboto:wght@300;400;500&family=Ubuntu:wght@400;500;700&display=swap');
+         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Reem+Kufi+Fun:wght@400;600;700&family=Roboto:wght@300;400;500&family=Ubuntu:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+        :root {
+            --corDestaque: #0dff00;
+            --corFundo: #111;
+            --corFonte: #fff;
+            --corCard: #181818;
+            --corSecundaria: #232323;
+            --fontTitle: 'Inter', sans-serif;
+            --fontText: 'Inter', sans-serif;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-            line-height: 1.6;
+            font-family: var(--fontText);
         }
-
-        :root {
-            --corDestaque: #aeff00;
-            --corFonteBtn: #000;
-            --corFundo: #000029;
-            --corFonte: #ffffff;
-            --corSecundaria: #0d3d00;
-            --fontTitle: 'Reem Kufi Fun', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-            --fontText: 'Ubuntu', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-        }
-
-        body.dark-mode {
-            padding-left: 2em;
-            padding-right: 2em;
-            color: var(--corFonte);
+        body {
             background: var(--corFundo);
+            color: var(--corFonte);
+            min-height: 100vh;
+            padding: 0 1em 2em 1em;
         }
-
-        body.light-mode {
-            background: #f0fff1;
-            color: #000;
-        }
-
         header {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-direction: column;
+            text-align: center;
+            margin: 2em 0 1em 0;
         }
-
-        header nav {
-            display: flex;
-            gap: 1em;
-        }
-
-        button {
-            background-color: var(--corDestaque);
-            color: var(--corFonteBtn);
-            width: 100%;
-            padding: 6px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
         header h1 {
             font-family: var(--fontTitle);
+            font-size: 2.5em;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--corDestaque);
         }
-
-        nav a {
-            color: #fff;
-            font-size: 10px;
+        .dashboard {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2em;
         }
-
-        nav {
-            align-items: center;
+        .card {
+            background: var(--corCard);
+            border-radius: 12px;
+            padding: 1.5em 2em;
+            min-width: 180px;
+            box-shadow: 0 2px 8px #0004;
+            text-align: center;
         }
-
-        nav a span {
-            font-size: 2em;
+        .card h2 {
+            font-size: 2.2em;
+            margin-bottom: 0.2em;
+            color: var(--corDestaque);
         }
-
+        .card span {
+            font-size: 1em;
+            color: #aaa;
+        }
         .container {
+            max-width: 900px;
             margin: 0 auto;
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            gap: 0.7em;
-            padding: 1em;
+            background: var(--corSecundaria);
+            border-radius: 10px;
+            padding: 2em;
+            box-shadow: 0 2px 8px #0003;
         }
-
-        .container h3 {
-            font-size: 2em;
+        details {
+            margin-bottom: 1.5em;
         }
-
-        .infos,
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5em;
+        summary {
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--corDestaque);
         }
-
-        input,
-        textarea {
-            outline: none;
-            border: 0.5px solid #000;
-            border-radius: 3px;
-            padding: 5px;
+        ul {
+            margin: 0.5em 0 0 1.5em;
         }
-
-        textarea {
-            height: 300px;
+        li {
+            margin-bottom: 0.5em;
         }
-
-        small a {
+        label {
+            font-weight: 600;
+        }
+        input, textarea {
+            background: #222;
             color: #fff;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 6px;
+            margin-bottom: 0.7em;
         }
-
-        img {
-            max-width: 100%;
-            height: auto;
-            background: #fff;
-            border-radius: 6px;
+        button {
+            background: var(--corDestaque);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-
-        @media screen and (max-width: 1000px) {
-            .container {
-                width: 100%;
-            }
-
-            body {
-                padding-left: 1em;
-                padding-right: 1em;
-            }
+        button:hover {
+            background: #d0ff4a;
+        }
+        @media (max-width: 700px) {
+            .dashboard { flex-direction: column; gap: 1em; }
+            .container { padding: 1em; }
         }
     </style>
 </head>
-<body class="dark-mode">
-
+<body>
     <header>
         <h1>Painel de Administração</h1>
-
     </header>
 
+    <div class="dashboard">
+        <div class="card">
+            <h2>{{ users|length }}</h2>
+            <span>Usuários</span>
+        </div>
+        <div class="card">
+            <h2>{{ articles|length }}</h2>
+            <span>Artigos</span>
+        </div>
+        <div class="card">
+            <h2>{{ searches|length }}</h2>
+            <span>Buscas</span>
+        </div>
+  
+        <div class="card">
+            <h2>{{ correcoes|length }}</h2>
+            <span>Correções</span>
+        </div>
+    </div>
+
     <div class="container">
-        <h3>Usuários</h3>
-      <details>
-        <summary>Abrir infos</summary>
-        <ul>
-            {% for user in users %}
-                <li>{{ user.username }}</li>
-            {% endfor %}
-        </ul>
-      </details>
+      
+
+        <details open>
+            <summary>Usuários</summary>
+            <ul>
+                {% for user in users %}
+                    <li>
+                        <strong>{{ user.username }}</strong> — {{ user.email }} 
+                
+                    </li>
+                {% endfor %}
+            </ul>
+        </details>
+
+        <details>
+            <summary>Artigos</summary>
+            <ul>
+                {% for article in articles %}
+                    <li>
+                        <strong>{{ article.titulo }}</strong> — {{ article.autor }} 
+                        <a href="/delete_article/{{ article.id }}" onclick="return confirm('Tem certeza que deseja excluir este artigo?')" style="color:#aeff00;">Excluir</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </details>
+
+        <details>
+            <summary>Buscas Recentes</summary>
+            <ul>
+                {% for search in searches %}
+                    <li>{{ search.termo }} <small>({{ search.data }})</small></li>
+                {% endfor %}
+            </ul>
+        </details>
+
+     
+
+        <details>
+            <summary>Correções do LearnLoop</summary>
+            <ul>
+                {% for correcao in correcoes %}
+                <li>
+                    <details>
+                        <summary>{{ correcao.tema }}</summary>
+                        <p>{{ correcao.texto }}</p>
+                        <strong>Correção:</strong> {{ correcao.final | safe }}
+                    </details>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
 
         <h3>Excluir Artigo</h3>
         <form action="/delete_article" method="post">
             <label for="article_id">ID do Artigo:</label>
-            <input type="text" id="article_id" name="article_id">
+            <input type="text" id="article_id" name="article_id" required>
             <button type="submit">Excluir</button>
         </form>
-
-        <h3>Buscas</h3>
-      <details>
-        <summary>Abrir infos</summary>
-        <ul>
-            {% for search in searches %}
-                <li>{{ search.termo }}</li>
-            {% endfor %}
-        </ul>
-      </details>
-        <h3>Artigos</h3>
-      <details>
-        <summary>Abrir infos</summary>
-        <ul>
-            {% for article in articles %}
-                <li>{{ article.titulo }} - <a href="/delete_article/{{ article.id }}" onclick="return confirm('Tem certeza que deseja excluir este artigo?')">Excluir</a></li>
-            {% endfor %}
-        </ul>
-      </details>
 
         <h3>Excluir Grupo</h3>
         <form action="/delete_group" method="post">
             <label for="group_id">ID do Grupo:</label>
-            <input type="text" id="group_id" name="group_id">
+            <input type="text" id="group_id" name="group_id" required>
             <button type="submit">Excluir</button>
         </form>
-
-       <details>
-         <summary>Correções do LearnLoop</summary>
-         <ul>
-             {% for correcao in correcoes %}
-             <li>
-             <details>
-                 <summary>{{correcao.titulo}}</summary>
-                 <p>{{correcao.texto}}</p>
-                 <br><br>
-                 <strong>Correção:</strong> {{correcao.correcao | safe}}
-             </details>
-             </li>
-             {% endfor %}
-         </ul>
-       </details>
     </div>
-
 </body>
 </html>
