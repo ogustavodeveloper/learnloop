@@ -5,11 +5,44 @@
 {% block content %}
 <div class="container">
   <h3>Entre na plataforma</h3>
-  <form action="/api/login" method="GET">
-    <input type="text" placeholder="Digite o seu nome de usuário" name="username">
-    <input type="password" placeholder='Digite sua senha' name="password">
+  <form id="loginForm">
+    <input type="text" placeholder="Digite o seu nome de usuário" name="username" required>
+    <input type="password" placeholder='Digite sua senha' name="password" required>
     <button type="submit">Entrar</button>
+    <div id="loginError" style="color: #000; margin-top: 0.5em;"></div>
   </form>
   <small>Não tem uma conta? <a href="/cadastro">clique aqui</a></small>
 </div>
+
+<!-- Axios CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    username: form.username.value,
+    password: form.password.value
+  };
+  const errorDiv = document.getElementById('loginError');
+  errorDiv.textContent = '';
+
+  try {
+    const response = await axios.post('/api/login', data);
+    if (response.data.msg) {
+      window.location.href = '/';
+    }
+  } catch (err) {
+    if (err.response && err.response.data && err.response.data.error) {
+      errorDiv.style.backgroundColor = 'yellow';
+      errorDiv.style.padding = '5px';
+      errorDiv.style.borderRadius = '6px';
+ 
+      errorDiv.textContent = err.response.data.error;
+    } else {
+      errorDiv.textContent = 'Erro desconhecido ao fazer login.';
+    }
+  }
+});
+</script>
 {% endblock %}

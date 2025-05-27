@@ -13,16 +13,45 @@
 {% block content %}
 <div class="container">
   <h3>Cadastre-se na plataforma</h3>
-  <form action="/api/signup" method="POST">
-    <input type="text" placeholder="Digite o seu nome de usuário" name="username">
-    <input type="email" placeholder="Digite seu e-mail" name="email">
-    <input type="password" placeholder='Digite sua senha' name="password">
+  <form id="signupForm">
+    <input type="text" placeholder="Digite o seu nome de usuário" name="username" required>
+    <input type="email" placeholder="Digite seu e-mail" name="email" required>
+    <input type="password" placeholder='Digite sua senha' name="password" required>
     <div style="display: flex; gap: 0.6em;">
       <input type="checkbox" required>
       <p>Aceito os <a href="/termos-de-uso">Termos de uso</a> e <a href="/politica-de-privacidade">Políticas de Privacidade</a></p>
     </div>
     <button type="submit">Cadastrar</button>
+    <div id="signupError" style="color: #000; margin-top: 0.5em; background: none; padding: 5px; border-radius: 6px;"></div>
   </form>
   <small>Já tem uma conta? <a href="/login">clique aqui</a></small>
 </div>
+
+<!-- Axios CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  const errorDiv = document.getElementById('signupError');
+  
+  errorDiv.textContent = '';
+
+  try {
+    const response = await axios.post('/api/signup', data);
+    if (response.data.msg) {
+      window.location.href = '/login';
+    }
+  } catch (err) {
+    if (err.response && err.response.data && err.response.data.error) {
+      
+      errorDiv.style.backgroundColor = 'yellow';
+      errorDiv.textContent = err.response.data.error;
+    } else {
+      errorDiv.textContent = 'Erro desconhecido ao cadastrar.';
+    }
+  }
+});
+</script>
 {% endblock %}

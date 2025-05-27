@@ -1,6 +1,6 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, send_file
-from app.routes import iaplan_bp
+from app.routes import sessoes_bp
 from app.models import SessionStudie, User, Documento, Quiz, Pergunta
 from app import db
 import uuid
@@ -18,29 +18,36 @@ client = AzureOpenAI(
 )
 
 def upload_to_azure_blob(container_name, file_path, blob_name):
+    try:
+        # Obter a connection string dos segredos (variável de ambiente)
+        connection_string = os.getenv('CONECTION')
+        if not connection_string:
+            raise ValueError("Connection string não encontrada nos segredos.")
+
+        # Conectar ao serviço Blob
+        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+
+        # Tentar criar o container (ignorar erro se já existir)
         try:
-                # Obter a connection string dos segredos (variável de ambiente)
-            connection_string = os.getenv('CONECTION')
-            if not connection_string:
-                raise ValueError("Connection string não encontrada nos segredos.")
-
-                                                    # Conectar ao serviço Blob e ao container
-            blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
-                                                                            
-                                                                                    
-            with open(file_path, "rb") as data:
-                blob_client.upload_blob(data, overwrite=True)
-                                                                                                                
-                                                                                                                    
-            blob_url = blob_client.url
-            return blob_url
-
+            blob_service_client.create_container(container_name)
         except Exception as e:
-            print(f"Erro ao enviar o arquivo: {e}")
-            return None
+            # Se o erro for porque já existe, ignore
+            if "ContainerAlreadyExists" not in str(e):
+                raise
 
-@iaplan_bp.route("/session/<id>")
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+
+        with open(file_path, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True)
+
+        blob_url = blob_client.url
+        return blob_url
+
+    except Exception as e:
+        print(f"Erro ao enviar o arquivo: {e}")
+        return None
+
+@sessoes_bp.route("/session/<id>")
 def planPage(id):
     try:
         user = session['user']
@@ -51,7 +58,7 @@ def planPage(id):
     quizzes = Quiz.query.filter_by(sessao=id).all()
     return render_template("session.html", documentos=documentos, sessao=sessao, quizzes=quizzes)
 
-@iaplan_bp.route("/add-doc", methods=["POST"])
+@sessoes_bp.route("/add-doc", methods=["POST"])
 def addDoc():
     try:
       documento = request.files.get("documento")
@@ -59,7 +66,7 @@ def addDoc():
       caminho_doc_temp = os.path.join("/tmp", documento.filename)
       documento.save(caminho_doc_temp)
       filename = documento.filename 
-      projeto_az = upload_to_azure_blob("learnloop-projetos", caminho_doc_temp, documento.filename)
+      projeto_az = upload_to_azure_blob("learnloop-projetes", caminho_doc_temp, documento.filename)
 
       new_doc = Documento(id=str(uuid.uuid4()), filename=filename, url=projeto_az, sessao=sessao)
       db.session.add(new_doc)
@@ -75,12 +82,12 @@ def addDoc():
 
     
 
-@iaplan_bp.route("/feed-session")
+@sessoes_bp.route("/feed-session")
 def feedSession():
     sessions = SessionStudie.query.filter_by(user=session["user"])
     return render_template("feed-sessions.html", sessions=sessions)
 
-@iaplan_bp.route("/download-db")
+@sessoes_bp.route("/download-db")
 def download_file():
     # Diretório onde os documentos do Word estão localizados
     directory_path = os.path.abspath("instance")
@@ -93,7 +100,7 @@ def download_file():
     else:
         return "Arquivo não encontrado", 404
 
-@iaplan_bp.route("/save-session", methods=["POST"])
+@sessoes_bp.route("/save-session", methods=["POST"])
 def saveSession():
     try:
         user = session["user"]
@@ -131,7 +138,7 @@ def saveSession():
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
 
-@iaplan_bp.route("/update-anotacao", methods=["POST"])
+@sessoes_bp.route("/update-anotacao", methods=["POST"])
 def updateAnotacao():
     id = request.form.get("sessao")
     anotado = request.form.get("anotacao")
@@ -143,7 +150,7 @@ def updateAnotacao():
         "msg": "success"
     })
 
-@iaplan_bp.route("/api/delete-session/<id>")
+@sessoes_bp.route("/api/delete-session/<id>")
 def removeSession(id):
     session = SessionStudie.query.filter_by(id=id).first()
     db.session.delete(session)
@@ -151,7 +158,7 @@ def removeSession(id):
 
     return redirect("/feed-session")
 
-@iaplan_bp.route("/api/get-resumo-ia", methods=["POST"])
+@sessoes_bp.route("/api/get-resumo-ia", methods=["POST"])
 def getResumo():
     try:
         user = session["user"]
@@ -175,7 +182,7 @@ def getResumo():
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
     
-@iaplan_bp.route("/api/gerar-quiz", methods=["POST"])
+@sessoes_bp.route("/api/gerar-quiz", methods=["POST"])
 def gerarQuiz():
     try:
         
@@ -280,7 +287,7 @@ def gerarQuiz():
             "details": str(e)
         })
 
-@iaplan_bp.route("/quiz/<id>")
+@sessoes_bp.route("/quiz/<id>")
 def pageQuiz(id):
 
     quiz = Quiz.query.filter_by(id=id).first()
