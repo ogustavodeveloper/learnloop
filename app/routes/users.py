@@ -1,132 +1,81 @@
-from flask import request, session, jsonify, redirect
+from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, make_response, Response
 from app import db
-from app.models import User
+from app.models import User, Artigo, Redacao, Correcoes
 from passlib.hash import bcrypt_sha256
 import uuid
+import markdown
 from app.routes import users_bp
-import logging
 
-logger = logging.getLogger(__name__)
+# Função de criptografia de senha
+def crip(dado):
+    dado_criptografado = bcrypt_sha256.hash(dado)
+    return str(dado_criptografado)
 
-def hash_password(password):
-    return bcrypt_sha256.hash(password)
-
-@users_bp.before_request
-def before_request():
-    logger.debug("Requisição recebida no Blueprint de 'users'.")
-
+# Rota para o cadastro de um novo usuário via API
 @users_bp.route('/api/signup', methods=["POST"])
 def signup():
-    data = request.form
-    username = data.get("username")
-    password = data.get("password")
-    email = data.get("email")
+    username = request.form["username"]
+    password = crip(request.form["password"])
+    email = request.form["email"]
 
-    if not username or not password or not email:
-        return jsonify({"error": "Todos os campos são obrigatórios."}), 400
+    newUser = User(username=username, email=email, password=password, id=str(uuid.uuid4()))
+    db.session.add(newUser)
+    db.session.commit()
+    session["user"] = newUser.id
+    session.permanent = True
 
-    if User.query.filter((User.username == username) | (User.email == email)).first():
-        return jsonify({"error": "Usuário ou e-mail já cadastrado."}), 409
+    return redirect("/")
 
-    try:
-        hashed_password = hash_password(password)
-        new_user = User(
-            username=username,
-            email=email,
-            password=hashed_password,
-            id=str(uuid.uuid4())
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        session["user"] = new_user.id
-        session.permanent = True
-        return jsonify({"msg": "Usuário cadastrado com sucesso."}), 201
-    except Exception as e:
-        logger.error(f"Erro ao cadastrar usuário: {e}")
-        db.session.rollback()
-        return jsonify({"error": "Erro interno ao cadastrar usuário."}), 500
-
-@users_bp.route("/api/login", methods=["POST"])
+# Rota de login de usuário via API
+@users_bp.route("/api/login", methods=["GET"])
 def login():
-    data = request.get_json() or request.form
-    username = data.get("username")
-    password = data.get("password")
-
-    if not username or not password:
-        return jsonify({"error": "Usuário e senha são obrigatórios."}), 400
-
+    username = request.args.get("username")
+    password = request.args.get("password")
     user = User.query.filter_by(username=username).first()
     if user and bcrypt_sha256.verify(password, user.password):
         session["user"] = user.id
         session.permanent = True
-        return jsonify({"msg": "Login realizado com sucesso."}), 200
-    return jsonify({"error": "Usuário ou senha incorretos."}), 401
 
-@users_bp.route("/api/logout", methods=["POST"])
+        return redirect("/")
+    else:
+        return "<h1>Usuário ou senha incorretos</h1>"
+
+# Rota para logout
+@users_bp.route("/api/logout")
 def logout():
     session.clear()
-    return jsonify({"msg": "Logout realizado com sucesso."}), 200
+    return redirect("/login")
 
-@users_bp.route("/api/user", methods=["GET"])
-def get_user():
+# Rota para obter informações do usuário logado
+@users_bp.route("/api/user")
+def user():
     user_id = session.get("user")
-    if not user_id:
-        return jsonify({"error": "Usuário não autenticado."}), 401
     user = User.query.filter_by(id=user_id).first()
-    if not user:
-        return jsonify({"error": "Usuário não encontrado."}), 404
-    return jsonify({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email
-    }), 200
+    return jsonify({"user": user})
 
+# Rota para excluir o usuário
 @users_bp.route("/api/delete-user", methods=["POST"])
 def delete_user():
     user_id = session.get("user")
-    if not user_id:
-        return jsonify({"error": "Usuário não autenticado."}), 401
     user = User.query.filter_by(id=user_id).first()
-    if not user:
-        return jsonify({"error": "Usuário não encontrado."}), 404
-
-    data = request.get_json()
-    senha = data.get("senha")
-    if not senha or not bcrypt_sha256.verify(senha, user.password):
-        return jsonify({"error": "Senha incorreta."}), 401
-
-    try:
+    senha = request.get_json()["senha"]
+    if bcrypt_sha256.verify(senha, user.password):
         db.session.delete(user)
         db.session.commit()
         session.clear()
-        return jsonify({"msg": "Usuário deletado com sucesso."}), 200
-    except Exception as e:
-        logger.error(f"Erro ao deletar usuário: {e}")
-        db.session.rollback()
-        return jsonify({"error": "Erro interno ao deletar usuário."}), 500
+        return jsonify({"msg": "usuário deletado com sucesso"})
+    else:
+        return jsonify({"msg": "Senha incorreta"})
 
+# Rota para atualizar os dados do usuário
 @users_bp.route("/api/update-user", methods=["POST"])
 def update_user():
-    user_id = session.get("user")
-    if not user_id:
-        return jsonify({"error": "Usuário não autenticado."}), 401
-    user = User.query.filter_by(id=user_id).first()
-    if not user:
-        return jsonify({"error": "Usuário não encontrado."}), 404
-
     data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    user_id = session.get("user")
+    user = User.query.filter_by(id=user_id).first()
+    user.username = data["username"]
+    user.password = data["password"]
+    db.session.commit()
+    return jsonify({"msg": "usuário atualizado com sucesso"})
 
-    if username:
-        user.username = username
-    if password:
-        user.password = hash_password(password)
 
-    try:
-        db.session.commit()
-        return jsonify({"msg": "Usuário atualizado com sucesso."}), 200
-    except Exception as e:
-        logger.error(f"Erro ao atualizar usuário: {e}")
-        db.session.rollback()
-        return jsonify({"error": "Erro interno ao atualizar usuário."}), 500
