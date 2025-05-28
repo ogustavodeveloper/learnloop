@@ -59,6 +59,84 @@
       main {
         padding-bottom: 80px; /* espaço para o footer */
       }
+      .nav-text {
+        text-decoration: none;
+        font-style: none;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.3em;
+      }
+      header nav a {
+        display: flex;
+        gap: 0.5em;
+        text-decoration: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .menu-lateral {
+        display: none;
+      }
+
+      .menu-mobile {
+        display: none;
+      }
+
+      @media (max-width: 900px) {
+        
+        
+        header {
+          padding: 15px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+        header nav {
+          display: none; /* Esconde o menu desktop em telas menores */
+        }
+
+        header .menu-mobile {
+          display: flex; /* Exibe o menu móvel */
+        }
+
+        .menu-lateral{
+          display: block; /* Exibe o menu lateral */
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 250px;
+          height: 100%;
+          background-color: #000;
+          backdrop-filter: blur(10px);
+          padding: 1em;
+          z-index: 1000;
+          left: -250px; /* Esconde inicialmente */
+          transition: left 0.3s ease;
+        }
+
+        .menu-lateral-active {
+          left: 0;
+          
+          /* Exibe o menu lateral */
+        }
+        .menu-lateral-header div a {
+          display: flex;
+   
+          align-items: center;
+          gap: 0.5em;
+          text-decoration: none;
+          color: var(--corDestaque);
+          background: none;
+        }
+     
+
+
+      header .search-form {
+    display: none !important;
+    visibility: hidden;
+    position: absolute;
+  }
+      }
     </style>
   </head>
   <body class='dark-mode'>
@@ -67,33 +145,50 @@
       <nav aria-label="Navegação principal">
         <a href="/" title="Início">
           <span class="material-symbols-outlined">home</span>
+          <span class="nav-text">Início</span>
         </a>
-        <a href="/create-artigo" title="Criar artigo">
+        <a href="/avaliar-redacao" title="Criar artigo">
           <span class="material-symbols-outlined">add_circle</span>
+          <span class="nav-text">Corrigir Redação</span>
         </a>
         <a href="/feed/artigos" title="Feed de artigos">
           <span class="material-symbols-outlined">list</span>
+          <span class="nav-text">Feed de artigos</span>
         </a>
         {% if session['user'] %}
           <a onclick="excluirConta()" title="Excluir conta">
             <span class="material-symbols-outlined">person_remove</span>
+            <span class="nav-text">Excluir conta</span>
           </a>
           <a href="/api/logout" title="Sair">
             <span class="material-symbols-outlined">logout</span>
+            <span class="nav-text">Sair</span>
           </a>
         {% else %}
           <a href="/login" title="Entrar">
             <span class="material-symbols-outlined">login</span>
+            <span class="nav-text">Entrar</span>
           </a>
         {% endif %}
+        
       </nav>
-      <form action="/search/artigos" method="GET" style="display: flex; flex-direction: row; margin-top: 1em;">
-        <input style="padding: 4px;" type="text" name="pesquisa" placeholder="Digite sua pesquisa" required aria-label="Pesquisar artigos">
-        <button aria-label="Pesquisar">
+      <nav class="menu-mobile" aria-label="Menu móvel">
+        <span class="material-symbols-outlined">
+        menu
+        </span>
+      </nav>
+      <form action="/search/artigos" method="GET" style="display: flex; flex-direction: row; margin-top: 1em;" class="search-form se-pc">
+        <input style="padding: 4px; width: 90%;" type="text" name="pesquisa" placeholder="Digite sua pesquisa" required aria-label="Pesquisar artigos">
+        <button aria-label="Pesquisar" style="width: 20%; margin-right: 6px;">
           <span class="material-symbols-outlined">search</span>
         </button>
       </form>
+      
     </header>
+
+    
+
+
     <main>
       {% block content %}{% endblock %}
     </main>
@@ -106,6 +201,54 @@
         <a href="/contato">Contato</a>
       </p>
     </footer>
+
+    <div class="menu-lateral">
+      <div class="mapa-btn">
+        <div class="menu-lateral-header">
+          <a>
+          <span id="close-menu" class="material-symbols-outlined" id="close-menu" style="cursor: pointer; font-size: 2em; color: var(--corDestaque);">
+            close
+</span>
+
+</a>
+        <div>
+          <a href="/feed/artigos" title="Feed de artigos">
+            <span class="material-symbols-outlined">list</span>
+            <span class="nav-text">Feed de artigos</span>
+          </a>
+        </div>
+        <div>
+          <a href="/avaliar-redacao" title="Criar artigo">
+          <span class="material-symbols-outlined">add_circle</span>
+          <span class="nav-text">Corrigir Redação</span>
+        </a>
+        </div>
+        {% if session['user'] %}
+          <div>
+            <a onclick="excluirConta()" title="Excluir conta">
+              <span class="material-symbols-outlined">person_remove</span>
+              <span class="nav-text">Excluir conta</span>
+            </a>
+          </div>
+          <div>
+            <a href="/api/logout" title="Sair">
+              <span class="material-symbols-outlined">logout</span>
+              <span class="nav-text">Sair</span>
+            </a>
+          </div>
+
+          
+        {% else %}
+          <div>
+            <a href="/login" title="Entrar">
+              <span class="material-symbols-outlined">login</span>
+              <span class="nav-text">Entrar</span>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+      
+    </div>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
@@ -118,6 +261,18 @@
             });
         });
       }
+
+      document.querySelector('.menu-mobile').addEventListener('click', function() {
+        const menuLateral = document.querySelector('.menu-lateral');
+        menuLateral.classList.toggle('menu-lateral-active');
+      });
+
+      document.getElementById('close-menu').addEventListener('click', function() {
+        const menuLateral = document.querySelector('.menu-lateral');
+        menuLateral.classList.remove('menu-lateral-active');
+      });
+
+
     </script>
   </body>
 </html>
