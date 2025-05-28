@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, make_response, Response
 from app import db
-from app.models import User, Artigo, Redacao, Correcoes
+from app.models import User
 from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
