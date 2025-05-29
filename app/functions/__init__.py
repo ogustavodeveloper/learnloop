@@ -39,3 +39,58 @@ def obter_transcricao(video_url):
         return texto_completo
     except Exception as e:
         return f"Erro ao obter transcrição: {str(e)}"
+
+from googleapiclient.discovery import build
+import re
+
+# Sua chave da API já definida no código ou importada do ambiente seguro
+API_KEY = os.getenv("API_YT")
+
+def obter_dados_video(video_url: str, max_comentarios: int = 10) -> str:
+    """Retorna string formatada com título, descrição e comentários do vídeo do YouTube"""
+    
+    # Extrair ID do vídeo
+    match = re.search(r'(?:v=|youtu\.be/)([a-zA-Z0-9_-]{11})', video_url)
+    if not match:
+        return "❌ Link inválido: não foi possível extrair o ID do vídeo."
+    
+    video_id = match.group(1)
+    
+    # Conectar API
+    youtube = build('youtube', 'v3', developerKey=API_KEY)
+    
+    # Buscar dados do vídeo
+    video_response = youtube.videos().list(
+        part='snippet',
+        id=video_id
+    ).execute()
+    
+    if not video_response['items']:
+        return "❌ Vídeo não encontrado na API."
+    
+    snippet = video_response['items'][0]['snippet']
+    titulo = snippet['title']
+    descricao = snippet['description']
+    
+    # Buscar comentários
+    comentarios = []
+    comment_response = youtube.commentThreads().list(
+        part='snippet',
+        videoId=video_id,
+        textFormat='plainText',
+        maxResults=max_comentarios
+    ).execute()
+    
+    for item in comment_response.get('items', []):
+        comentario = item['snippet']['topLevelComment']['snippet']['textDisplay']
+        comentarios.append(comentario)
+    
+    # Montar string final
+    resultado = f"📺 Título:\n{titulo}\n\n📝 Descrição:\n{descricao}\n\n💬 Comentários:"
+    if comentarios:
+        for i, c in enumerate(comentarios, 1):
+            resultado += f"\n{i}. {c}"
+    else:
+        resultado += "\nNenhum comentário disponível."
+    
+    return resultado
