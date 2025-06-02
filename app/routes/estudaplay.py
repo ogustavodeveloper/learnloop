@@ -30,7 +30,7 @@ from googleapiclient.discovery import build
 import re
 
 # Sua chave da API já definida no código ou importada do ambiente seguro
-API_KEY = "AIzaSyBl9PP7KrN-5h1eXbY0M-DQniPkr2oft-oAIzaSyBl9PP7KrN-5h1eXbY0M-DQniPkr2oft-o"
+API_KEY = os.getenv("API_YT")
 
 def obter_dados_video(video_url: str, max_comentarios: int = 10) -> str:
     """Retorna string formatada com título, descrição e comentários do vídeo do YouTube"""
