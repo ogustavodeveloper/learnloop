@@ -111,8 +111,8 @@ def publicarVideoYt():
         chat_completion = client.chat.completions.create(
                     model="gpt-4o-mini",  # Nome do deployment configurado no Azure
                    messages=[
-                       {"role": "system", "content": "Você é um assistente de estudos de um vestibulando, e apenas transforma a transcrição de um VideoYtaula de forma super organizada"},
-                     {"role": "user", "content": f"Transcrição: {transcricao}"}
+                       {"role": "system", "content": "Você é um assistente de estudos de um vestibulando, e apenas transforma as informações que ele enviar, em um resumo do vídeo/assunto. Com base na descrição, título, e comentários(e aprimore a resposta com base também nos comentários) sem nenhuma referência a nenhum dado enviado pelo usuário."},
+                     {"role": "user", "content": f"Informações: {transcricao}"}
                    ]
                 )
 
