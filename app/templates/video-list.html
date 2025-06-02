@@ -60,7 +60,7 @@
                 formData.append("titulo-yt", assunto)
                 formData.append("video-yt-link", video)
 
-                return axios.post("https://jubilant-garbanzo-pj9j76pqjggvcr4wg-5000.app.github.dev/api/publicar-video", formData).then(response => {
+                return axios.post("/api/publicar-video", formData).then(response => {
                     if(response.data.msg === "success") {
                     Swal.fire("Vídeo Publicado com sucesso!", "Recarregue a página", "success")
                     }
