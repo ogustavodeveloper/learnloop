@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+<style>
+.video-responsive {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+}
+.video-responsive iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 70%;
+    height: 70%;
+    border: none;
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>{{video.titulo}}</h3>
+    <div class="video-responsive">
+        <iframe src="https://www.youtube.com/embed/{{video.id_video}}" allowfullscreen></iframe>
+    </div>
+
+    <p><strong>Resumo: </strong>{{video.resumo}}</p>
+</div>
+{% endblock %}

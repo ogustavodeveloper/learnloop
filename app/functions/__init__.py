@@ -24,18 +24,6 @@ def upload_arquivo(container_name, file_path, blob_name):
             print(f"Erro ao enviar o arquivo: {e}")
             return None
 
-from youtube_transcript_api import YouTubeTranscriptApi
-import re
 
-def obter_transcricao(video_url):
-    match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11})", video_url)
-    if not match:
-        raise ValueError("URL inválida. Não foi possível extrair o ID do vídeo.")
-    video_id = match.group(1)
 
-    try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt', 'en'])
-        texto_completo = " ".join([entry['text'] for entry in transcript])
-        return texto_completo
-    except Exception as e:
-        return f"Erro ao obter transcrição: {str(e)}"
+

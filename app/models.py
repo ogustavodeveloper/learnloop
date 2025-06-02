@@ -135,7 +135,19 @@ class Pergunta(db.Model):
     self.alternativas = alternativas 
     self.quiz = quiz
 
+class VideoYt(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  titulo = db.Column(db.String())
+  resumo = db.Column(db.String())
+  transcricao = db.Column(db.String())
+  id_video = db.Column(db.String())
 
+  def __init__(self, id, titulo, resumo, transcricao, id_video):
+    self.id = id
+    self.titulo = titulo 
+    self.resumo = resumo
+    self.transcricao = transcricao 
+    self.id_video = id_video
 
 with app.app_context():
   db.create_all()
