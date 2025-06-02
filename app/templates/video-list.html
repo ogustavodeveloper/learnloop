@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block styled %}
+
+<style>
+    .list-videos {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+
+    .list-videos a {
+        color: #fff;
+        text-decoration: none;
+        border: 0.5px solid #fff;
+        border-radius: 6px;
+        padding: 5px;
+    }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h3>Vídeos publicados</h3>
+    <button onclick="addVideo()">Enviar Vídeo</button>
+
+    <div class="list-videos">
+        {% for video in videos %}
+        <a href="/video/{{video.id}}">{{video.titulo}}</a>
+        {% endfor %}
+
+        <a href="/video">oi</a>
+        <a href="/video">oi</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" integrity="sha512-WrdC3CE9vf1nBf58JHepuWT4x24uTacky9fuzw2g/3L9JkihgwZ6Cfv+JGTtNyosOhEmttMtEZ6H3qJWfI7gIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    function addVideo() {
+        Swal.fire({
+            title: "Adicionar Vídeo do YouTube",
+            html: `
+            <p>Digite o assunto</p>
+              <input type="text" placeholder="Digite o assunto" id="titulo-yt">
+              <br> 
+              <p>Digite o link do vídeo</p>
+              <input type="text placeholder="Digite o link do youtube" id="video-yt-link">
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+                const assunto = document.getElementById("titulo-yt").value;
+                const video = document.getElementById("video-yt-link").value; 
+
+                const formData = new FormData()
+
+                formData.append("titulo-yt", assunto)
+                formData.append("video-yt-link", video)
+
+                return axios.post("https://jubilant-garbanzo-pj9j76pqjggvcr4wg-5000.app.github.dev/api/publicar-video", formData).then(response => {
+                    if(response.data.msg === "success") {
+                    Swal.fire("Vídeo Publicado com sucesso!", "Recarregue a página", "success")
+                    }
+                    else {
+                        Swal.fire("Ocorreu um erro no servidor!", response.data.details, "error")
+                    }
+                }).catch((error) => {
+                    Swal.fire("Ocorreu um erro!", `${error}`)
+                })
+            }
+        })
+    }
+</script>
+
+{% endblock %}
