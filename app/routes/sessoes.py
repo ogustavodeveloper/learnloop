@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, send_file
 from app.routes import sessoes_bp
-from app.models import SessionStudie, User, Documento, Quiz, Pergunta
+from app.models import SessionStudie, User, Documento, Simulado, Pergunta
 from app import db
 import uuid
 import markdown
@@ -55,7 +55,7 @@ def planPage(id):
         return render_template("plan.html", sessions=[])
     sessao = SessionStudie.query.filter_by(id=id).first()
     documentos = Documento.query.filter_by(sessao=id).all()
-    quizzes = Quiz.query.filter_by(sessao=id).all()
+    quizzes = Simulado.query.filter_by(sessao=id).all()
     return render_template("session.html", documentos=documentos, sessao=sessao, quizzes=quizzes)
 
 @sessoes_bp.route("/add-doc", methods=["POST"])
@@ -196,7 +196,7 @@ def gerarQuiz():
             model="gpt-4o",  # Nome do deployment configurado no Azure
             messages=[
                 {"role": "system", "content": """
-                Você é um gerador de simulado para ENEM, sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON:
+                Você é um gerador de simulado para ENEM, sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON, com base nas questôes do ENEM:
                  
                  {
                     "pergunta1": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
@@ -216,7 +216,7 @@ def gerarQuiz():
         assistant_response = json.loads(assistant_response)
 
 
-        newQuiz = Quiz(id=str(uuid.uuid4()), titulo=assunto, sessao=sessao)
+        newQuiz = Simulado(id=str(uuid.uuid4()), titulo=assunto, sessao=sessao, user=session["user"], views=0, acertos=0)
         db.session.add(newQuiz)
         db.session.commit()
         
@@ -290,7 +290,7 @@ def gerarQuiz():
 @sessoes_bp.route("/quiz/<id>")
 def pageQuiz(id):
 
-    quiz = Quiz.query.filter_by(id=id).first()
+    quiz = Simulado.query.filter_by(id=id).first()
 
     if not quiz:
         return "Quiz não encontrado", 404

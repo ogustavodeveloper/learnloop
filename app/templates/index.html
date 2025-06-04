@@ -12,173 +12,52 @@
 {% block styled %}
 <style>
 
-
-  /* Layout dos botões */
-  .mapa-btn {
+  .functions {
     display: flex;
-    gap: 1em;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.5em;
+
+  }
+
+  .function {
+    background-color: #151515;
+    padding: 7px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    padding-bottom: 10px;
   }
 
-  .mapa-btn img {
-    width: 40%;
+  .function strong {
+    font-size: 1em;
+  }
+
+  .function img {
+    background: transparent;
+    width: 1.5em;
+  }
+
+  .dados {
+    background-color: #151515;
+    padding: 1em;
     border-radius: 6px;
-    cursor: pointer;
-    transition: transform 0.2s ease-in-out;
   }
 
-  .mapa-btn img:hover {
-    transform: scale(1.05);
+  .dados h3{
+    font-size: 1.5em;
+    margin-bottom: 0.8em;
   }
 
-  /* Efeito de animação para as imagens */
-  @keyframes slide-hint {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(-40px); }
+  /* Responsividade */
+  @media screen and (max-width: 1000px) {
+
   }
 
-  .mapa-btn img:first-child {
-    animation: slide-hint 2s ease-in-out;
-  }
-
-  /* Estilização de artigos */
-  .list-artigos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1em;
-  }
-
-  .artigo {
-    padding: 10px;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    width: 40%;
-    transition: background 0.3s;
-  }
-
-  .artigo:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-  }
-
-  /* Botão de Ver Todos */
-  .btn-ver-todos {
-    padding: 10px;
-    background-color: var(--corDestaque);
-    color: black;
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-
-  .btn-ver-todos:hover {
-    opacity: 0.8;
-  }
-
-  .mapa-btn div {
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 16px;
-    border-radius: 8px;
-    flex: 1 1 320px; /* Cresce, encolhe, largura mínima */
-    min-width: 260px;
-    max-width: 48%;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1em;
-    box-sizing: border-box;
-  }
-
-  .mapa-btn div:not(:last-child) {
-    margin-right: 1em;
-  }
-
-  .mapa-btn div a {
-    text-decoration: none;
-    color: #09ff00;
-    font-weight: bold;
-    margin-top: auto; /* Empurra o link para o final da div */
-    display: inline-block;
-  }
-
-  .mapa-btn div h4{
-    margin: 0 0 0.5em 0;
-    font-size: 1.2em;
+  @media screen and (max-width: 800px) {
   }
 
   
 
-  /* Responsividade */
-  @media screen and (max-width: 1000px) {
-    .mapa-btn img,
-    .artigo {
-      width: 100%;
-    }
-
-    .mapa-btn div {
-      padding-bottom: 0;
-      width: 100%; 
-    }
-  }
-
-  @media screen and (max-width: 800px) {
-    .mapa-btn {
-      flex-direction: column;
-      gap: 0.7em;
-    }
-    .mapa-btn div {
-      max-width: 100%;
-      min-width: 0;
-      margin-right: 0;
-      padding: 10px 8px;
-      margin-bottom: 0.5em;
-      height: 100%;
-      flex: 1 1 auto;
-      
-      
-    }
-    .mapa-btn div:last-child {
-      margin-bottom: 0;
-    }
-    .mapa-btn div h4 {
-      font-size: 1em;
-      margin-bottom: 0.3em;
-    }
-    .mapa-btn div p {
-      font-size: 0.95em;
-      margin-bottom: 0.5em;
-    }
-    .mapa-btn div a {
-      margin-top: 0.5em;
-      /* Remover o margin-top: auto para evitar espaço extra */
-      margin-top: 0.5em !important;
-    }
-  }
-
-  @keyframes slide-hint {
-    0% {
-      transform: translateX(0);
-    }
-            
-    50% {
-      transform: translateX(-40px);
-                  
-    }
-                    
-    100% {
-      transform: translateX(0);
-    }
-  }
-
-  .mapa-btn img{
-    animation: slide-hint 2s ease-in-out;
-  }
 
   a{
     color: #fff;
@@ -191,42 +70,48 @@
 <div class="container">
   <h3>Olá, Estudante!</h3>
 
-  <img src="{{ url_for('static', filename='img/banner.png') }}" alt="Redes Sociais">
-     
-  <h3>Explore nossos recursos</h3>
+  <div class="functions">
 
-  <div class="mapa-btn">
-
-    <div>
-      <h4>Corretor de Redações</h4>
-      <p>Corrija sua redação com a ajuda da IA! E conte com o apoio em tempo real da Redação Guiada!</p>
-      <a href="/redacao">Acesse agora  ⟶</a>
+    <div class="function" onclick="window.location.href='/redacao'">
+      <strong>Corretor de Redações</strong>
+      <img src="{{ url_for('static', filename='img/icon-next.png') }}">
     </div>
 
-    <div>
-      <h4>Sessões de Estudos</h4>
-      <p>Guarde o que você estudou de forma fácil! Será criada uma página exclusiva onde você poderá guardar documentos e gerar quiz com base em sua anotação para testar conhecimento e fazer revisões</p>
-      <a href="/feed-session">Acesse agora  ⟶</a>
-    </div>    
-    
-  </div>
-</div>
+    <div class="function" onclick="window.location.href='/feed-session'">
+      <strong>Sessões de Estudos</strong>
+      <img src="{{ url_for('static', filename='img/icon-next.png') }}">
+    </div>
 
-<div class="container">
-  <p>Explore os mais recentes conteúdos do Estudaê!</p>
-  
-  <div id="ultimos-artigos" class="list-artigos">
-    {% for artigo in artigos %}
-      <div class="artigo" data-link="/artigo/{{ artigo.id }}">
-        <strong>{{ artigo.titulo }}</strong>
-        <small>{{ artigo.categoria }}</small>
-      </div>
-    {% endfor %}
+
+
   </div>
 
-  <button class="btn-ver-todos" onclick="window.location.href='/feed/artigos'">Explorar Novos Conteúdos</button>
 
-  
+  <div class="dados">
+    <h3>Seu desempenho</h3>
+    <p><strong>Redações Enviadas: </strong>{{redacoes|length}} redações</p>
+    <p><strong>Sessões de Estudos criadas: </strong>{{redacoes|length}} sessões</p>
+    <p><strong>Quizzes gerados: </strong>{{redacoes|length}} quizzes</p>
+  </div>
+
+  <div class="functions dados" style="margin-top: 2em;">
+    <h3 style="">Suas próximas revisões</h3>
+    <p>Em breve...</p>
+    <!--
+    <div class="function" onclick="window.location.href='/sessoes'">
+      <strong>Revisão de Matemática</strong>
+      <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
+    </div>
+    <div class="function" onclick="window.location.href='/sessoes'">
+      <strong>Revisão de História</strong>
+      <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
+    </div>
+
+
+  -->
+    <!-- Adicione mais revisões conforme necessário -->
+  </div>
+
 </div>
 
 {% endblock %}

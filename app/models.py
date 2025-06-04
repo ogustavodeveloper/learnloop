@@ -111,15 +111,22 @@ class Documento(db.Model):
     self.url = url 
     self.sessao = sessao 
 
-class Quiz(db.Model):
+class Simulado(db.Model):
   id = db.Column(db.String(), primary_key=True)
   titulo = db.Column(db.String())
   sessao = db.Column(db.String())
+  user = db.Column(db.String())
+  views = db.Column(db.Integer, default=0)
+  acertos = db.Column(db.Integer, default=0)
 
-  def __init__(self, id, titulo, sessao):
+
+  def __init__(self, id, titulo, sessao, user, views, acertos):
     self.id = id
     self.titulo = titulo
     self.sessao = sessao 
+    self.user = user
+    self.views = views
+    self.acertos = acertos
   
 class Pergunta(db.Model):
   id = db.Column(db.String(), primary_key=True)

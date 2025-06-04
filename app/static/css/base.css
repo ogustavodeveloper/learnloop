@@ -1,4 +1,4 @@
- @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Reem+Kufi+Fun:wght@400;600;700&family=Roboto:wght@300;400;500&family=Ubuntu:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=Reem+Kufi+Fun:wght@400;600;700&family=Roboto:wght@300;400;500&family=Ubuntu:wght@400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 *{
@@ -11,7 +11,7 @@
 }
 
 :root{
-  --corDestaque: #0dff00;
+  --corDestaque: #5CFF76;
   --corFonteBtn: #000;
   --corFundo: #000;
   --corFonte: #ffffff;
@@ -143,6 +143,24 @@ footer {
 
 footer a {
   color: black;
+}
+
+.swal2-confirm {
+  background-color: var(--corDestaque);
+  color: var(--corFonteBtn);
+  width: 100%;
+  padding: 6px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 800;
+  font-family: inherit;
+  font-size: 1em;
+}
+
+.swal2-confirm:hover, .swal2-confirm:focus {
+  background-color: var(--corDestaque);
+  color: #000;
 }
 
 @media screen and (max-width: 1000px) {
