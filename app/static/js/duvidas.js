@@ -1,155 +1,3 @@
-// Função para obter informações sobre uma dúvida
-
-function generateRespostasHTML(respostas) {
-  let html = '<ul>';
-  respostas.forEach(resposta => {
-    html += `<li><strong>${resposta.autor}:</strong> ${resposta.texto}</li>`; 
-  });
-  html += '</ul>';
-  return html;
-}
-
-function getDuvida(duvida) {
-  axios.get(`/get-duvida/${duvida}`)
-    .then(response => {
-      if (response.data.msg === 'success') {
-        const infos = response.data.dados;
-        const respostasHTML = generateRespostasHTML(response.data.respostas);
-
-        // Exibir informações e respostas em uma janela de diálogo
-        Swal.fire({
-          title: infos.texto,
-          text: infos.autor,
-          html: respostasHTML,
-          showCloseButton: true,  // Adiciona o botão de fechar
-          showCancelButton: true,
-          confirmButtonText: 'Deletar Dúvida',
-          cancelButtonText: 'Fechar',
-          showLoaderOnConfirm: true,
-          preConfirm: () => {
-            // Chama a função para deletar a dúvida
-            return deletarDuvida(duvida);
-          },
-        });
-      } else {
-        window.location.href = '/login';
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao obter dúvida:', error);
-    });
-}
-
-// Função para deletar uma dúvida
-function deletarDuvida(duvidaId) {
-  return axios.post('/deletar-duvida', { duvidaId })
-    .then(response => {
-      if (response.data.msg === 'success') {
-        Swal.fire({
-          title: 'Dúvida deletada com sucesso!',
-          icon: 'success',
-        });
-
-        // Adapte esta parte para remover a dúvida da interface
-        // Exemplo: document.getElementById('duvida-container').remove();
-      } else {
-        Swal.fire({
-          title: 'Erro ao deletar dúvida',
-          text: response.data.msg,
-          icon: 'error',
-        });
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao deletar dúvida:', error);
-      Swal.fire({
-        title: 'Erro ao deletar dúvida',
-        text: 'Ocorreu um erro ao tentar deletar a dúvida.',
-        icon: 'error',
-      });
-    });
-}
-
-
-// Função para adicionar uma nova dúvida
-function addDuvida() {
-  Swal.fire({
-    title: 'Publicar Dúvida (sua dúvida não será deletada)',
-    html: `
-      <input type='text' placeholder='Digite a sua dúvida' id='duvida'>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Publicar',
-    preConfirm: () => {
-      const duvida = document.querySelector('#duvida').value;
-      if (!duvida) {
-        Swal.showValidationMessage('Por favor, digite a sua dúvida.');
-      }
-      return duvida;
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      axios.post('/create-duvidas', {
-        texto: result.value,
-        
-      })
-        .then((response) => {
-          if (response.data.msg === 'success') {
-            Swal.fire({
-              title: 'Dúvida publicada com sucesso!',
-              icon: 'success',
-            });
-
-            document.querySelector(".list-duvidas").innerHTML += `
-              <div>
-                <p onclick='getDuvida("${response.data.id}")'><strong>${result.value}</strong></p>
-                <button style='margin-top: 1em;' onclick='responderDuvida("${response.data.id}")'>Responder Dúvida</button>
-              </div>
-            `
-          } else {
-            window.location.href = '/login'
-          }
-        });
-    }
-  });
-}
-
-// Função para responder a uma dúvida
-function responderDuvida(duvidaId) {
-  Swal.fire({
-    title: 'Responder Dúvida',
-    html: `
-      <input type='text' placeholder='Digite a sua resposta' id='resposta-duvida'>
-    `,
-    showCancelButton: true,
-    confirmButtonText: 'Responder',
-    preConfirm: () => {
-      const resposta = document.querySelector('#resposta-duvida').value;
-      if (!resposta) {
-        Swal.showValidationMessage('Por favor, digite a sua resposta.');
-      }
-      return resposta;
-    },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      axios.post('/responder-duvida', {
-        duvidaId: duvidaId,
-        resposta: result.value,
-      })
-        .then((response) => {
-          if (response.data.msg === 'success') {
-            Swal.fire({
-              title: 'Sucesso!',
-              text: 'Sua resposta foi enviada com sucesso!',
-              icon: 'success',
-            });
-          }
-        });
-    }
-  });
-}
-
-
 function search() {
   var search = prompt("Digite o que você quer pesquisar:")
   if(search == false) {
@@ -179,3 +27,83 @@ function excluirConta() {
     })
   }
 }
+
+function ajudaDinamica() {
+  const path = window.location.pathname;
+
+  let titulo = 'Ajuda';
+  let html = 'Aqui você encontra informações sobre o uso da plataforma.';
+
+  if (path.includes('/duvidas')) {
+    titulo = 'Como funciona a página de Dúvidas?';
+    html = `
+      <b>Publicar Dúvida:</b> Clique em "Publicar Dúvida", escreva sua dúvida e confirme.<br><br>
+      <b>Responder:</b> Clique em "Responder Dúvida" para enviar uma resposta.<br><br>
+      <b>Visualizar:</b> Clique no texto da dúvida para ver detalhes e respostas.<br><br>
+      <b>Deletar:</b> Dentro dos detalhes, use "Deletar Dúvida" para remover.<br><br>
+      <i>Use esta página para compartilhar e resolver dúvidas com outros usuários!</i>
+    `;
+  } else if (path.startsWith('/feed-session') || path.startsWith('/feed-sessions')) {
+    titulo = 'Como funciona a Lista de Sessões de Estudos?';
+    html = `
+      <b>Registrar Nova Sessão:</b> Clique em "Registrar Nova Sessão" para criar uma nova sessão de estudos.<br><br>
+      <b>Visualizar Sessão:</b> Clique em uma sessão para ver detalhes, anotações e documentos.<br><br>
+      <i>Organize e acesse rapidamente todas as suas sessões de estudo!</i>
+    `;
+  } else if (path.startsWith('/session')) {
+    titulo = 'Como funciona a página de Sessão de Estudos?';
+    html = `
+      <b>Resumo/Anotações:</b> Escreva ou edite suas anotações e clique em "Atualizar Anotação".<br><br>
+      <b>Adicionar Arquivo:</b> Selecione um arquivo e clique em "Adicionar" para anexar materiais.<br><br>
+      <b>Documentos Salvos:</b> Clique nos nomes dos arquivos para abri-los.<br><br>
+      <b>Quizzes:</b> Veja quizzes já criados ou clique em "Gerar Quiz" para criar um novo.<br><br>
+      <b>Deletar Sessão:</b> Use o botão ao final para excluir esta sessão.<br><br>
+      <i>Organize seus estudos, salve materiais e teste seus conhecimentos!</i>
+    `;
+  } else if (path.startsWith('/redacao')) {
+    titulo = 'Como funciona a página de Redações Corrigidas?';
+    html = `
+      <b>Visualizar Correção:</b> Clique no tema de uma redação para ver a correção detalhada.<br><br>
+      <b>Nova Correção:</b> Clique em "Corrigir Nova Redação" para enviar outro texto.<br><br>
+      <i>Acompanhe seu progresso e veja o feedback das suas redações!</i>
+    `;
+  } else if (path.startsWith('/correcao/')) {
+    titulo = 'Como funciona a Correção de Redação?';
+    html = `
+      <b>Correção Detalhada:</b> Veja a análise de cada competência do ENEM.<br><br>
+      <b>Nota Final:</b> Confira sua nota final e o comentário geral.<br><br>
+      <i>Use o feedback para aprimorar sua redação e focar nos pontos que precisam de atenção!</i>
+    `;
+  } else if (path.startsWith('/avaliar-redacao')) {
+    titulo = 'Como funciona a Redação Guiada?';
+    html = `
+      <b>Redação Guiada:</b> Clique em "Redação Guiada" para receber dicas personalizadas sobre o que escrever a seguir.<br><br>
+      <b>Correção Automática:</b> Envie sua redação para receber uma correção detalhada por competência.<br><br>
+      <b>Digitalizar Redação:</b> Use a opção de digitalizar para enviar uma foto do seu texto manuscrito.<br><br>
+      <i>Aproveite para evoluir sua escrita com o apoio da IA!</i>
+    `;
+  } else if (path.includes('/artigos')) {
+    titulo = 'Como funciona a página de Artigos?';
+    html = `
+      <b>Pesquisar:</b> Use a barra de pesquisa para encontrar artigos.<br><br>
+      <b>Visualizar:</b> Clique no título de um artigo para ler.<br><br>
+      <b>Salvar:</b> Adicione artigos aos favoritos para acessar depois.<br><br>
+      <i>Explore conteúdos para aprofundar seus estudos!</i>
+    `;
+  }
+
+  Swal.fire({
+    title: titulo,
+    html: html,
+    icon: 'info',
+    confirmButtonText: 'Entendi!'
+  });
+}
+
+// Adiciona o evento ao botão de ajuda, se existir
+document.addEventListener('DOMContentLoaded', function() {
+  const btnAjuda = document.querySelector('#help-icon');
+  if (btnAjuda) {
+    btnAjuda.onclick = ajudaDinamica; // Sem parênteses!
+  }
+});

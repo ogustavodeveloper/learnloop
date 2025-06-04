@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}LearnLoop One{% endblock %}
+{% block title %}Estudaê - Lista de Redações{% endblock %}
 
 {% block styled %}
 <style>
@@ -32,6 +32,14 @@
 
 <div class="container">
     <h3>Corretor de Redações</h3>
+
+    <!-- Estatísticas -->
+    <div class="stats" style="margin-bottom: 1em; background: #222; color: #fff; border-radius: 8px; padding: 1em;">
+        <strong>Redações enviadas:</strong> {{ total_redacoes }}<br>
+        <strong>Maior nota final:</strong> {{ maior_nota }}<br>
+        <strong>Menor nota final:</strong> {{ menor_nota }}<br>
+        <strong>Média das notas finais:</strong> {{ media_nota }}
+    </div>
 
     <button onclick='window.location.href="/avaliar-redacao"'>Corrigir Nova Redação</button>
 

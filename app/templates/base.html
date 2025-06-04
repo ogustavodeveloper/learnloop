@@ -46,7 +46,7 @@
     <style>
       /* Footer fixo */
       footer {
-        position: relative;
+        position: fixed;
         left: 0;
         bottom: 0;
         width: 100%;
@@ -151,10 +151,9 @@
           <span class="material-symbols-outlined">add_circle</span>
           <span class="nav-text">Corrigir Redação</span>
         </a>
-        <a href="/feed/artigos" title="Feed de artigos">
-          <span class="material-symbols-outlined">list</span>
-          <span class="nav-text">Feed de artigos</span>
-        </a>
+
+        
+     
         {% if session['user'] %}
           <a onclick="excluirConta()" title="Excluir conta">
             <span class="material-symbols-outlined">person_remove</span>
@@ -170,6 +169,13 @@
             <span class="nav-text">Entrar</span>
           </a>
         {% endif %}
+
+        <a id="help-icon" title="Ajuda">
+          <span class="material-symbols-outlined">
+info
+</span>
+<span class="nav-text">Ajuda</span>
+        </a>
         
       </nav>
       <nav class="menu-mobile" aria-label="Menu móvel">
@@ -177,12 +183,6 @@
         menu
         </span>
       </nav>
-      <form action="/search/artigos" method="GET" style="display: flex; flex-direction: row; margin-top: 1em;" class="search-form se-pc">
-        <input style="padding: 4px; width: 90%;" type="text" name="pesquisa" placeholder="Digite sua pesquisa" required aria-label="Pesquisar artigos">
-        <button aria-label="Pesquisar" style="width: 20%; margin-right: 6px;">
-          <span class="material-symbols-outlined">search</span>
-        </button>
-      </form>
       
     </header>
 
@@ -211,12 +211,7 @@
 </span>
 
 </a>
-        <div>
-          <a href="/feed/artigos" title="Feed de artigos">
-            <span class="material-symbols-outlined">list</span>
-            <span class="nav-text">Feed de artigos</span>
-          </a>
-        </div>
+        
         <div>
           <a href="/avaliar-redacao" title="Criar artigo">
           <span class="material-symbols-outlined">add_circle</span>
@@ -246,6 +241,12 @@
             </a>
           </div>
         {% endif %}
+        <a id="help-icon">
+          <span class="material-symbols-outlined">
+info
+</span>
+<span class="nav-text">Ajuda</span>
+        </a>
       </div>
       
     </div>

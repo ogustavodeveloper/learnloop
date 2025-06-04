@@ -23,6 +23,7 @@ a{
 
 {% block content %}
 <div class="container">
+   <button onclick="mostrarAjuda()" style="float:right;margin-top:10px;">Ajuda</button>
    <h3 id="assunto">{{sessao.assunto}}</h3>
    <small>Criada: {{sessao.data}}</small>
    <textarea id="resumo" placeholder="Digite aqui suas anotações">{{sessao.resumo}}</textarea>
@@ -72,4 +73,21 @@ a{
 
 
 <script src="{{ url_for('static', filename='js/session.js') }}"></script>
+<script>
+function mostrarAjuda() {
+   Swal.fire({
+      title: 'Como funciona esta página?',
+      html: `
+         <b>Resumo/Anotações:</b> Escreva ou edite suas anotações sobre a sessão e clique em "Atualizar Anotação".<br><br>
+         <b>Adicionar Arquivo:</b> Selecione um arquivo e clique em "Adicionar" para anexar materiais à sessão.<br><br>
+         <b>Documentos Salvos:</b> Clique nos nomes dos arquivos para abri-los.<br><br>
+         <b>Quizzes:</b> Veja quizzes já criados ou clique em "Gerar Quiz" para criar um novo com base no conteúdo da sessão.<br><br>
+         <b>Deletar Sessão:</b> Use o botão ao final para excluir esta sessão de estudos.<br><br>
+         <i>Use esta página para organizar seus estudos, salvar materiais e testar seus conhecimentos!</i>
+      `,
+      icon: 'info',
+      confirmButtonText: 'Entendi!'
+   });
+}
+</script>
 {% endblock %}
