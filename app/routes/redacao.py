@@ -129,9 +129,30 @@ Seja direto e objetivo.
 @redacao_bp.route('/redacao')
 def redacaoPage():
     try:
-      correcoes = Corrections.query.filter_by(user=session['user']).all()
+        correcoes = Corrections.query.filter_by(user=session['user']).all()
 
-      return render_template('redacoes.html', redacoes=correcoes)
+        # Estatísticas
+        total = len(correcoes)
+        notas = []
+        for c in correcoes:
+            try:
+                nota = int(str(c.final).split("\\")[0])
+                notas.append(nota)
+            except Exception:
+                continue
+
+        maior_nota = max(notas) if notas else 0
+        menor_nota = min(notas) if notas else 0
+        media_nota = round(sum(notas)/len(notas), 2) if notas else 0
+
+        return render_template(
+            'redacoes.html',
+            redacoes=correcoes,
+            total_redacoes=total,
+            maior_nota=maior_nota,
+            menor_nota=menor_nota,
+            media_nota=media_nota
+        )
     except Exception as e:
         return redirect("/login")
 

@@ -60,7 +60,7 @@ function ajudaDinamica() {
       <b>Deletar Sessão:</b> Use o botão ao final para excluir esta sessão.<br><br>
       <i>Organize seus estudos, salve materiais e teste seus conhecimentos!</i>
     `;
-  } else if (path.startsWith('/redacoes')) {
+  } else if (path.startsWith('/redacao')) {
     titulo = 'Como funciona a página de Redações Corrigidas?';
     html = `
       <b>Visualizar Correção:</b> Clique no tema de uma redação para ver a correção detalhada.<br><br>
