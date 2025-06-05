@@ -100,10 +100,10 @@ function ajudaDinamica() {
   });
 }
 
-// Adiciona o evento ao botão de ajuda, se existir
+// Adiciona o evento ao(s) botão(ões) de ajuda, se existir(em)
 document.addEventListener('DOMContentLoaded', function() {
-  const btnAjuda = document.querySelector('#help-icon');
-  if (btnAjuda) {
-    btnAjuda.onclick = ajudaDinamica; // Sem parênteses!
-  }
+  const btnsAjuda = document.querySelectorAll('#help-icon');
+  btnsAjuda.forEach(function(btn) {
+    btn.onclick = ajudaDinamica; // Sem parênteses!
+  });
 });
