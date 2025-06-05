@@ -155,6 +155,3 @@ class VideoYt(db.Model):
     self.resumo = resumo
     self.transcricao = transcricao 
     self.id_video = id_video
-
-with app.app_context():
-  db.create_all()
