@@ -7,7 +7,7 @@
 <div class="container">
     <h3>Quiz sobre {{ quiz.titulo }}</h3>
 
-    <form method="POST" action="/enviar_respostas/{{ quiz.id }}">
+    <form id="quizForm" method="POST" action="/enviar_respostas/{{ quiz.id }}">
         {% for pergunta in perguntas %}
             <div class="pergunta">
                 <p>{{ pergunta.questao }}</p>
@@ -17,6 +17,9 @@
                         <option value="{{ alternativa }}">{{ alternativa }}</option>
                     {% endfor %}
                 </select>
+                <div class="resolucao" style="display:none; margin-top:10px;">
+                    <b><strong>Resolução:</strong></b> {{ pergunta.resolucao }}
+                </div>
             </div>
             <br>
         {% endfor %}
@@ -32,8 +35,6 @@
         select.addEventListener('change', function() {
             const respostaSelecionada = this.value.trim();
             const respostaCorreta = this.getAttribute('data-resposta').trim();
-            console.log(respostaSelecionada)
-            console.log(respostaCorreta)
             if (respostaSelecionada == respostaCorreta) {
                 alert('Resposta Correta!');
             } else if (respostaSelecionada !== "") {
@@ -41,6 +42,17 @@
             }
         });
     });
-});
+
+    // Ao enviar o formulário, mostra as resoluções
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Impede o envio padrão
+        document.querySelectorAll('.resolucao').forEach(function(div) {
+            div.style.display = 'block';
+        });
+        // Opcional: desabilita selects e botão após envio
+        selects.forEach(select => select.disabled = true);
+        this.querySelector('button[type="submit"]').disabled = true;
+    });
+  });
 </script>
 {% endblock %}
