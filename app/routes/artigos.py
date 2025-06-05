@@ -27,8 +27,9 @@ def homepage():
         correcoes = Corrections.query.filter_by(user=user).all()
         sessoes = SessionStudie.query.filter_by(user=user).all()
         quiz = Simulado.query.filter_by(user=user).all()
+        print(len(sessoes))
 
-        return render_template("index.html", user=user, correcoes=correcoes, sessoes=sessoes, quiz=quiz)
+        return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz))
     except Exception as e:
         return render_template("login.html")
 
