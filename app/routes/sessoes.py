@@ -201,15 +201,19 @@ def gerarQuiz():
             model="gpt-4o",  # Nome do deployment configurado no Azure
             messages=[
                 {"role": "system", "content": """
-                Você é um gerador de simulado para ENEM, sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON, com base nas questôes do ENEM:
+                Você é um gerador de simulado para ENEM.
+                Sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON:
                  
                  {
-                    "pergunta1": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
-                    "pergunta2": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
-                    "pergunta3": {"pergunta": pergunta gerada, "alternativas": alternativas separadas em /, "respostaCerta": alternativa certa},
-                 }
+                    "pergunta1": {
+                        "pergunta": pergunta gerada,
+                        "alternativas": alternativas separadas em /,
+                        "respostaCerta": alternativa certa,
+                        "resolucao": explicação detalhada da resposta correta
+                    },
                     ...
-                 
+                 }
+                 Atenção: cada pergunta deve obrigatoriamente conter uma resolução clara e detalhada no campo "resolucao".
                 """},
                 {"role": "user", "content": f"Assunto: {assunto}. Anotação: {anotacao}"}
             ],
@@ -225,11 +229,13 @@ def gerarQuiz():
         db.session.add(newQuiz)
         db.session.commit()
         
+        # Exemplo para a primeira pergunta:
         new_pergunta = Pergunta(
             id=str(uuid.uuid4()),
             questao=assistant_response["pergunta1"]["pergunta"],
             resposta_certa=assistant_response["pergunta1"]["respostaCerta"],
             alternativas=assistant_response["pergunta1"]["alternativas"],
+            resolucao=assistant_response["pergunta1"]["resolucao"],  # <-- Adicione esta linha
             quiz=newQuiz.id
         )
 
@@ -241,6 +247,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta2"]["pergunta"],
             resposta_certa=assistant_response["pergunta2"]["respostaCerta"],
             alternativas=assistant_response["pergunta2"]["alternativas"],
+            resolucao=assistant_response["pergunta2"]["resolucao"],  # <-- Adicione esta linha
             quiz=newQuiz.id
         )
 
@@ -252,6 +259,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta3"]["pergunta"],
             resposta_certa=assistant_response["pergunta3"]["respostaCerta"],
             alternativas=assistant_response["pergunta3"]["alternativas"],
+            resolucao=assistant_response["pergunta3"]["resolucao"],  # <-- Adicione esta linha
             quiz=newQuiz.id
         )
 
@@ -263,6 +271,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta4"]["pergunta"],
             resposta_certa=assistant_response["pergunta4"]["respostaCerta"],
             alternativas=assistant_response["pergunta4"]["alternativas"],
+            resolucao=assistant_response["pergunta4"]["resolucao"],  # <-- Adicione esta linha
             quiz=newQuiz.id
         )
 
@@ -274,6 +283,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta5"]["pergunta"],
             resposta_certa=assistant_response["pergunta5"]["respostaCerta"],
             alternativas=assistant_response["pergunta5"]["alternativas"],
+            resolucao=assistant_response["pergunta5"]["resolucao"],  # <-- Adicione esta linha
             quiz=newQuiz.id
         )
 

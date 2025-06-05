@@ -134,13 +134,15 @@ class Pergunta(db.Model):
   resposta_certa = db.Column(db.String())
   alternativas = db.Column(db.String())
   quiz = db.Column(db.String())
+  resolucao = db.Column(db.String())
 
-  def __init__(self, id, questao, resposta_certa, alternativas, quiz):
+  def __init__(self, id, questao, resposta_certa, alternativas, quiz, resolucao):
     self.id = id
     self.questao = questao 
     self.resposta_certa = resposta_certa
     self.alternativas = alternativas 
     self.quiz = quiz
+    self.resolucao = resolucao 
 
 class VideoYt(db.Model):
   id = db.Column(db.String(), primary_key=True)
