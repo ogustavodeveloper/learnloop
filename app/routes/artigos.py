@@ -30,7 +30,7 @@ def homepage():
 
         return render_template("index.html", user=user, correcoes=correcoes, sessoes=sessoes, quiz=quiz)
     except Exception as e:
-        return f"Erro: {e}", 500
+        return render_template("login.html")
 
 from datetime import datetime
 
