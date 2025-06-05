@@ -33,6 +33,11 @@
 <div class="container">
     <h3>Corretor de Redações</h3>
 
+    
+
+    <button onclick='window.location.href="/avaliar-redacao"'>Corrigir Nova Redação</button>
+
+    
     <!-- Estatísticas -->
     <div class="stats" style="margin-bottom: 1em; background: #222; color: #fff; border-radius: 8px; padding: 1em;">
         <strong>Redações enviadas:</strong> {{ total_redacoes }}<br>
@@ -40,8 +45,6 @@
         <strong>Menor nota final:</strong> {{ menor_nota }}<br>
         <strong>Média das notas finais:</strong> {{ media_nota }}
     </div>
-
-    <button onclick='window.location.href="/avaliar-redacao"'>Corrigir Nova Redação</button>
 
     <div class="redacoes">
         {% for redacao in redacoes %}
@@ -56,6 +59,36 @@
 
      
     </div>
+<canvas id="graficoLinhaNotas" width="400" height="120" style="margin-bottom: 2em;"></canvas>
+    
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const notas = {{ notas|tojson }};
+    const datas = {{ datas|tojson }};
+    const ctx = document.getElementById('graficoLinhaNotas').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: datas,
+            datasets: [{
+                label: 'Nota Final',
+                data: notas,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#4e73df'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, max: 1000 }
+            }
+        }
+    });
+</script>
 
 {% endblock %}

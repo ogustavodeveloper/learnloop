@@ -133,11 +133,13 @@ def redacaoPage():
 
         # Estatísticas
         total = len(correcoes)
+        datas = []
         notas = []
         for c in correcoes:
             try:
                 nota = int(str(c.final).split("\\")[0])
                 notas.append(nota)
+                datas.append(c.data)
             except Exception:
                 continue
 
@@ -151,7 +153,9 @@ def redacaoPage():
             total_redacoes=total,
             maior_nota=maior_nota,
             menor_nota=menor_nota,
-            media_nota=media_nota
+            media_nota=media_nota,
+            notas=notas,
+            datas=datas
         )
     except Exception as e:
         return redirect("/login")
