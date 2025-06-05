@@ -25,6 +25,7 @@ a{
 {% block content %}
 <div class="container">
    <button onclick="addSession()">Registrar Nova Sessão</button>
+   <button onclick="gravarAudio()">Registrar Sessão com áudio</button>
    <br> 
    <h3>Lista de Sessões</h3>
    <div id="list-sessions">
@@ -49,7 +50,7 @@ a{
               <input type="text" placeholder="Digite o assunto" id="assunto">
               <br> 
               <p>Digite um resumo rápido do que entendeu (opcional)</p>
-              <input type="text placeholder="Digite o que entendeu rapidamente" id="resumo">
+              <input type="text" placeholder="Digite o que entendeu rapidamente" id="resumo">
             `,
             focusConfirm: false,
             preConfirm: () => {
@@ -67,6 +68,97 @@ a{
             }
         })
     }
+
+    // Função para gravar áudio e enviar para a API
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function gravarAudio() {
+        Swal.fire({
+            title: "Gravar Sessão de Estudos por Áudio",
+            html: `
+                <p id="gravacao-status">Clique em <b>Iniciar Gravação</b> para começar.</p>
+                <button id="start-audio">Iniciar Gravação</button>
+                <button id="stop-audio" disabled>Parar</button>
+                <button id="enviar-audio" disabled>Enviar Áudio</button>
+                <br><br>
+                <audio id="audio-preview" controls style="display:none;"></audio>
+            `,
+            showConfirmButton: false,
+            didOpen: () => {
+                const startBtn = document.getElementById('start-audio');
+                const stopBtn = document.getElementById('stop-audio');
+                const enviarBtn = document.getElementById('enviar-audio');
+                const audioPreview = document.getElementById('audio-preview');
+                const status = document.getElementById('gravacao-status');
+                let audioBlob = null;
+                let stream = null;
+
+                startBtn.onclick = async function() {
+                    audioChunks = [];
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            mediaRecorder = new MediaRecorder(stream);
+                            mediaRecorder.start();
+                            startBtn.disabled = true;
+                            stopBtn.disabled = false;
+                            enviarBtn.disabled = true;
+                            status.innerHTML = "<span style='color: red;'>Gravando...</span>";
+
+                            mediaRecorder.ondataavailable = function(e) {
+                                audioChunks.push(e.data);
+                            };
+
+                            mediaRecorder.onstop = function() {
+                                audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                                const audioUrl = URL.createObjectURL(audioBlob);
+                                audioPreview.src = audioUrl;
+                                audioPreview.style.display = 'block';
+                                enviarBtn.disabled = false;
+                                status.innerHTML = "<span style='color: green;'>Gravação finalizada. Ouça antes de enviar.</span>";
+                                // Libera o microfone
+                                if (stream) {
+                                    stream.getTracks().forEach(track => track.stop());
+                                }
+                            };
+                        } catch (err) {
+                            Swal.fire("Permissão negada!", "Não foi possível acessar o microfone.", "error");
+                        }
+                    } else {
+                        Swal.fire("Navegador não suportado!", "Seu navegador não suporta gravação de áudio.", "error");
+                    }
+                };
+
+                stopBtn.onclick = function() {
+                    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                        mediaRecorder.stop();
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                        status.innerHTML = "Processando áudio...";
+                    }
+                };
+
+                enviarBtn.onclick = function() {
+                    if (audioBlob) {
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob, 'sessao.webm');
+
+                        axios.post('/save-session-audio', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        }).then(() => {
+                            Swal.fire("Sessão de áudio salva com sucesso!", "Recarregue a página", "success");
+                        }).catch(() => {
+                            Swal.fire("Erro ao salvar áudio!", "Tente novamente.", "error");
+                        });
+                    }
+                };
+            }
+        });
+    }
+
  </script>
 
 {% endblock %}

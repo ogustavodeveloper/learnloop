@@ -87,10 +87,11 @@
         header {
           padding: 15px;
           display: flex;
-          flex-direction: row;
+          flex-direction: row-reverse;
           align-items: center;
           justify-content: space-between;
         }
+        
         header nav {
           display: none; /* Esconde o menu desktop em telas menores */
         }
@@ -141,7 +142,7 @@
   </head>
   <body class='dark-mode'>
     <header>
-      <span>Estudaê</span>
+      <span onclick="window.location.href='/'">Estudaê</span>
       <nav aria-label="Navegação principal">
         <a href="/" title="Início">
           <span class="material-symbols-outlined">home</span>

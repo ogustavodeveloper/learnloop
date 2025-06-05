@@ -10,6 +10,11 @@ import datetime
 from openai import AzureOpenAI
 from azure.storage.blob import BlobServiceClient
 import json 
+from werkzeug.utils import secure_filename
+import tempfile
+
+# Adicione esta importação:
+import speech_recognition as sr
 
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -298,3 +303,70 @@ def pageQuiz(id):
     perguntas = Pergunta.query.filter_by(quiz=quiz.id).all()
 
     return render_template("quiz.html", perguntas=perguntas, quiz=quiz)
+
+@sessoes_bp.route("/save-session-audio", methods=["POST"])
+def save_session_audio():
+    try:
+        user = session.get("user")
+        if not user:
+            return jsonify({"msg": "Usuário não autenticado"}), 401
+
+        user_db = User.query.filter_by(id=user).first()
+        if not user_db:
+            return jsonify({"msg": "Usuário não encontrado"}), 404
+
+        # Recebe o arquivo de áudio enviado pelo frontend
+        audio_file = request.files.get("audio")
+        if not audio_file:
+            return jsonify({"msg": "Nenhum arquivo de áudio enviado"}), 400
+
+        # Salva temporariamente o arquivo
+        filename = secure_filename(audio_file.filename)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as temp_audio:
+            audio_file.save(temp_audio.name)
+            temp_audio_path = temp_audio.name
+
+        # Converte para wav usando ffmpeg (speech_recognition não suporta webm)
+        temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        temp_wav.close()
+        os.system(f"ffmpeg -y -i '{temp_audio_path}' '{temp_wav.name}'")
+
+        # Transcreve o áudio usando SpeechRecognition + Google Web Speech API (gratuito)
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(temp_wav.name) as source:
+            audio_data = recognizer.record(source)
+            try:
+                texto = recognizer.recognize_google(audio_data, language="pt-BR")
+            except sr.UnknownValueError:
+                texto = ""
+            except sr.RequestError as e:
+                return jsonify({"msg": f"Erro ao acessar serviço de transcrição: {e}"}), 500
+
+        # Remove arquivos temporários
+        os.remove(temp_audio_path)
+        os.remove(temp_wav.name)
+
+        # Cria a sessão normalmente, usando a transcrição como resumo
+        data_session = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        assunto = "Sessão por áudio"
+        resumo = texto if texto else "Nenhuma transcrição reconhecida."
+
+        # Gera um resumo com IA se desejar, ou salva a transcrição diretamente
+        newSession = SessionStudie(
+            user=user_db.id,
+            assunto=assunto,
+            resumo=resumo,
+            data=data_session,
+            id=str(uuid.uuid4()),
+            revisao=0
+        )
+        db.session.add(newSession)
+        db.session.commit()
+
+        return jsonify({
+            "msg": "success",
+            "resumo": resumo
+        })
+
+    except Exception as e:
+        return jsonify({"msg": f"deu erro: {e}"}, 500)
