@@ -157,3 +157,19 @@ class VideoYt(db.Model):
     self.resumo = resumo
     self.transcricao = transcricao 
     self.id_video = id_video
+
+class Revisoes(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  user = db.Column(db.String())
+  assunto = db.Column(db.String())
+  data = db.Column(db.String())
+  status = db.Column(db.String())
+  id_session = db.Column(db.String())
+
+  def __init__(self, id, user, assunto, data, status, id_session):
+    self.id = id
+    self.user = user
+    self.assunto = assunto
+    self.data = data
+    self.status = status
+    self.id_session = id_session
