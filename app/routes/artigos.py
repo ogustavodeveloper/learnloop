@@ -46,7 +46,7 @@ def homepage():
 
         return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz), revisoes=revisoes_pendentes)
     except Exception as e:
-        return print(e)
+        return render_template("login.html")
 
 
 
