@@ -1,11 +1,12 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, make_response, send_file
 from app.routes import artigos_bp
-from app.models import Corrections, SessionStudie, Simulado
+from app.models import Corrections, SessionStudie, Simulado, Revisoes
 from app import db
 import os
 from openai import AzureOpenAI
 from dotenv import load_dotenv
+import datetime
 
 load_dotenv()
 
@@ -28,12 +29,26 @@ def homepage():
         sessoes = SessionStudie.query.filter_by(user=user).all()
         quiz = Simulado.query.filter_by(user=user).all()
         print(len(sessoes))
+        revisoes = Revisoes.query.filter_by(user=user).all()
+        revisoes_pendentes = []
+        for revisao in revisoes:
+            print(revisao.data)
+            print(datetime.datetime.now().date())
+            if revisao.data == datetime.datetime.now().date():
+            
+             
+                revisoes_pendentes.append({
+                            "assunto": revisao.assunto,
+                            "session_id": revisao.id_session
+                        })
 
-        return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz))
+        print(revisoes_pendentes)
+
+        return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz), revisoes=revisoes_pendentes)
     except Exception as e:
-        return render_template("login.html")
+        return print(e)
 
-from datetime import datetime
+
 
 
 @artigos_bp.route("/download-file/<filename>")

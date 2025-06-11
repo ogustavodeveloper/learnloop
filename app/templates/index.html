@@ -95,21 +95,17 @@
   </div>
 
   <div class="functions dados" style="margin-top: 2em;">
-    <h3 style="">Suas próximas revisões</h3>
-    <p>Em breve...</p>
-    <!--
-    <div class="function" onclick="window.location.href='/sessoes'">
-      <strong>Revisão de Matemática</strong>
+    <h3>Revisões do Dia</h3>
+  
+    
+
+    {% for rev in revisoes %}
+      <div style="background-color: #000;" class="function" onclick="window.location.href='/session/{{rev.id_session}}'">
+      <strong>{{rev.assunto}}</strong>
       <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
     </div>
-    <div class="function" onclick="window.location.href='/sessoes'">
-      <strong>Revisão de História</strong>
-      <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
-    </div>
-
-
-  -->
-    <!-- Adicione mais revisões conforme necessário -->
+    {% endfor %}
+  
   </div>
 
 </div>
