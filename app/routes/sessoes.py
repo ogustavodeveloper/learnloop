@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, send_file
 from app.routes import sessoes_bp
-from app.models import SessionStudie, User, Documento, Simulado, Pergunta
+from app.models import SessionStudie, User, Documento, Simulado, Pergunta, Revisoes
 from app import db
 import uuid
 import markdown
@@ -107,7 +107,12 @@ def saveSession():
         user = session["user"]
         user_db = User.query.filter_by(id=user).first()
         if user_db:
-            
+            print(datetime.date.today())
+            data_atual = datetime.datetime.now()
+            dia_seguinte = data_atual + datetime.timedelta(days=1)
+
+            print(f"Data atual: {data_atual.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Dia seguinte: {dia_seguinte.strftime('%Y-%m-%d %H:%M:%S')}")
             
             data_session = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             resumo = markdown.markdown(request.form.get("resumo"))
@@ -134,7 +139,16 @@ def saveSession():
             db.session.add(newSession)
             db.session.commit()
 
-            return jsonify({"msg": "success", "msg": documento.filename})
+            revisoes = [1, 7, 14, 30]
+
+            for revisao in revisoes:
+                data_atual = datetime.datetime.now().date()
+                dia = data_atual + datetime.timedelta(days=revisao)
+                newRevisao = Revisoes(id=str(uuid.uuid4()), user=session["user"], assunto=assunto, data=dia, status="pendente", id_session=newSession.id)
+                db.session.add(newRevisao)
+                db.session.commit()
+
+            return jsonify({"msg": "success"})
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})

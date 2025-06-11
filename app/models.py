@@ -162,7 +162,7 @@ class Revisoes(db.Model):
   id = db.Column(db.String(), primary_key=True)
   user = db.Column(db.String())
   assunto = db.Column(db.String())
-  data = db.Column(db.String())
+  data = db.Column(db.DateTime)
   status = db.Column(db.String())
   id_session = db.Column(db.String())
 
