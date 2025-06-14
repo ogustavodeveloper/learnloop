@@ -14,6 +14,7 @@ function sendArquivo(sessao) {
                                                                                                                                                                         })
                                                                                                                                                                                         .then(response => {
                                                                                                                                                                                                             Swal.fire('Documento Salvo!', "Atualize a página !", 'success');
+                                                                                                                                                                                                            location.reload()
                                                                                                                                                                                                                                 
                                                                                                                                                                                                                                                 })
                                                                                                                                                                                                                                                                 .catch((error) => {
@@ -73,4 +74,50 @@ Swal.fire({
             Swal.fire("Ocorreu um erro! Tente novamente.", `Detalhes do erro: ${response.data.details}`,"error")
         }
     })
+}
+
+function abrirModalArquivo(sessao) {
+    Swal.fire({
+        title: 'Selecione um arquivo',
+        html: `<input type="file" id="swal-input-file" class="swal2-input" accept="*/*">`,
+        showCancelButton: true,
+        confirmButtonText: 'Enviar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const fileInput = Swal.getPopup().querySelector('#swal-input-file');
+            if (!fileInput.files[0]) {
+                Swal.showValidationMessage('Selecione um arquivo!');
+                return false;
+            }
+            return fileInput.files[0];
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            const documento = result.value;
+            const formData = new FormData();
+            formData.append("documento", documento);
+            formData.append("assunto", sessao);
+
+            Swal.fire({
+                title: 'Enviando arquivo...',
+                html: 'Por favor, aguarde enquanto o arquivo é enviado.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            axios.post('/add-doc', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(response => {
+                Swal.fire('Documento Salvo!', "Atualize a página!", 'success');
+            })
+            .catch((error) => {
+                Swal.fire('Erro', 'Não foi possível salvar o documento: ' + error, 'error');
+            });
+        }
+    });
 }
