@@ -74,7 +74,10 @@ def addDoc():
       db.session.commit()
 
       return jsonify({
-        "msg": "success"
+        "msg": "success",
+        "id": new_doc.id,
+        "url": new_doc.url,
+        "filename": new_doc.filename
     })
 
     except Exception as e:
@@ -118,24 +121,24 @@ def saveSession():
             resumo = markdown.markdown(request.form.get("resumo"))
             assunto = request.form.get("assunto")
 
-            user_message = {"role": "user", "content": f"Tema: {assunto}. Minhas anotações: {resumo}"}
+            #user_message = {"role": "user", "content": f"Tema: {assunto}. Minhas anotações: {resumo}"}
 
                     # Usando o Azure OpenAI para gerar o resumo
-            chat_completion = client.chat.completions.create(
-                                        model="gpt-4o",  # model = "deployment_name"
-                                        messages=[
-                                            {"role": "system", "content": "Você é uma Inteligência Artificial voltada para auxiliar nos estudos. "
-                                                            "Quando o usuário fornecer anotações, reestruture o conteúdo de forma clara, coerente e bem organizada, sem usar markdown. "
-                                                                            "Caso o conteúdo esteja em branco, identifique o tema indicado e crie uma nova anotação explicativa. "
-                                                                                            "Essa nova anotação deve ensinar os conceitos fundamentais que o estudante precisa saber para compreender o assunto, "
-                                                                                                            "e também incluir uma parte dedicada especificamente ao tema central proposto."},
-                                            user_message
-                                        ]
-                                    )
+            # chat_completion = client.chat.completions.create(
+                                  #      model="gpt-4o",  # model = "deployment_name"
+                                    #    messages=[
+                                        #    {"role": "system", "content": "Você é uma Inteligência Artificial voltada para auxiliar nos estudos. "
+                                       #                     "Quando o usuário fornecer anotações, reestruture o conteúdo de forma clara, coerente e bem organizada, sem usar markdown. "
+                                               #                             "Caso o conteúdo esteja em branco, identifique o tema indicado e crie uma nova anotação explicativa. "
+                                                  #                                          "Essa nova anotação deve ensinar os conceitos fundamentais que o estudante precisa saber para compreender o assunto, "
+                                                        #                                                    "e também incluir uma parte dedicada especificamente ao tema central proposto."},
+                                   #         user_message
+                                   #     ]
+                                  #  )
 
-            resposta = chat_completion.choices[0].message.content
+           # resposta = chat_completion.choices[0].message.content
 
-            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo=resposta, data=data_session, id=str(uuid.uuid4()), revisao=0)
+            newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo="", data=data_session, id=str(uuid.uuid4()), revisao=0)
             db.session.add(newSession)
             db.session.commit()
 
@@ -148,7 +151,7 @@ def saveSession():
                 db.session.add(newRevisao)
                 db.session.commit()
 
-            return jsonify({"msg": "success"})
+            return jsonify({"msg": "success", "id": newSession.id})
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
