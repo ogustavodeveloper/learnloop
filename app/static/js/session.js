@@ -113,6 +113,7 @@ function abrirModalArquivo(sessao) {
                 }
             })
             .then(response => {
+                document.getElementById("documentos").innerHTML += `<a id="doc" href="${response.data.url} target="_blank">${response.data.filename}</a>`;
                 Swal.fire('Documento Salvo!', "Atualize a página!", 'success');
             })
             .catch((error) => {

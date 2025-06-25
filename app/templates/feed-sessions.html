@@ -63,6 +63,7 @@ a{
                 formData.append("resumo", resumo)
 
                 return axios.post("/save-session", formData).then(response => {
+                    window.location.href = `/session/${response.data.id}`
                     Swal.fire("Sessão salva com sucesso!", "Recarregue a página", "success")
                 })
             }
