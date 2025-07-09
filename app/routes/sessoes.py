@@ -326,3 +326,12 @@ def pageQuiz(id):
     perguntas = Pergunta.query.filter_by(quiz=quiz.id).all()
 
     return render_template("quiz.html", perguntas=perguntas, quiz=quiz)
+
+@sessoes_bp.route("/api/delete-doc/<id>", methods=["POST"])
+def delete_doc(id):
+    doc = Documento.query.filter_by(id=id).first()
+    if not doc:
+        return jsonify({"msg": "Documento não encontrado"}), 404
+    db.session.delete(doc)
+    db.session.commit()
+    return jsonify({"msg": "success"})

@@ -39,8 +39,10 @@ a{
       <h2>Documentos salvos na sessão:</h2>
       {% if documentos %}
       {% for documento in documentos %}
-         <a id="doc" href="{{documento.url}}" target="_blank">{{documento.filename}}</a>
-         
+         <div style="display:flex;align-items:center;gap:0.5em;">
+            <a id="doc" href="/documento/{{documento.id}}">{{documento.filename}}</a>
+            <button style="width:auto;padding:4px 10px;" onclick="deletarDoc('{{documento.id}}', this)">🗑️</button>
+         </div>
       {% endfor %}
 
       {% else %}

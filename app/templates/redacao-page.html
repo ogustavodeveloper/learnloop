@@ -2,7 +2,8 @@
 
 {% block styled %}
     <style>
-        .competencia { margin-bottom: 1.5em; }
+        .competencia { margin-bottom: 1.5em; cursor: pointer;}
+
         .competencia strong { display: block; margin-bottom: 0.5em; }
         .nota, .analise { margin-left: 1em; }
         .descricao { font-style: italic; color: #555; }
@@ -10,51 +11,93 @@
             line-height: 0.9em;
         }
     </style>
+{% endblock %}
 
-    {% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Correção Detalhada</h3>
 
-    {% block content %}
-    <div class="container">
-        <h3>Correção Detalhada</h3>
-
-        {% if error %}
-            <p>{{ error }}</p>
-        {% else %}
-            <h3>Tema: {{ correcao.tema }}</h3>
-            <p><strong>Texto:</strong> {{ correcao.texto }}</p>
-            
-            <h4>Análise de Competências</h4>
-
-            {% set competencias = [correcao.cp1, correcao.cp2, correcao.cp3, correcao.cp4, correcao.cp5] %}
-            {% set descricoes = [
-                "Competência 1: Demonstrar o domínio da norma culta da língua escrita.",
-                "Competência 2: Compreender a proposta de redação e aplicar conceitos de várias áreas para desenvolver o tema.",
-                "Competência 3: Selecionar, relacionar, organizar e interpretar informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
-                "Competência 4: Demonstrar conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
-                "Competência 5: Elaborar proposta de intervenção para o problema abordado, respeitando os direitos humanos."
-            ] %}
-
-            {% for i in range(competencias|length) %}
-                {% if competencias[i] %}
-                    {% set nota, analise = competencias[i].split('\\') %}
-                    <div class="competencia">
-                        <strong>{{ descricoes[i] }}</strong>
-                        <p class="nota"><strong>Nota:</strong> {{ nota }}</p>
-                        <p class="analise"><strong>Análise:</strong> {{ analise }}</p>
-                    </div>
-                {% endif %}
-            {% endfor %}
-            
-            <h4>Nota Final</h4>
-            {% set final_nota, final_analise = correcao.final.split('\\') %}
-            <p><strong>Nota Final:</strong> {{ final_nota }}</p>
-            <p><strong>Análise Final:</strong> {{ final_analise }}</p>
-        {% endif %}
-    </div>
-
-    <script>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% else %}
+        <h3>Tema: {{ correcao.tema }}</h3>
+        <p><strong>Texto:</strong> {{ correcao.texto }}</p>
         
-    </script>
+        <h4>Análise de Competências</h4>
 
+        {% set competencias = [correcao.cp1, correcao.cp2, correcao.cp3, correcao.cp4, correcao.cp5] %}
+        {% set descricoes = [
+            "Competência 1: Demonstrar o domínio da norma culta da língua escrita.",
+            "Competência 2: Compreender a proposta de redação e aplicar conceitos de várias áreas para desenvolver o tema.",
+            "Competência 3: Selecionar, relacionar, organizar e interpretar informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
+            "Competência 4: Demonstrar conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
+            "Competência 5: Elaborar proposta de intervenção para o problema abordado, respeitando os direitos humanos."
+        ] %}
 
-    {% endblock %}
+        {% for i in range(competencias|length) %}
+            {% if competencias[i] %}
+                {% set nota, analise = competencias[i].split('\\') %}
+                <div class="competencia" onclick="recorrigirCompetencia({{ i+1 }})" title="Clique para pedir recorreção desta competência" id="competencia-{{i+1}}">
+                    <strong>{{ descricoes[i] }}</strong>
+                    <p class="nota"><strong>Nota:</strong> <span id="nota-{{i+1}}">{{ nota }}</span></p>
+                    <p class="analise"><strong>Análise:</strong> <span id="analise-{{i+1}}">{{ analise }}</span></p>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+        <h4>Nota Final</h4>
+        {% set final_nota, final_analise = correcao.final.split('\\') %}
+        <p><strong>Nota Final:</strong> <span id="nota-final">{{ final_nota }}</span></p>
+        <p><strong>Análise Final:</strong> <span id="analise-final">{{ final_analise }}</span></p>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function recorrigirCompetencia(numero) {
+    Swal.fire({
+        title: `Recorrigir Competência ${numero}?`,
+        text: "A IA irá reavaliar apenas esta competência. Deseja continuar?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim, recorrigir",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({title: "Reavaliando...", text: "Aguarde...", allowOutsideClick: false, didOpen: () => {Swal.showLoading();}});
+            fetch("/api/recorrigir-competencia", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    competencia: numero,
+                    correcao_id: `{{ correcao.id }}`
+                })
+            })
+            .then(r => r.json())
+            .then(d => {
+                Swal.close();
+                if(d.msg === "success") {
+                    document.getElementById(`nota-${numero}`).innerText = d.nota;
+                    document.getElementById(`analise-${numero}`).innerText = d.analise;
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span"); // só para garantir compatibilidade
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span");
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span");
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span");
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span");
+                    document.querySelector("p strong + span, p strong + span + span, p strong + span + span + span");
+                    document.getElementById("nota-final").innerText = d.nota_final;
+                    document.getElementById("analise-final").innerText = d.analise_final;
+                    Swal.fire("Pronto!", "Competência e nota final recorrigidas com sucesso.", "success");
+                } else {
+                    Swal.fire("Erro", d.details || "Erro ao recorrigir.", "error");
+                }
+            })
+            .catch(() => {
+                Swal.close();
+                Swal.fire("Erro", "Erro ao recorrigir competência.", "error");
+            });
+        }
+    });
+}
+</script>
+{% endblock %}
