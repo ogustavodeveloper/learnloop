@@ -7,22 +7,22 @@ function sendArquivo(sessao) {
     formData.append("assunto", assunto)
 
     axios.post('/add-doc', formData, {
-                                headers: {
-                                                                  'Content-Type': 'multipart/form-data'
-                                                                                                            }
-                                                                                                                                                            
-                                                                                                                                                                        })
-                                                                                                                                                                                        .then(response => {
-                                                                                                                                                                                                            Swal.fire('Documento Salvo!', "Atualize a página !", 'success');
-                                                                                                                                                                                                            location.reload()
-                                                                                                                                                                                                                                
-                                                                                                                                                                                                                                                })
-                                                                                                                                                                                                                                                                .catch((error) => {
-                                                                                                                                                                                                                                                                                    Swal.fire('Erro', 'Não foi possível salvar o documento:' + error , 'error');
-                                                                                                                                                                                                                                                                                                    });
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+
+    })
+        .then(response => {
+            Swal.fire('Documento Salvo!', "Atualize a página !", 'success');
+            location.reload()
+
+        })
+        .catch((error) => {
+            Swal.fire('Erro', 'Não foi possível salvar o documento:' + error, 'error');
+        });
 
 
-    }
+}
 
 function updateAnotacao(sessao) {
     const anotacao = document.getElementById("resumo").value
@@ -36,7 +36,7 @@ function updateAnotacao(sessao) {
     })
 }
 
-function gerarQuiz(session){
+function gerarQuiz(session) {
     const formData = new FormData()
     const anotacao = document.getElementById("resumo").value
     const assunto = document.getElementById("assunto").textContent
@@ -45,33 +45,33 @@ function gerarQuiz(session){
     formData.append("assunto", assunto)
 
     let timerInterval;
-Swal.fire({
-  title: "Quiz sendo criado!",
-  html: "Aguarde alguns segundos, você vai ser direcionado automaticamente para o seu quiz exclusivo!",
-  timer: 2000,
-  timerProgressBar: true,
-  didOpen: () => {
-    Swal.showLoading();
-    const timer = Swal.getPopup().querySelector("b");
-    timerInterval = setInterval(() => {
-      timer.textContent = `${Swal.getTimerLeft()}`;
-    }, 100);
-  },
-  willClose: () => {
-    clearInterval(timerInterval);
-  }
-}).then((result) => {
-  /* Read more about handling dismissals below */
-  if (result.dismiss === Swal.DismissReason.timer) {
-    console.log("I was closed by the timer");
-  }
-});
+    Swal.fire({
+        title: "Quiz sendo criado!",
+        html: "Aguarde alguns segundos, você vai ser direcionado automaticamente para o seu quiz exclusivo!",
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+                timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+        },
+        willClose: () => {
+            clearInterval(timerInterval);
+        }
+    }).then((result) => {
+        /* Read more about handling dismissals below */
+        if (result.dismiss === Swal.DismissReason.timer) {
+            console.log("I was closed by the timer");
+        }
+    });
     axios.post("/api/gerar-quiz", formData).then(response => {
-        if(response.data.msg == "success") {
+        if (response.data.msg == "success") {
             Swal.fire("Quiz Criado!", "Aproveite!", "success")
             window.location.href = `/quiz/${response.data.id}`
         } else {
-            Swal.fire("Ocorreu um erro! Tente novamente.", `Detalhes do erro: ${response.data.details}`,"error")
+            Swal.fire("Ocorreu um erro! Tente novamente.", `Detalhes do erro: ${response.data.details}`, "error")
         }
     })
 }
@@ -112,13 +112,27 @@ function abrirModalArquivo(sessao) {
                     'Content-Type': 'multipart/form-data'
                 }
             })
-            .then(response => {
-                document.getElementById("documentos").innerHTML += `<a id="doc" href="${response.data.url} target="_blank">${response.data.filename}</a>`;
-                Swal.fire('Documento Salvo!', "Atualize a página!", 'success');
-            })
-            .catch((error) => {
-                Swal.fire('Erro', 'Não foi possível salvar o documento: ' + error, 'error');
-            });
+                .then(response => {
+                    document.getElementById("documentos").innerHTML += `<a id="doc" href="${response.data.url} target="_blank">${response.data.filename}</a>`;
+                    Swal.fire('Documento Salvo!', "Atualize a página!", 'success');
+                })
+                .catch((error) => {
+                    Swal.fire('Erro', 'Não foi possível salvar o documento: ' + error, 'error');
+                });
         }
     });
+}
+
+function deletarDoc(id, btn) {
+    if (confirm("Tem certeza que deseja deletar este documento?")) {
+        fetch(`/api/delete-doc/${id}`, { method: "POST" })
+            .then(r => r.json())
+            .then(d => {
+                if (d.msg === "success") {
+                    btn.parentElement.remove();
+                } else {
+                    alert("Erro ao deletar documento.");
+                }
+            });
+    }
 }

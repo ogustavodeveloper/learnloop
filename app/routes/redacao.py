@@ -215,3 +215,95 @@ def redacaoGuiada():
             "msg": "error",
             "error": str(e)
         })
+
+from flask import request, jsonify
+
+@redacao_bp.route("/api/recorrigir-competencia", methods=["POST"])
+def recorrigir_competencia():
+    try:
+        data = request.get_json()
+        competencia = int(data.get("competencia"))
+        correcao_id = data.get("correcao_id")
+
+        correcao = Corrections.query.filter_by(id=correcao_id).first()
+        if not correcao:
+            return jsonify({"msg": "error", "details": "Correção não encontrada."}), 404
+
+        if competencia not in [1,2,3,4,5]:
+            return jsonify({"msg": "error", "details": "Competência inválida."}), 400
+
+        prompts = [
+            "Competência 1: Demonstre o domínio da norma culta da língua escrita.",
+            "Competência 2: Compreenda a proposta de redação e aplique conceitos de várias áreas para desenvolver o tema.",
+            "Competência 3: Selecione, relacione, organize e interprete informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
+            "Competência 4: Demonstre conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
+            "Competência 5: Elabore proposta de intervenção para o problema abordado, respeitando os direitos humanos."
+        ]
+        prompt = f"Avalie apenas a {prompts[competencia-1]} do ENEM para o texto abaixo, pois o estudante achou algum erro. Dê uma nota de 0 a 200 e um comentário breve (máx. 2 frases). Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,
+            top_p=1.0
+        )
+        content = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
+        import json
+        try:
+            result = json.loads(content)
+            nota = str(result.get("nota", 0))
+            analise = result.get("analise", "")
+        except Exception:
+            return jsonify({"msg": "error", "details": "Erro ao processar resposta da IA."}), 500
+
+        # Atualiza a competência recorrigida no banco
+        campo = f"cp{competencia}"
+        setattr(correcao, campo, f"{nota}\\{analise}")
+
+        # Recalcula a nota final e pede nova análise final para a IA
+        notas = []
+        for i in range(1, 6):
+            valor = getattr(correcao, f"cp{i}")
+            nota_comp = int(valor.split("\\")[0]) if valor else 0
+            notas.append(nota_comp)
+        nova_nota_final = sum(notas)
+
+        # Gera nova análise final com a IA
+        prompt_final = (
+            f"Estas são as notas das competências do ENEM para a redação abaixo: "
+            f"{notas}. Some as notas para dar a nota final (máx. 1000) e faça uma análise geral em até 2 frases. "
+            f"Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
+        )
+        chat_final = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
+                {"role": "user", "content": prompt_final}
+            ],
+            temperature=0.1,
+            top_p=1.0
+        )
+        content_final = chat_final.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
+        try:
+            result_final = json.loads(content_final)
+            nota_final = str(result_final.get("nota", nova_nota_final))
+            analise_final = result_final.get("analise", "")
+        except Exception:
+            nota_final = str(nova_nota_final)
+            analise_final = "Análise final não disponível."
+
+        correcao.final = f"{nota_final}\\{analise_final}"
+        db.session.commit()
+
+        return jsonify({
+            "msg": "success",
+            "nota": nota,
+            "analise": analise,
+            "nota_final": nota_final,
+            "analise_final": analise_final
+        })
+    except Exception as e:
+        return jsonify({"msg": "error", "details": str(e)}), 500
