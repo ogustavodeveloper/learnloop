@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Estudaê | Radar do Conhecimento{% endblock %}
+
+{% block metas %}
+<meta name="description" content="O Radar do Conhecimento é uma ferramenta inovadora que utiliza Inteligência Artificial para analisar e mapear o conhecimento dos usuários, oferecendo insights personalizados e recomendações de estudo. Descubra como essa tecnologia pode transformar sua jornada de aprendizado!">
+{% endblock %}
+
+{% block styled %}
+<style></style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>Radar do Conhecimento</h3>
+
+    <br><br>
+    <button onclick="gerarSimulado()">Gerar Simulado</button>
+    <br><br>
+
+    <div id="perguntas">
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" integrity="sha512-WrdC3CE9vf1nBf58JHepuWT4x24uTacky9fuzw2g/3L9JkihgwZ6Cfv+JGTtNyosOhEmttMtEZ6H3qJWfI7gIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+let questoesGlobais = {};
+let cursoGlobal = "";
+let faculdadeGlobal = "";
+
+function gerarSimulado() {
+    Swal.fire({
+        title: "Gerar Simulado",
+        html: `
+        <input type="text" id="curso" class="swal2-input" placeholder="Curso desejado">
+        <input type="text" id="faculdade" class="swal2-input" placeholder="Faculdade desejada">
+        `,
+        confirmButtonText: "Gerar",
+        preConfirm: () => {
+            const curso = Swal.getPopup().querySelector('#curso').value;
+            const faculdade = Swal.getPopup().querySelector('#faculdade').value;
+            if (!curso || !faculdade) {
+                Swal.showValidationMessage(`Por favor, preencha todos os campos.`);
+            }
+            return { curso, faculdade };
+        }
+    }).then((result) => {
+        if (!result.value) return;
+        const { curso, faculdade } = result.value;
+        cursoGlobal = curso;
+        faculdadeGlobal = faculdade;
+        /*Swal.fire({
+            title: "Gerando Simulado",
+            text: "Aguarde enquanto geramos seu simulado personalizado.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });*/
+        Swal.fire("Aguarde! Seu simulado está sendo gerado...", "", "info")
+        axios.post("/api/gerar-radar", { curso, faculdade })
+            .then((response) => {
+                if (response.data.msg === "success") {
+                    questoesGlobais = response.data.questoes;
+                    renderizarQuestoes(questoesGlobais);
+                } else {
+                    Swal.fire({
+                        title: "Erro",
+                        text: response.data.message,
+                        icon: "error"
+                    });
+                }
+            }).catch(() => {
+                Swal.fire({
+                    title: "Erro",
+                    text: "Ocorreu um erro ao gerar o simulado.",
+                    icon: "error"
+                });
+            });
+    });
+}
+
+function renderizarRelatorio(relatorio) {
+    let html = ``;
+    Object.keys(relatorio).forEach(area => {
+        html += `<div class="relatorio-area">
+            <h3>${area}</h3>
+            <strong>Assuntos que você domina:</strong>
+            <ul>${relatorio[area].assuntos_sabendo.map(a => `<li style="margin-left: 2em;">${a}</li>`).join('')}</ul>
+            <strong>Assuntos que precisa estudar:</strong>
+            <ul>${relatorio[area].assuntos_nao_sabendo.map(a => `<li style="margin-left: 2em;">${a}</li>`).join('')}</ul>
+            <strong>Recomendações:</strong>
+            <p>${relatorio[area].recomendacoes}</p>
+        </div><br>`;
+    });
+    document.getElementById("perguntas").innerHTML = html;
+}
+
+function renderizarQuestoes(questoes) {
+    const perguntasDiv = document.getElementById("perguntas");
+    perguntasDiv.innerHTML = "";
+    let html = `<form id="formSimulado">`;
+    Object.keys(questoes).forEach((key, idx) => {
+        const q = questoes[key];
+        const alternativas = q.alternativas.split('/');
+        html += `<div><strong>${idx+1}. ${q.pergunta}</strong><br>`;
+        alternativas.forEach((alt, i) => {
+            html += `
+                <label>
+                    <input type="radio" name="resp_${key}" value="${alt.trim()}" required> ${alt.trim()}
+                </label><br>
+            `;
+        });
+        html += `</div><br>`;
+    });
+    html += `<button type="submit">Enviar Respostas</button></form>`;
+    perguntasDiv.innerHTML = html;
+
+    document.getElementById("formSimulado").onsubmit = function(e) {
+        e.preventDefault();
+        const respostas = {};
+        Object.keys(questoes).forEach((key) => {
+            const radios = document.getElementsByName(`resp_${key}`);
+            for (const radio of radios) {
+                if (radio.checked) {
+                    respostas[key] = radio.value;
+                    break;
+                }
+            }
+        });
+
+        Swal.fire({
+            title: "Corrigindo...",
+            html: "Aguarde enquanto geramos seu relatório personalizado.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        axios.post("/api/corrigir-radar", { 
+            respostas, 
+            questoes, 
+            curso: cursoGlobal, 
+            faculdade: faculdadeGlobal 
+        })
+        .then((response) => {
+            Swal.close();
+            renderizarRelatorio(response.data.relatorio);
+            Swal.fire({
+                title: "Correção Completa",
+                text: "Seu relatório foi gerado com sucesso!",
+                icon: "success"
+            });
+        }).catch(() => {
+            Swal.close();
+            Swal.fire({
+                title: "Erro",
+                text: "Ocorreu um erro ao corrigir o simulado.",
+                icon: "error"
+            });
+        });
+    };
+}
+</script>
+{% endblock %}
