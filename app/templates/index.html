@@ -11,55 +11,168 @@
 
 {% block styled %}
 <style>
-
-  .functions {
+  /* Layout dos botões */
+  .mapa-btn {
     display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-
+    gap: 1em;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding-bottom: 10px;
   }
 
-  .function {
+  .mapa-btn div {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 16px;
+    border-radius: 8px;
+    flex: 0 1 40%;
+    width: 40%;
+    min-width: 260px;
+    max-width: 40%;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    margin-bottom: 1em;
+    box-sizing: border-box;
+  }
+
+  .mapa-btn div h4 {
+    margin: 0 0 0.3em 0;
+    font-size: 1.2em;
+  }
+
+  .mapa-btn div p {
+    margin: 0;
+    font-size: 1em;
+    flex: 1; /* Faz o texto ocupar o espaço disponível */
+  }
+
+  .mapa-btn div a {
+    text-decoration: none;
+    color: #09ff00;
+    font-weight: bold;
+    margin-top: auto; /* Mantém o link sempre embaixo */
+    margin-bottom: 0.2em; /* Espaço pequeno do fundo */
+    display: inline-block;
+  }
+
+  /* Estilização de artigos */
+  .list-artigos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+  }
+
+  .artigo {
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    width: 40%;
+    transition: background 0.3s;
+  }
+
+  .artigo:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Botão de Ver Todos */
+  .btn-ver-todos {
+    padding: 10px;
+    background-color: var(--corDestaque);
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .btn-ver-todos:hover {
+    opacity: 0.8;
+  }
+
+  /* Seção de dados do estudante */
+  .dados {
     background-color: #151515;
+    padding: 1em;
+    border-radius: 6px;
+    margin: 2em 0;
+  }
+
+  .dados h3 {
+    font-size: 1.5em;
+    margin-bottom: 0.8em;
+  }
+
+  /* Seção de revisões */
+  .revisoes {
+    background-color: #151515;
+    padding: 1em;
+    border-radius: 6px;
+    margin-top: 2em;
+  }
+
+  .revisao-item {
+    background-color: #000;
     padding: 7px;
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 0.5em;
+    cursor: pointer;
   }
 
-  .function strong {
-    font-size: 1em;
+  .revisao-item:last-child {
+    margin-bottom: 0;
   }
 
-  .function img {
+  .revisao-item img {
     background: transparent;
     width: 1.5em;
   }
 
-  .dados {
-    background-color: #151515;
-    padding: 1em;
-    border-radius: 6px;
-  }
-
-  .dados h3{
-    font-size: 1.5em;
-    margin-bottom: 0.8em;
-  }
-
   /* Responsividade */
   @media screen and (max-width: 1000px) {
+    .mapa-btn img,
+    .artigo {
+      width: 100%;
+    }
 
+    .mapa-btn div {
+      width: 100%; 
+    }
   }
 
   @media screen and (max-width: 800px) {
+    .mapa-btn {
+      flex-direction: column;
+      gap: 0.7em;
+    }
+    
+    .mapa-btn div {
+      max-width: 100%;
+      min-width: 0;
+      margin-right: 0;
+      padding: 10px 8px;
+      margin-bottom: 0.5em;
+    }
+    
+    .mapa-btn div h4 {
+      font-size: 1em;
+      margin-bottom: 0.3em;
+    }
+    
+    .mapa-btn div p {
+      font-size: 0.95em;
+      margin-bottom: 0.5em;
+    }
   }
 
-  
-
-
-  a{
+  a {
     color: #fff;
   }
 </style>
@@ -70,27 +183,29 @@
 <div class="container">
   <h3>Olá, Estudante!</h3>
 
-  <div class="functions">
+  <img src="{{ url_for('static', filename='img/banner.png') }}" alt="Redes Sociais" style="width: 100%; margin-bottom: 1.5em;">
+     
+  <h3>Explore nossos recursos</h3>
 
-    <div class="function" onclick="window.location.href='/redacao'">
-      <strong>Corretor de Redações</strong>
-      <img src="{{ url_for('static', filename='img/icon-next.png') }}">
+  <div class="mapa-btn">
+    <div>
+      <h4>Corretor de Redações</h4>
+      <p>Corrija sua redação com a ajuda da IA! E conte com o apoio em tempo real da Redação Guiada!</p>
+      <a href="/redacao">Acesse agora ⟶</a>
     </div>
 
-    <div class="function" onclick="window.location.href='/feed-session'">
-      <strong>Sessões de Estudos</strong>
-      <img src="{{ url_for('static', filename='img/icon-next.png') }}">
+    <div>
+      <h4>Sessões de Estudos</h4>
+      <p>Guarde o que você estudou de forma fácil! Será criada uma página exclusiva onde você poderá guardar documentos e gerar quiz com base em sua anotação para testar conhecimento e fazer revisões</p>
+      <a href="/feed-session">Acesse agora ⟶</a>
     </div>
 
-    <div class="function" onclick="window.location.href='/radar-conhecimento'">
-      <strong>Radar do Conhecimento (NOVIDADE)</strong>
-      <img src="{{ url_for('static', filename='img/icon-next.png') }}">
+    <div>
+      <h4>Radar do Conhecimento (NOVIDADE)</h4>
+      <p>Descubra suas áreas de conhecimento e identifique pontos que precisam de mais atenção com nosso sistema inteligente.</p>
+      <a href="/radar-conhecimento">Acesse agora ⟶</a>
     </div>
-
-
-
   </div>
-
 
   <div class="dados">
     <h3>Seu desempenho</h3>
@@ -99,22 +214,36 @@
     <p><strong>Quizzes gerados: </strong>{{quiz}} quizzes</p>
   </div>
 
-  <div class="functions dados" style="margin-top: 2em;">
+  <div class="revisoes">
     <h3>Revisões do Dia</h3>
   
     {% if revisoes|length == 0 %}
-    <p>Nenhuma revisão pendente pra hoje.</p>
+      <p>Nenhuma revisão pendente pra hoje.</p>
     {% endif %}
 
     {% for rev in revisoes %}
-      <div style="background-color: #000;" class="function" onclick="window.location.href='/session/{{rev.id_session}}'">
-      <strong>{{rev.assunto}}</strong>
-      <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
-    </div>
+      <div class="revisao-item" onclick="window.location.href='/session/{{rev.id_session}}'">
+        <strong>{{rev.assunto}}</strong>
+        <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
+      </div>
     {% endfor %}
-  
   </div>
+<!--
+  <div style="margin-top: 2em;">
+    <p>Explore os mais recentes conteúdos do Estudaê!</p>
+    
+    <div id="ultimos-artigos" class="list-artigos">
+      {% for artigo in artigos %}
+        <div class="artigo" data-link="/artigo/{{ artigo.id }}">
+          <strong>{{ artigo.titulo }}</strong>
+          <small>{{ artigo.categoria }}</small>
+        </div>
+      {% endfor %}
+    </div>
 
+    <button class="btn-ver-todos" onclick="window.location.href='/feed/artigos'">Explorar Novos Conteúdos</button>
+  </div>
+-->
 </div>
 
 {% endblock %}
