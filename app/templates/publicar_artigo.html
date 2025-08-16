@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Publicar Artigo - Estudaê{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>Publicar novo artigo</h3>
+  <form id="form-publicar-artigo" style="display:flex; flex-direction:column; gap:1em;">
+    <input type="text" name="titulo" placeholder="Título do artigo" required style="font-size:1.2em;">
+    <textarea name="conteudo" placeholder="Conteúdo do artigo" required style="height:300px; font-size:1.1em;"></textarea>
+    <button type="submit">Publicar</button>
+  </form>
+</div>
+<script>
+document.getElementById('form-publicar-artigo').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const titulo = this.titulo.value;
+  const conteudo = this.conteudo.value;
+  axios.post('/api/publicar-artigo', { titulo, conteudo })
+    .then(res => {
+      Swal.fire('Publicado!', res.data.msg, 'success').then(() => {
+        window.location.href = '/artigos';
+      });
+    })
+    .catch(err => {
+      Swal.fire('Erro!', err.response.data.msg || 'Erro ao publicar', 'error');
+    });
+});
+</script>
+{% endblock %}

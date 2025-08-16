@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ artigo.titulo }} - Estudaê{% endblock %}
+{% block content %}
+<div class="container">
+  <h3 style="color:var(--corDestaque);">{{ artigo.titulo }}</h3>
+  <div style="margin:1em 0; font-size:1.1em; color:#fff; background:#111; border-radius:8px; padding:1em; box-shadow:0 2px 8px #0002;">
+    {{ artigo.conteudo | safe | replace('\n', '<br>') }}
+  </div>
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <!-- <small style="color:#888;">Por {{ artigo.user }}</small> -->
+    {% if session['user'] == artigo.user %}
+      <form id="delete-form" method="post" action="/api/deletar-artigo" style="display:inline;">
+        <input type="hidden" name="artigo_id" value="{{ artigo.id }}">
+        <button type="button" onclick="deletarArtigo({{ artigo.id }})" style="background:#ff5c5c; color:#fff; border:none; border-radius:5px; padding:0.5em 1em; cursor:pointer;">Excluir</button>
+      </form>
+    {% endif %}
+  </div>
+  <a href="/artigos" style="color:var(--corDestaque); margin-top:2em; display:inline-block;">← Voltar para artigos</a>
+</div>
+<script>
+function deletarArtigo(id) {
+  Swal.fire({
+    title: 'Tem certeza?',
+    text: 'Deseja realmente excluir este artigo?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, excluir',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      axios.post('/api/deletar-artigo', { artigo_id: id })
+        .then(res => {
+          Swal.fire('Excluído!', res.data.msg, 'success').then(() => {
+            window.location.href = '/artigos';
+          });
+        })
+        .catch(err => {
+          Swal.fire('Erro!', err.response.data.msg || 'Erro ao excluir', 'error');
+        });
+    }
+  });
+}
+</script>
+{% endblock %}

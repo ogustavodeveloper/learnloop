@@ -1,7 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, make_response, send_file
 from app.routes import artigos_bp
-from app.models import Corrections, SessionStudie, Simulado, Revisoes
+from app.models import Corrections, SessionStudie, Simulado, Revisoes, Artigo
 from app import db
 import os
 from openai import AzureOpenAI
@@ -47,8 +47,6 @@ def homepage():
         return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz), revisoes=revisoes_pendentes)
     except Exception as e:
         return render_template("login.html")
-
-
 
 
 @artigos_bp.route("/download-file/<filename>")
@@ -163,4 +161,72 @@ def gerar_artigo():
     finally:
         if os.path.exists(image_path):
             os.remove(image_path)
+            
+import uuid 
 
+@artigos_bp.route("/api/publicar-artigo", methods=["POST"])
+def publicar_artigo():
+    try:
+        data = request.get_json()                                           
+        titulo = data.get("titulo")
+        conteudo = data.get("conteudo")
+        user = session.get("user")
+        
+        if not titulo or not conteudo:
+            return jsonify({"msg": "Título e conteúdo são obrigatórios"}), 400
+        
+        newArtigo = Artigo(titulo=titulo, conteudo=conteudo, user=user, id=str(uuid.uuid4()))
+        db.session.add(newArtigo)
+        db.session.commit()
+        
+        return jsonify({"msg": "Artigo publicado com sucesso!"}), 200
+    
+    except Exception as e:
+        print(f"Erro: {e}")
+        return jsonify({"msg": "error", "error": str(e)}), 500                                  
+    
+@artigos_bp.route("/artigos")
+def listar_artigos():
+    try:
+        artigos = Artigo.query.all()
+        return render_template("artigos.html", artigos=artigos)
+    except Exception as e:
+        print(f"Erro: {e}")
+        return jsonify({"msg": "error", "error": str(e)}), 500
+    
+@artigos_bp.route("/artigo/<artigo_id>")                                        
+def ver_artigo(artigo_id):
+    try:
+        artigo = Artigo.query.filter_by(id=artigo_id).first()           
+        if not artigo:
+            return "Artigo não encontrado", 404
+        return render_template("ver_artigo.html", artigo=artigo)
+    except Exception as e:
+        print(f"Erro: {e}")
+        return jsonify({"msg": "error", "error": str(e)}), 500
+    
+@artigos_bp.route("/api/deletar-artigo", methods=["POST"])
+def deletar_artigo():
+    try:
+        data = request.get_json()
+        artigo_id = data.get("artigo_id")
+        user = session.get("user")
+        
+        artigo = Artigo.query.get(artigo_id)
+        if not artigo:
+            return jsonify({"msg": "Artigo não encontrado"}), 404
+        
+        if artigo.user != user:
+            return jsonify({"msg": "Você não tem permissão para deletar este artigo"}), 403                                 
+        db.session.delete(artigo)
+        db.session.commit()
+        
+        return jsonify({"msg": "Artigo deletado com sucesso!"}), 200
+    
+    except Exception as e:
+        print(f"Erro: {e}")
+        return jsonify({"msg": "error", "error": str(e)}), 500                      
+    
+@artigos_bp.route("/publicar-artigo")
+def publicar_artigo_page():
+    return render_template("publicar_artigo.html")

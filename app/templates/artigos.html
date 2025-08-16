@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Artigos - Estudaê{% endblock %}
+{% block content %}
+<div class="container">
+  <h3>Artigos em destaque</h3>
+
+  <button onclick="location.href='/publicar-artigo'">Publicar novo artigo</button>
+  {% if artigos %}
+    <ul style="list-style:none; padding:0;">
+      {% for artigo in artigos %}
+        <li style="margin-bottom:2em; background:#111; border-radius:8px; padding:1em; box-shadow:0 2px 8px #0002;">
+          <a href="/artigo/{{ artigo.id }}" style="text-decoration:none; color:var(--corDestaque); font-size:1.3em; font-weight:700;">
+            {{ artigo.titulo }}
+          </a>
+          <p style="color:#ccc; margin-top:0.5em;">{{ artigo.conteudo[:120] }}... <span style="color:var(--corDestaque);">Ler mais</span></p>
+          <!-- <small style="color:#888;">Por {{ artigo.user }}</small> -->
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Nenhum artigo publicado ainda. Seja o primeiro!</p>
+  {% endif %}
+</div>
+{% endblock %}
