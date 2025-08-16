@@ -17,26 +17,17 @@ class User(db.Model):
 
 class Artigo(db.Model):
   id = db.Column(db.String(), primary_key=True)
-  titulo = db.Column(db.String(128))
-  texto = db.Column(db.String(1024))
-  autor = db.Column(db.String(64))
-  data = db.Column(db.String(64))
-  categoria = db.Column(db.String(64))
-  tags = db.Column(db.String(64))
-  likes = db.Column(db.Integer)
-  views = db.Column(db.Integer)
+  titulo = db.Column(db.String())
+  conteudo = db.Column(db.String())
+  user = db.Column(db.String())
 
-  def __init__(self, titulo, texto, autor, data, categoria, tags, likes, id, views):
-    self.titulo = titulo
-    self.texto = texto
-    self.autor = autor
-    self.data = data
-    self.categoria = categoria
-    self.tags = tags
-    self.likes = likes
+  def __init__(self, id, titulo, conteudo, user):
     self.id = id
-    self.views = views
-
+    self.titulo = titulo
+    self.conteudo = conteudo
+    self.user = user                    
+  
+  
 class buscas(db.Model):
   user = db.Column(db.String())
   termo = db.Column(db.String())
@@ -173,3 +164,23 @@ class Revisoes(db.Model):
     self.data = data
     self.status = status
     self.id_session = id_session
+
+class Repertorio(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  user = db.Column(db.String())
+  titulo = db.Column(db.String())
+  arquivo = db.Column(db.String())
+  eixos = db.Column(db.String())
+  autor = db.Column(db.String())
+  resumo = db.Column(db.Text)
+  capa = db.Column(db.String())
+  
+  def __init__(self, id, user, titulo, arquivo, eixos, autor, resumo, capa):
+    self.id = id
+    self.user = user
+    self.titulo = titulo 
+    self.arquivo = arquivo 
+    self.eixos = eixos 
+    self.autor = autor 
+    self.resumo = resumo 
+    self.capa = capa

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h3>Repertórios</h3>
+    <button onclick="window.location.href='/publicar-repertorio'">Publicar Repertório</button>
+    <div class="grid-repertorios">
+        {% for repertorio in repertorios %}
+        <a href="/repertorio/{{repertorio.id}}" class="repertorio-capa" title="{{ repertorio.titulo }}">
+            <img src="{{ repertorio.capa }}" alt="Capa de {{ repertorio.titulo }}">
+        </a>
+        {% endfor %}
+    </div>
+</div>
+<style>
+.grid-repertorios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5em;
+    margin-top: 2em;
+}
+
+.repertorio-capa img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+    background: #fff;
+}
+
+.repertorio-capa:hover img {
+    transform: scale(1.04);
+    box-shadow: 0 4px 18px rgba(92,255,118,0.25);
+}
+</style>
+{% endblock %}

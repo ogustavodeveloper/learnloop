@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h3>Publicar Repertório</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="nome" placeholder="Digite o nome do repertório">
+        <input type="text" name="eixos" placeholder="Digite os eixos do repertório (separados por vírgula)">
+        <input type="text" name="autor" placeholder="Digite o nome do autor">
+    
+        <p>Selecione o arquivo do repetório:</p>
+        <input type="file" name="arquivo">
+
+        
+        <p>Selecione a capa do repertório:</p>
+        <input type="file" name="capa">
+
+        <textarea name="resumo" placeholder="Digite o que achou do repertório"></textarea>
+
+        <button type="submit">Publicar Repertório</button>
+    </form>
+</div>
+{% endblock %}
