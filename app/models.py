@@ -174,8 +174,9 @@ class Repertorio(db.Model):
   autor = db.Column(db.String())
   resumo = db.Column(db.Text)
   capa = db.Column(db.String())
+  tipo = db.Column(db.String(), default="outro")
   
-  def __init__(self, id, user, titulo, arquivo, eixos, autor, resumo, capa):
+  def __init__(self, id, user, titulo, arquivo, eixos, autor, resumo, capa, tipo):
     self.id = id
     self.user = user
     self.titulo = titulo 
@@ -184,3 +185,4 @@ class Repertorio(db.Model):
     self.autor = autor 
     self.resumo = resumo 
     self.capa = capa
+    self.tipo = tipo

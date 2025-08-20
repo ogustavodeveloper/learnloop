@@ -6,9 +6,18 @@
     
     <p><strong>Autor:</strong> {{repertorio.autor}}</p>
     <p><strong>Eixos: </strong>{{repertorio.eixos}}</p>
-    <p><strong>Resumo: </strong>{{repertorio.resumo}}</p>
 
-    <button onclick="window.location.href='{{repertorio.arquivo}}'">Baixar o arquivo</button>
+    {% if repertorio.resumo %}
+        <p><strong>Resumo:</strong> {{repertorio.resumo}}</p>
+    {% else %}
+        <p><strong>Resumo:</strong> Não disponível</p>
+    {% endif %}
+
+    {% if repertorio.arquivo %}
+        <button onclick="window.location.href='{{repertorio.arquivo}}'">Baixar o arquivo</button>
+    {% else %}
+        <button disabled style="background: #ccc; color: #666;">Arquivo não disponível</button>
+    {% endif %}
 
     <img src="{{repertorio.capa}}" width="300">
 </div>
