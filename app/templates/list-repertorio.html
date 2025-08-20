@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container">
     <h3>Repertórios</h3>
+    <small>Idealizado pelo <a style="color: #fff" href="https://www.instagram.com/gremiocepjrs/">Grêmio Estudantil - Expressão Jovem</a> do Colégio Estadual Professor Jorge Rodrigues dos Santos (Irecê/BA)</small>
     <button style="margin-bottom: 2em;" onclick="window.location.href='/publicar-repertorio'">Publicar Repertório</button>
     {% for tipo, lista in repertorios_por_tipo.items() %}
         {% if lista %}
