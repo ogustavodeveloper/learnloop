@@ -3,27 +3,31 @@
 {% block content %}
 <div class="container">
     <h3>Repertórios</h3>
-    <button onclick="window.location.href='/publicar-repertorio'">Publicar Repertório</button>
-    <div class="grid-repertorios">
-        {% for repertorio in repertorios %}
-        <a href="/repertorio/{{repertorio.id}}" class="repertorio-capa" title="{{ repertorio.titulo }}">
-            <img src="{{ repertorio.capa }}" alt="Capa de {{ repertorio.titulo }}">
-        </a>
-        {% endfor %}
-    </div>
+    <button style="margin-bottom: 2em;" onclick="window.location.href='/publicar-repertorio'">Publicar Repertório</button>
+    {% for tipo, lista in repertorios_por_tipo.items() %}
+        {% if lista %}
+        <h3>{{ tipo|capitalize }}</h3>
+        <div class="grid-repertorios">
+            {% for repertorio in lista %}
+            <a href="/repertorio/{{repertorio.id}}" class="repertorio-capa" title="{{ repertorio.titulo }}">
+                <img src="{{ repertorio.capa }}" alt="Capa de {{ repertorio.titulo }}">
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endfor %}
 </div>
 <style>
 .grid-repertorios {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5em;
-    margin-top: 2em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em; /* Menor espaçamento */
+    margin-top: 0.5em; /* Menor margem superior */
 }
 
 .repertorio-capa img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
+    width: 12em;
+
     border-radius: 10px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     transition: transform 0.2s;

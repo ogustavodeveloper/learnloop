@@ -40,16 +40,17 @@ def publicar_repertorio():
     if request.method == "POST":
         data = request.form 
         titulo = data.get("nome")
-        print(titulo)
         arquivo = request.files.get("arquivo")
         eixos = data.get("eixos")
         autor = data.get("autor")
         user = session.get("user")
-        if not arquivo:
-            return "Arquivo não enviado", 400
-        caminho = os.path.join("/tmp", arquivo.filename)
-        arquivo.save(caminho)
-        new_arquivo = upload_to_azure_blob("repertorio", caminho, arquivo.filename)
+
+        # Arquivo opcional
+        new_arquivo = None
+        if arquivo and arquivo.filename:
+            caminho = os.path.join("/tmp", arquivo.filename)
+            arquivo.save(caminho)
+            new_arquivo = upload_to_azure_blob("repertorio", caminho, arquivo.filename)
 
         capa = request.files.get("capa")
         caminho_capa = os.path.join("/tmp", capa.filename)
@@ -64,7 +65,8 @@ def publicar_repertorio():
             user=user,
             id=str(uuid.uuid4()),
             resumo=data.get("resumo"),
-            capa=new_capa
+            capa=new_capa,
+            tipo=data.get("tipo")
         )
 
         db.session.add(new_repertorio)
@@ -82,4 +84,13 @@ def exibirRepertorio(id):
 @repertorio_bp.route("/repertorios")
 def repertorios():
     repertorios = Repertorio.query.all()
-    return render_template("list-repertorio.html", repertorios=repertorios)
+    tipos = ["livro", "filme", "serie", "podcast", "outro"]
+    agrupados = {tipo: [] for tipo in tipos}
+    for r in repertorios:
+        # Se não tiver tipo, coloca em "outro"
+        tipo = getattr(r, "tipo", None) or "outro"
+        if tipo not in agrupados:
+            agrupados["outro"].append(r)
+        else:
+            agrupados[tipo].append(r)
+    return render_template("list-repertorio.html", repertorios_por_tipo=agrupados)

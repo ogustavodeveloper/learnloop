@@ -4,16 +4,24 @@
 <div class="container">
     <h3>Publicar Repertório</h3>
     <form method="POST" enctype="multipart/form-data">
-        <input type="text" name="nome" placeholder="Digite o nome do repertório">
-        <input type="text" name="eixos" placeholder="Digite os eixos do repertório (separados por vírgula)">
-        <input type="text" name="autor" placeholder="Digite o nome do autor">
+        <p>Qual o tipo de repertório?</p>
+        <select name="tipo" required>
+            <option value="livro">Livro</option>
+            <option value="filme">Filme</option>
+            <option value="serie">Série</option>
+            <option value="podcast">Podcast</option>
+            <option value="outro" selected>Outro</option>
+        </select>
+        <input type="text" name="nome" placeholder="Digite o nome do repertório" required>
+        <input type="text" name="eixos" placeholder="Digite os eixos do repertório (separados por vírgula)" required>
+        <input type="text" name="autor" placeholder="Digite o nome do autor" required>
     
-        <p>Selecione o arquivo do repetório:</p>
+        <p>Selecione o arquivo do repetório(opcional):</p>
         <input type="file" name="arquivo">
 
         
         <p>Selecione a capa do repertório:</p>
-        <input type="file" name="capa">
+        <input type="file" name="capa" required>
 
         <textarea name="resumo" placeholder="Digite o que achou do repertório"></textarea>
 
