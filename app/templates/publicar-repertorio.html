@@ -16,9 +16,19 @@
         <input type="text" name="eixos" placeholder="Digite os eixos do repertório (separados por vírgula)" required>
         <input type="text" name="autor" placeholder="Digite o nome do autor" required>
     
-        <p>Selecione o arquivo do repetório(opcional):</p>
-        <input type="file" name="arquivo">
+        <p>Você quer enviar um arquivo ou informar um link?</p>
+        <select name="tipo_envio" id="tipo_envio" onchange="toggleArquivoLink()">
+            <option value="arquivo" selected>Arquivo</option>
+            <option value="link">Link</option>
+        </select>
 
+        <div id="campo_arquivo">
+            <p>Selecione o arquivo do repertório (opcional):</p>
+            <input type="file" name="arquivo">
+        </div>
+        <div id="campo_link" style="display:none;">
+            <input type="url" name="link" placeholder="Cole o link do repertório">
+        </div>
         
         <p>Selecione a capa do repertório:</p>
         <input type="file" name="capa" required>
@@ -28,4 +38,11 @@
         <button type="submit">Publicar Repertório</button>
     </form>
 </div>
+<script>
+function toggleArquivoLink() {
+    var tipo = document.getElementById('tipo_envio').value;
+    document.getElementById('campo_arquivo').style.display = tipo === 'arquivo' ? 'block' : 'none';
+    document.getElementById('campo_link').style.display = tipo === 'link' ? 'block' : 'none';
+}
+</script>
 {% endblock %}

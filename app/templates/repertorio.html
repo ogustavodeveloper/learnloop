@@ -13,10 +13,12 @@
         <p><strong>Resumo:</strong> Não disponível</p>
     {% endif %}
 
-    {% if repertorio.arquivo %}
-        <button onclick="window.location.href='{{repertorio.arquivo}}'">Baixar o arquivo</button>
+    {% if repertorio.link %}
+        <button onclick="window.open('{{ repertorio.link }}', '_blank')">Ver o link</button>
+    {% elif repertorio.arquivo %}
+        <button onclick="window.location.href='{{ repertorio.arquivo }}'">Baixar o arquivo</button>
     {% else %}
-        <button disabled style="background: #ccc; color: #666;">Arquivo não disponível</button>
+        <button disabled style="background: #ccc; color: #666;">Arquivo/Link não disponível</button>
     {% endif %}
 
     <img src="{{repertorio.capa}}" width="300">
