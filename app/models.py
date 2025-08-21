@@ -170,17 +170,19 @@ class Repertorio(db.Model):
   user = db.Column(db.String())
   titulo = db.Column(db.String())
   arquivo = db.Column(db.String())
+  link = db.Column(db.String())  # Novo campo
   eixos = db.Column(db.String())
   autor = db.Column(db.String())
   resumo = db.Column(db.Text)
   capa = db.Column(db.String())
   tipo = db.Column(db.String(), default="outro")
   
-  def __init__(self, id, user, titulo, arquivo, eixos, autor, resumo, capa, tipo):
+  def __init__(self, id, user, titulo, arquivo, link, eixos, autor, resumo, capa, tipo):
     self.id = id
     self.user = user
     self.titulo = titulo 
     self.arquivo = arquivo 
+    self.link = link
     self.eixos = eixos 
     self.autor = autor 
     self.resumo = resumo 

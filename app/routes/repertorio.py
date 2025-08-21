@@ -40,12 +40,13 @@ def publicar_repertorio():
     if request.method == "POST":
         data = request.form 
         titulo = data.get("nome")
-        arquivo = request.files.get("arquivo")
+        tipo_envio = data.get("tipo_envio")
+        arquivo = request.files.get("arquivo") if tipo_envio == "arquivo" else None
+        link = data.get("link") if tipo_envio == "link" else None
         eixos = data.get("eixos")
         autor = data.get("autor")
         user = session.get("user")
 
-        # Arquivo opcional
         new_arquivo = None
         if arquivo and arquivo.filename:
             caminho = os.path.join("/tmp", arquivo.filename)
@@ -60,6 +61,7 @@ def publicar_repertorio():
         new_repertorio = Repertorio(
             titulo=titulo,
             arquivo=new_arquivo,
+            link=link,
             eixos=eixos,
             autor=autor,
             user=user,
