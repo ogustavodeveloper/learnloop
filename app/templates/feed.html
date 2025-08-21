@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Estudaê - Feed de Artigos{% endblock %}
+
+{% block metas %}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2345353716426198"
+     crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block styled %}
+<style>
+  .list-artigos{
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1em;
+  }
+
+  .artigo{
+    padding: 7px;
+    border: 0.5px solid #ffffff;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+  }
+
+  .list-artigos {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 1em;
+  }
+
+  .artigo {
+      padding: 7px;
+      border: none; /* Remover a borda */
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.2); /* Adicionar cor de fundo com transparência */
+      backdrop-filter: blur(10px); /* Aplicar o efeito de vidro */
+      transition: background-color 0.3s ease; /* Adicionar transição suave para a cor de fundo */
+  }
+
+  .artigo:hover {
+      background-color: rgba(255, 255, 255, 0.3); /* Ajustar a cor de fundo ao passar o mouse */
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <button onclick="window.location.href = '/create-artigo'">Criar Artigo</button>
+  <h3>Lista de artigos</h3>
+  <div class="list-artigos">
+    {% if artigos %}
+    {% for artigo in artigos %}
+    <div onclick="window.location.href = '/artigo/{{artigo.id}}'" class="artigo">
+      <strong>{{artigo.titulo}}</strong>
+      <small>{{artigo.categoria}}</small>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>Nenhum resultado encontrado.</p>
+    {% endif %}
+  </div>
+</div> <!--
+<div class="container">
+<section onclick="window.location.href='https://www.instagram.com/realengof7'">
+  <img src="{{url_for('static', filename='img/ads.png')}}">
+</section>
+</div>-->
+<div class="container">
+  <h3>Pesquisas que podem ajudar:</h3>
+  <div class="list-artigos">
+    {% if feciba_results %}
+      {% for artigo in feciba_results %}
+        <div class="artigo">
+          <strong onclick="window.location.href = '/download-file/{{artigo.file_name}}'">{{artigo.file_name}}</strong>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>Nenhum resultado encontrado.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
