@@ -17,15 +17,25 @@ class User(db.Model):
 
 class Artigo(db.Model):
   id = db.Column(db.String(), primary_key=True)
-  titulo = db.Column(db.String())
-  conteudo = db.Column(db.String())
-  user = db.Column(db.String())
+  titulo = db.Column(db.String(128))
+  texto = db.Column(db.String(1024))
+  autor = db.Column(db.String(64))
+  data = db.Column(db.String(64))
+  categoria = db.Column(db.String(64))
+  tags = db.Column(db.String(64))
+  likes = db.Column(db.Integer)
+  views = db.Column(db.Integer)
 
-  def __init__(self, id, titulo, conteudo, user):
-    self.id = id
+  def __init__(self, titulo, texto, autor, data, categoria, tags, likes, id, views):
     self.titulo = titulo
-    self.conteudo = conteudo
-    self.user = user                    
+    self.texto = texto
+    self.autor = autor
+    self.data = data
+    self.categoria = categoria
+    self.tags = tags
+    self.likes = likes
+    self.id = id
+    self.views = views                  
   
   
 class buscas(db.Model):
