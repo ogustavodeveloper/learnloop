@@ -50,7 +50,13 @@
         <p><strong>Nota Final:</strong> <span id="nota-final">{{ final_nota }}</span></p>
         <p><strong>Análise Final:</strong> <span id="analise-final">{{ final_analise }}</span></p>
     {% endif %}
+
+    <br> <br>
+
+    <button onclick="avaliarRedacao()">Avaliar redação</button>
 </div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -98,6 +104,52 @@ function recorrigirCompetencia(numero) {
             });
         }
     });
+}
+
+
+function avaliarRedacao() {
+    Swal.fire({
+        title: "Avaliar Redação",
+        text: "Sua opinião importa! Avalie a redação para ajudar a melhorar nosso sistema.",
+        
+        html: `
+            <div style="text-align: left;">
+                <label for="nota">Nota (0-10):</label>
+                <input type="number" id="nota" name="nota" min="0" max="10" style="width: 100%; margin-bottom: 1em;">
+                
+                <label for="comentario">Comentário:</label>
+                <textarea id="comentario" name="comentario" rows="4" style="width: 100%;"></textarea>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Enviar",
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+            const nota = document.getElementById('nota').value;
+            const comentario = document.getElementById('comentario').value;
+            if (nota === '' || isNaN(nota) || nota < 0 || nota > 10) {
+                Swal.showValidationMessage('Por favor, insira uma nota válida entre 0 e 10.');
+                return false;
+            }
+
+            axios.post("/api/avaliar-redacao", {
+                correcao_id: `{{ correcao.id }}`,
+                nota: parseFloat(nota),
+                comentario: comentario
+            })
+            .then(response => {
+                if (response.data.msg === "success") {
+                    Swal.fire("Obrigado!", "Sua avaliação foi enviada com sucesso.", "success");
+                } else {
+                    Swal.fire("Erro", response.data.details || "Erro ao enviar avaliação.", "error");
+                }
+            })
+            .catch(() => {
+                Swal.fire("Erro", "Erro ao enviar avaliação.", "error");
+            }); 
+
+        }
+    })
 }
 </script>
 {% endblock %}

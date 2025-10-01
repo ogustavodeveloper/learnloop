@@ -1,6 +1,23 @@
 function redacao() {
-  var title = document.getElementById("titulo");
+  var title = document.getElementById("tema");
   var conteudo = document.getElementById("conteudo");
+
+  if (title.value.length < 5) {
+    Swal.fire({
+      title: "Erro",
+      text: "O título da redação deve ter no mínimo 5 caracteres.",
+      icon: "error"
+    });
+    return;
+  }       
+  if (conteudo.value.length < 20) {
+    Swal.fire({
+      title: "Erro",
+      text: "O conteúdo da redação deve ter no mínimo 20 caracteres.",
+      icon: "error"
+    });
+    return;
+  }
 
   Swal.fire({
     title: "Corrigindo sua redação...",
@@ -120,6 +137,25 @@ function salvarRedacao() {
 function redacaoGuiada() {
   var tema = document.getElementById("tema").value;
   var texto = document.getElementById("conteudo").value;
+
+  if (tema.length < 5) {
+    Swal.fire({
+      title: "Erro",
+      text: "O tema da redação deve ter no mínimo 5 caracteres.",
+      icon: "error"
+    });
+    return;
+  }
+
+  if (texto.length < 5) {    
+    Swal.fire({
+      title: "Erro",
+      text: "O conteúdo da redação deve ter no mínimo 5 caracteres.",  
+      icon: "error"
+    });
+    return;
+  }
+
 
   // Exibir alerta de carregamento
   Swal.fire({

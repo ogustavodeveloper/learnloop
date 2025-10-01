@@ -7,7 +7,7 @@ import uuid
 
 import os
 
-from app.models import Corrections
+from app.models import Corrections, Avaliacao 
 import uuid
 import json
 from datetime import datetime
@@ -305,5 +305,34 @@ def recorrigir_competencia():
             "nota_final": nota_final,
             "analise_final": analise_final
         })
+    except Exception as e:
+        return jsonify({"msg": "error", "details": str(e)}), 500
+
+@redacao_bp.route("/api/avaliar-redacao", methods=["POST"])
+def avaliar_redacao():
+    try:
+        user = session["user"]
+        
+        data = request.get_json()
+        
+        nota = float(data["nota"])
+        comentario = data["comentario"]
+        correcao_id = data["correcao_id"]
+        
+        tipo = "redacao"
+        
+        new_avaliacao = Avaliacao(
+            id=str(uuid.uuid4()),
+            tipo=tipo,
+            nota=nota,
+            comentario=comentario,
+            user=user,
+            correcao_id=correcao_id
+        )
+        
+        db.session.add(new_avaliacao)
+        db.session.commit()
+        
+        return jsonify({"msg": "success"})
     except Exception as e:
         return jsonify({"msg": "error", "details": str(e)}), 500

@@ -112,7 +112,7 @@
     background-color: #151515;
     padding: 1em;
     border-radius: 6px;
-    margin-top: 2em;
+    margin-bottom: 1em;
   }
 
   .revisao-item {
@@ -183,7 +183,28 @@
 <div class="container">
   <h3>Olá, Estudante!</h3>
 
-  <img src="{{ url_for('static', filename='img/banner.png') }}" alt="Redes Sociais" style="width: 100%; margin-bottom: 1.5em;">
+  
+  <div class="dados">
+    <h3>Seu desempenho</h3>
+    <p><strong>Redações Enviadas: </strong>{{correcoes}} redações</p>
+    <p><strong>Sessões de Estudos criadas: </strong>{{sessoes}} sessões</p>
+    <p><strong>Quizzes gerados: </strong>{{quiz}} quizzes</p>
+  </div>
+
+<div class="revisoes">
+    <h3>Revisões do Dia</h3>
+  
+    {% if revisoes|length == 0 %}
+      <p>Nenhuma revisão pendente pra hoje.</p>
+    {% endif %}
+
+    {% for rev in revisoes %}
+      <div class="revisao-item" onclick="window.location.href='/session/{{rev.id_session}}'">
+        <strong>{{rev.assunto}}</strong>
+        <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
+      </div>
+    {% endfor %}
+  </div>
      
   <h3>Explore nossos recursos</h3>
 
@@ -219,27 +240,8 @@
     </div>
   </div>
 
-  <div class="dados">
-    <h3>Seu desempenho</h3>
-    <p><strong>Redações Enviadas: </strong>{{correcoes}} redações</p>
-    <p><strong>Sessões de Estudos criadas: </strong>{{sessoes}} sessões</p>
-    <p><strong>Quizzes gerados: </strong>{{quiz}} quizzes</p>
-  </div>
 
-  <div class="revisoes">
-    <h3>Revisões do Dia</h3>
   
-    {% if revisoes|length == 0 %}
-      <p>Nenhuma revisão pendente pra hoje.</p>
-    {% endif %}
-
-    {% for rev in revisoes %}
-      <div class="revisao-item" onclick="window.location.href='/session/{{rev.id_session}}'">
-        <strong>{{rev.assunto}}</strong>
-        <img src="{{ url_for('static', filename='img/icon-next.png') }}" alt="Ir para sessão">
-      </div>
-    {% endfor %}
-  </div>
 <!--
   <div style="margin-top: 2em;">
     <p>Explore os mais recentes conteúdos do Estudaê!</p>
