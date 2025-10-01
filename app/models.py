@@ -198,3 +198,19 @@ class Repertorio(db.Model):
     self.resumo = resumo 
     self.capa = capa
     self.tipo = tipo
+    
+class Avaliacao(db.Model):
+  id = db.Column(db.String(), primary_key=True)
+  tipo = db.Column(db.String())
+  nota = db.Column(db.Float())
+  comentario = db.Column(db.String())
+  user = db.Column(db.String())
+  correcao_id = db.Column(db.String())
+  
+  def __init__(self, id, tipo, nota, comentario, user, correcao_id):
+    self.id = id
+    self.tipo = tipo
+    self.nota = nota
+    self.comentario = comentario
+    self.user = user
+    self.correcao_id = correcao_id 
