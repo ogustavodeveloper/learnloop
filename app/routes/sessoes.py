@@ -12,11 +12,11 @@ from azure.storage.blob import BlobServiceClient
 import json 
 
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-07-01-preview",
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-)
+# client = AzureOpenAI(
+    # api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    # api_version="2024-07-01-preview",
+    # azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+# )
 
 def upload_to_azure_blob(container_name, file_path, blob_name):
     try:
