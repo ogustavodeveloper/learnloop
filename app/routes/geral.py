@@ -111,15 +111,15 @@ import os
 import json 
 
 
-azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-if azure_endpoint is None:
-    raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is not set.")
+# azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+#if azure_endpoint is None:
+   # raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is not set.")
 
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-    api_version="2024-07-01-preview",
-    azure_endpoint=azure_endpoint
-)
+# client = AzureOpenAI(
+    # api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
+   # api_version="2024-07-01-preview",
+   # azure_endpoint=azure_endpoint
+#)
 
 @geral_bp.route('/radar-conhecimento')
 def radar_conhecimento():
