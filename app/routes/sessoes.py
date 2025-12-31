@@ -48,7 +48,7 @@ def upload_to_azure_blob(container_name, file_path, blob_name):
         print(f"Erro ao enviar o arquivo: {e}")
         return None
 
-@sessoes_bp.route("/session/<id>")
+@sessoes_bp.route("/caderno/<id>")
 def planPage(id):
     try:
         user = session['user']
@@ -86,7 +86,7 @@ def addDoc():
 
     
 
-@sessoes_bp.route("/feed-session")
+@sessoes_bp.route("/caderno-digital")
 def feedSession():
     sessions = SessionStudie.query.filter_by(user=session["user"])
     return render_template("feed-sessions.html", sessions=sessions)
