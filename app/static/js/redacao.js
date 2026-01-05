@@ -1,15 +1,26 @@
 function redacao() {
-  var title = document.getElementById("tema");
+  var titulo = document.getElementById("titulo");
+  var tema = document.getElementById("tema_custom");
   var conteudo = document.getElementById("conteudo");
 
-  if (title.value.length < 5) {
+  if (titulo && titulo.value.length < 5) {
     Swal.fire({
       title: "Erro",
       text: "O título da redação deve ter no mínimo 5 caracteres.",
       icon: "error"
     });
     return;
-  }       
+  }
+
+  if (!tema || tema.value.length < 5) {
+    Swal.fire({
+      title: "Erro",
+      text: "O tema da redação deve ter no mínimo 5 caracteres.",
+      icon: "error"
+    });
+    return;
+  }
+
   if (conteudo.value.length < 20) {
     Swal.fire({
       title: "Erro",
@@ -23,29 +34,29 @@ function redacao() {
     title: "Corrigindo sua redação...",
     text: "Aguarde, em instantes você será redirecionado para uma página com a correção detalhada.",
     icon: "info"
-  })
-  
+  });
+
   axios.post("/learn-ai/redacao", {
-    title: title.value,
+    title: titulo ? titulo.value : "",
     content: conteudo.value,
     nivel: document.getElementById("nivel").value,
-    tema: document.getElementById("tema").value
+    tema: tema.value
   }).then((r) => {
     if (r.data.msg === "success") {
-      window.location.href = '/correcao/'+r.data.response
+      window.location.href = '/correcao/' + r.data.response;
     } else {
       Swal.fire({
         title: "Erro ao corrigir sua redação",
         text: `Tire um print da mensagem ao lado e mande para o Instagram do Estudaê (@estudae.of) para podermos resolver este erro: ${r.data.details}`,
         icon: 'error'
-      })
+      });
     }
   }).catch((error) => {
     Swal.fire({
       title: "Houve um erro ao corrigir a sua redacão.",
       text: `Tire um print da mensagem ao lado e mande para o Instagram do Estudaê (@estudae.of) para podermos resolver este erro: ${error}`,
       icon: "error"
-    })
+    });
     console.error("Erro:", error);
   });
 }
@@ -135,8 +146,9 @@ function salvarRedacao() {
 }
 
 function redacaoGuiada() {
-  var tema = document.getElementById("tema").value;
+  var tema = document.getElementById("tema_custom").value;
   var texto = document.getElementById("conteudo").value;
+  
 
   if (tema.length < 5) {
     Swal.fire({
@@ -157,38 +169,79 @@ function redacaoGuiada() {
   }
 
 
-  // Exibir alerta de carregamento
+  // Pergunta ao usuário usando HTML com rádios (evita problema de fundo branco)
   Swal.fire({
-    title: 'Carregando...',
-    text: 'Aguarde enquanto processamos sua redação.',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
+    title: 'Em qual estágio está sua redação?',
+    html: `
+      <div style="text-align:left">
+        <label style="display:block; margin:8px 0;"><input type="radio" name="estagioRadio" value="Introdução"> Introdução</label>
+        <label style="display:block; margin:8px 0;"><input type="radio" name="estagioRadio" value="Desenvolvimento"> Desenvolvimento</label>
+        <label style="display:block; margin:8px 0;"><input type="radio" name="estagioRadio" value="Conclusão"> Conclusão</label>
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    preConfirm: () => {
+      const checked = document.querySelector('input[name="estagioRadio"]:checked');
+      if (!checked) {
+        Swal.showValidationMessage('Selecione o estágio da redação');
+        return false;
+      }
+      return checked.value;
     }
-  });
+  }).then((result) => {
+    if (!result.isConfirmed) return;
+    var estagio = result.value;
 
-  axios.post("/api/redacao-guiada", {
-    tema: tema,
-    texto: texto
-  }).then((response) => {
-    var data = response.data;
-    // Fechar o alerta de carregamento
-    Swal.close();
-
-    if (data.msg === "success") {
-      Swal.fire({
-        title: "Redação Guiada",
-        text: data.guia
-      });
-    }
-  }).catch((error) => {
-    // Fechar o alerta de carregamento em caso de erro
-    Swal.close();
-
+    // Exibir alerta de carregamento
     Swal.fire({
-      title: 'Erro!',
-      text: 'Ocorreu um erro ao processar sua solicitação.',
-      icon: 'error'
+      title: 'Carregando...',
+      text: 'Aguarde enquanto processamos sua redação.',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    axios.post("/api/redacao-guiada", {
+      tema: tema,
+      texto: texto,
+      estagio: estagio
+    }).then((response) => {
+      var data = response.data;
+      // Fechar o alerta de carregamento
+      Swal.close();
+
+      if (data.msg === "success") {
+        Swal.fire({
+          title: "Redação Guiada",
+          text: data.guia
+        });
+      }
+    }).catch((error) => {
+      // Fechar o alerta de carregamento em caso de erro
+      Swal.close();
+
+      Swal.fire({
+        title: 'Erro!',
+        text: 'Ocorreu um erro ao processar sua solicitação.',
+        icon: 'error'
+      });
     });
   });
 }
+
+// Sincroniza o select de temas com o input de tema_custom
+document.addEventListener('DOMContentLoaded', function() {
+  var selectTema = document.getElementById('tema');
+  var inputTema = document.getElementById('tema_custom');
+  if (selectTema && inputTema) {
+    selectTema.addEventListener('change', function() {
+      if (this.value) inputTema.value = this.value;
+    });
+    // Se o usuário digitar manualmente, limpa a seleção
+    inputTema.addEventListener('input', function() {
+      if (selectTema) selectTema.value = '';
+    });
+  }
+});

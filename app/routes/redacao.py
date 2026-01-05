@@ -185,21 +185,29 @@ def redacaoGuiada():
             return redirect('/login')
         
         data = request.get_json()
-        
+
         texto = data.get("texto")
-        
         tema = data.get("tema")
+        estagio = data.get("estagio")
+        print(estagio)
 
         # Verifica se todos os campos necessários foram preenchidos
-        if not all([texto, tema]):
+        if not all([texto, tema, estagio]):
             return jsonify({"msg": "error", "details": "Dados insuficientes para avaliação"}), 400
 
-        # Fazendo a chamada à API do Azure OpenAI
+        # Fazendo a chamada à API do Azure OpenAI, incluindo o estágio informado pelo usuário
+        sistema = (
+            "Você é um assistente na produção de redações para o ENEM. Irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema e o estágio informado. "
+            "Responda objetivamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos."
+        )
+
+        user_msg = f"Tema: {tema}. Estágio declarado pelo usuário: {estagio}. Redação atual: {texto}"
+
         chat_completion = client.chat.completions.create(
                 model="gpt-4o-mini",  # Nome do deployment configurado no Azure
                 messages=[
-                    {"role": "system", "content": "Você é um assistente na produção de redações para o ENEM, e irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema. Não coloque informações excessivas, apenas as próximas linhas, por exemplo: Se está no começo, ajuda na introdução, identifique em qual parte ele está(introdução, desenvolvimento ou conclusão). Lembre-se: o estudante está perdido! Exemplo de resposta: 'Nas próximas linhas, tente pensar tais coisas...', ofereça um repertório bacana."},
-                    {"role": "user", "content": f"Tema: {tema}. Redação: {texto}"}
+                    {"role": "system", "content": sistema},
+                    {"role": "user", "content": user_msg}
                 ]
             )
 
@@ -207,7 +215,7 @@ def redacaoGuiada():
         print(assistant_response)
         return jsonify({
             "msg": "success",
-            "guia": assistant_response 
+            "guia": assistant_response
         })
     except Exception as e:
         print(str(e))

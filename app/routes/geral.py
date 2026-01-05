@@ -53,7 +53,7 @@ def sitemap():
         
         # Adicionar a URL e a data formatada à lista de URLs
         urls.append({
-            'loc': f"https://learnloop.com.br/artigo/{artigo.id}",
+            'loc': f"https://estudae.site/artigo/{artigo.id}",
             'lastmod': data_criacao
         })
 
@@ -102,7 +102,7 @@ def robots_txt():
     User-agent: Googlebot
     Allow: /public/
 
-    Sitemap: https://learnloop.site/sitemap.xml
+    Sitemap: https://estudae.site/sitemap.xml
     """
     return Response(robots_txt_content, mimetype='text/plain')
 

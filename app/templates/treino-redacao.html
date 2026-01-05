@@ -35,7 +35,30 @@
   {% endif %}
   
   <div class="form">
-    <input id="tema" type="text" placeholder="Digite o tema da sua redação (obrigatório)">
+    <input id="tema_custom" type="text" placeholder="Digite o tema da sua redação (obrigatório)">
+    <select id="tema">
+      <option value="">-- Escolha um tema sugerido --</option>
+      <option value="Desigualdade social e pobreza">Desigualdade social e pobreza</option>
+      <option value="Violência contra a mulher">Violência contra a mulher</option>
+      <option value="Meio ambiente e sustentabilidade">Meio ambiente e sustentabilidade</option>
+      <option value="Saúde pública e pandemia">Saúde pública e pandemia</option>
+      <option value="Educação e inclusão">Educação e inclusão</option>
+      <option value="Tecnologia, privacidade e redes sociais">Tecnologia, privacidade e redes sociais</option>
+      <option value="Desinformação e fake news">Desinformação e fake news</option>
+      <option value="Racismo estrutural e combate ao preconceito">Racismo estrutural e combate ao preconceito</option>
+      <option value="Direitos humanos e cidadania">Direitos humanos e cidadania</option>
+      <option value="Trabalho infantil e exploração">Trabalho infantil e exploração</option>
+      <option value="Juventude e participação política">Juventude e participação política</option>
+      <option value="Saúde mental entre jovens">Saúde mental entre jovens</option>
+      <option value="Inclusão de pessoas com deficiência">Inclusão de pessoas com deficiência</option>
+      <option value="Cultura, identidade e diversidade">Cultura, identidade e diversidade</option>
+      <option value="Mobilidade urbana e transporte público">Mobilidade urbana e transporte público</option>
+      <option value="Consumo responsável e economia circular">Consumo responsável e economia circular</option>
+      <option value="Ética, trabalho e automação">Ética, trabalho e automação</option>
+      <option value="Desenvolvimento científico e acesso à informação">Desenvolvimento científico e acesso à informação</option>
+      <option value="Violência e segurança pública">Violência e segurança pública</option>
+      <option value="Meio rural: agricultura e preservação ambiental">Meio rural: agricultura e preservação ambiental</option>
+    </select>
     <input id="titulo" type="text" placeholder="Digite o título de sua redação">
 <label for="nivel">Selecione o nível de ensino:</label>
   <select id="nivel">
@@ -47,7 +70,7 @@
     <textarea id="conteudo" placeholder="Digite sua redação (obrigatório)"></textarea>
   </div>
 
-  <button onclick="redacaoGuiada()" disabled>Redação Guiada (DESABILITADO)</button>
+  <button onclick="redacaoGuiada()">Redação Guiada (DESABILITADO)</button>
   
   <button onclick="redacao()" disabled>Enviar para Correção (DESABILITADO)</button>
   <button onclick="carregarFoto()" disabled>Digitalizar Redação Manuscrita (DESABILITADO)</button> 
