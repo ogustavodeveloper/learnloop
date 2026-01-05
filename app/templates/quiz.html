@@ -1,6 +1,41 @@
 {% extends 'base.html' %}
 
 {% block styled %}
+<style>
+    /* Tema escuro com destaque verde */
+    .container { background: #050505; color: #fff; padding: 18px; border-radius: 8px; }
+    /* Estilo das alternativas (cartões) */
+    .alternativa-label {
+        display: block;
+        border: 1px solid #5CFF76;
+        padding: 12px 14px;
+        margin: 10px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        position: relative;
+        transition: transform 160ms ease, box-shadow 200ms ease, background-color 200ms ease;
+        background: #0b0b0b;
+    }
+    .alternativa-label:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    .alternativa-label input[type="radio"] { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0; width: 0; height: 0; }
+    .alternativa-label .alt-text { display: inline-block; margin-left: 36px; color: #ffffff; }
+    .alternativa-label input[type="radio"]:checked + .alt-text {
+        background: linear-gradient(90deg,#5CFF76,#34d95c);
+        color: #000;
+        padding: 8px 12px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(92,255,118,0.14);
+    }
+    /* quando estiver sem seleção */
+    .alternativa-label .alt-text { padding: 6px 8px; border-radius: 6px; }
+
+    /* Estilo do banner de resumo */
+    #quiz-summary { color: #fff; }
+
+    /* Result items animation initial state */
+    .resultado-item { background: #0e0e0e; border-color: rgba(255,255,255,0.04); }
+    .resultado-item div { color: #fff; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -23,36 +58,378 @@
             </div>
             <br>
         {% endfor %}
-        <button type="submit" class="btn btn-primary">Enviar Respostas</button>
+       <!-- <button type="submit" class="btn btn-primary">Enviar Respostas</button> -->
     </form>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const selects = document.querySelectorAll('select');
+document.addEventListener('DOMContentLoaded', function() {
+    const perguntaDivs = Array.from(document.querySelectorAll('.pergunta'));
+    const total = perguntaDivs.length;
+    const respostasDoUsuario = new Array(total).fill('');
 
-    selects.forEach(select => {
-        select.addEventListener('change', function() {
-            const respostaSelecionada = this.value.trim();
-            const respostaCorreta = this.getAttribute('data-resposta').trim();
-            if (respostaSelecionada == respostaCorreta) {
-                alert('Resposta Correta!');
-            } else if (respostaSelecionada !== "") {
-                alert('Resposta Incorreta!');
+    // Esconde completamente os blocos originais de perguntas para que não apareçam abaixo
+    perguntaDivs.forEach((d, idx) => {
+        d.style.display = 'none';
+    });
+
+    // Cria painel de pergunta única
+    const container = document.querySelector('.container');
+    const viewer = document.createElement('div');
+    viewer.id = 'quiz-viewer';
+    viewer.style.margin = '20px 0';
+    // Cria banner de resumo (oculto inicialmente)
+    const summaryBanner = document.createElement('div');
+    summaryBanner.id = 'quiz-summary';
+    summaryBanner.style.display = 'none';
+    summaryBanner.style.padding = '18px';
+    summaryBanner.style.borderRadius = '8px';
+    // fundo transparente conforme solicitado
+    summaryBanner.style.background = 'transparent';
+    summaryBanner.style.marginBottom = '12px';
+    summaryBanner.style.textAlign = 'center';
+    summaryBanner.style.fontSize = '18px';
+    summaryBanner.style.fontWeight = '700';
+    container.insertBefore(summaryBanner, quizForm);
+    viewer.innerHTML = `
+        <div id="questao-text" style="font-weight:600; margin-bottom:12px"></div>
+        <div id="alternativas-list"></div>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+            <button id="prevBtn" class="btn">Anterior</button>
+            <button id="nextBtn" class="btn btn-primary">Próxima</button>
+            <button id="submitBtn" class="btn btn-success" style="display:none;">Enviar Respostas</button>
+        </div>
+        <div id="progressText" style="margin-top:8px; color:#666;"></div>
+    `;
+    container.insertBefore(viewer, quizForm);
+
+        // Painel de debug visível (para quando o usuário não consegue abrir o console)
+      /*  const debugToggle = document.createElement('button');
+        debugToggle.id = 'debugToggle';
+        debugToggle.className = 'btn';
+        debugToggle.style.marginLeft = '8px';
+        debugToggle.style.fontSize = '12px';
+        debugToggle.innerText = 'Mostrar logs';
+        container.insertBefore(debugToggle, viewer);
+
+        const debugContainer = document.createElement('div');
+        debugContainer.id = 'quiz-debug';
+        debugContainer.style.display = 'none';
+        debugContainer.style.maxHeight = '160px';
+        debugContainer.style.overflow = 'auto';
+        debugContainer.style.fontSize = '13px';
+        debugContainer.style.background = 'rgba(0,0,0,0.03)';
+        debugContainer.style.border = '1px dashed #ccc';
+        debugContainer.style.padding = '8px';
+        debugContainer.style.marginTop = '12px';
+        container.insertBefore(debugContainer, viewer.nextSibling);
+
+        debugToggle.addEventListener('click', function(){
+            if (debugContainer.style.display === 'none'){
+                debugContainer.style.display = '';
+                debugToggle.innerText = 'Ocultar logs';
+            } else {
+                debugContainer.style.display = 'none';
+                debugToggle.innerText = 'Mostrar logs';
             }
         });
+
+        function debugLog(msg){
+            try{
+                const line = document.createElement('div');
+                line.textContent = msg;
+                debugContainer.appendChild(line);
+                debugContainer.scrollTop = debugContainer.scrollHeight;
+            }catch(e){}
+            try{ console.debug(msg); }catch(e){}
+        }
+*/
+    const questaoText = document.getElementById('questao-text');
+    const alternativasList = document.getElementById('alternativas-list');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const progressText = document.getElementById('progressText');
+
+    let current = 0;
+
+    function renderQuestion(idx) {
+        const div = perguntaDivs[idx];
+        const questao = div.querySelector('p').innerText;
+        const alternativas = Array.from(div.querySelectorAll('select option')).slice(1).map(o => o.value);
+
+        questaoText.innerText = `Pergunta ${idx+1} de ${total}: ${questao}`;
+        alternativasList.innerHTML = alternativas.map((alt,i) => {
+            const checked = (respostasDoUsuario[idx] && respostasDoUsuario[idx] === alt) ? 'checked' : '';
+            const name = `view_opt_${idx}`;
+            return `<label class="alternativa-label"><input type="radio" name="${name}" data-idx="${idx}" value="${alt}" ${checked}><span class="alt-text">${alt}</span></label>`;
+        }).join('');
+
+        progressText.innerText = `Progresso: ${idx+1}/${total}`;
+
+        prevBtn.style.display = idx === 0 ? 'none' : '';
+        nextBtn.style.display = idx === total-1 ? 'none' : '';
+        submitBtn.style.display = idx === total-1 ? '' : 'none';
+    }
+
+    // Listeners para capturar seleção das alternativas (usa data-idx)
+    alternativasList.addEventListener('change', function(e) {
+        if (e.target && e.target.matches('input[type="radio"][data-idx]')) {
+            const idx = parseInt(e.target.dataset.idx, 10);
+            respostasDoUsuario[idx] = e.target.value;
+            const label = e.target.closest('label');
+            if (label) {
+                label.style.transition = 'transform 220ms ease';
+                label.style.transform = 'scale(1.02)';
+                setTimeout(()=> label.style.transform = 'scale(1)', 220);
+            }
+        }
+    });
+    alternativasList.addEventListener('click', function(e){
+        const label = e.target.closest('label');
+        const input = label ? label.querySelector('input[type="radio"][data-idx]') : null;
+        if (input) {
+            const idx = parseInt(input.getAttribute('data-idx'), 10);
+            setTimeout(()=>{
+                if (input.checked) respostasDoUsuario[idx] = input.value;
+            }, 10);
+        }
     });
 
-    // Ao enviar o formulário, mostra as resoluções
-    document.getElementById('quizForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o envio padrão
-        document.querySelectorAll('.resolucao').forEach(function(div) {
-            div.style.display = 'block';
-        });
-        // Opcional: desabilita selects e botão após envio
-        selects.forEach(select => select.disabled = true);
-        this.querySelector('button[type="submit"]').disabled = true;
+    // Normaliza strings para comparação (remove múltiplos espaços e lowercase)
+    function decodeHtmlEntities(str) {
+        var txt = document.createElement('textarea');
+        txt.innerHTML = str;
+        return txt.value;
+    }
+
+    function removeDiacritics(str) {
+        return str.normalize && str.normalize('NFD').replace(/\p{Diacritic}/gu, '') || str;
+    }
+
+    function stripTags(s){
+        return String(s).replace(/<[^>]*>/g, '');
+    }
+
+    function normalize(s){
+        if (s === null || s === undefined) return '';
+        let out = String(s);
+        out = decodeHtmlEntities(out);
+        out = stripTags(out);
+        out = removeDiacritics(out);
+        out = out.replace(/\s+/g,' ').trim().toLowerCase();
+        return out;
+    }
+
+    nextBtn.addEventListener('click', function() {
+        // exige seleção antes de avançar
+        if (!respostasDoUsuario[current]) {
+            Swal.fire({title:'Atenção', text:'Selecione uma alternativa antes de continuar.', icon:'warning'});
+            return;
+        }
+        if (current < total-1) {
+            current++;
+            renderQuestion(current);
+        }
     });
-  });
+
+    submitBtn.addEventListener('click', function() {
+        if (!respostasDoUsuario[current]) {
+            Swal.fire({title:'Atenção', text:'Selecione uma alternativa antes de enviar.', icon:'warning'});
+            return;
+        }
+
+        // Calcula resultados com normalização para evitar diferenças de espaços/maiúsculas
+        let acertos = 0;
+        const detalhes = [];
+        perguntaDivs.forEach((d, i) => {
+            const corretaRaw = d.querySelector('select').getAttribute('data-resposta') || '';
+            const correta = corretaRaw ? String(corretaRaw).trim() : '';
+            const escolhaRaw = respostasDoUsuario[i] || '';
+
+            // Procura uma option correspondente, compara após normalização
+            const options = Array.from(d.querySelectorAll('select option')).slice(1).map(o => o.value);
+            const matching = options.find(o => normalize(o) === normalize(escolhaRaw));
+            const escolha = matching || escolhaRaw;
+
+            const normEscolha = normalize(escolha);
+            const normCorreta = normalize(correta);
+
+            // tenta mapear a alternativa para uma letra (a, b, c, ...)
+            let letraDetectada = '';
+            // primeiro, tenta extrair letra diretamente do texto da alternativa (formato: "c) ...")
+            const match = String(escolhaRaw).trim().match(/^([a-zA-Z])\)\s*/);
+            if (match) {
+                letraDetectada = match[1].toLowerCase();
+            } else {
+                const optIndex = options.findIndex(o => normalize(o) === normalize(escolhaRaw));
+                if (optIndex >= 0) {
+                    letraDetectada = String.fromCharCode(97 + optIndex); // 0 -> 'a'
+                }
+            }
+
+            // debug logs (visíveis na página se o console não puder ser aberto)
+            debugLog(`Quiz debug Q${i+1}: corretaRaw=>>${corretaRaw}<<, escolhaRaw=>>${escolhaRaw}<<, escolhaResolved=>>${escolha}<<`);
+            debugLog(` normalized: correta=>>${normCorreta}<<, escolha=>>${normEscolha}<<, letraDetectada=>>${letraDetectada}<<`);
+
+            // Conferência: considera acerto se a letra bate ou o texto normalizado bate
+            const acertou = (letraDetectada && letraDetectada === normalize(correta)) || (normEscolha !== '' && normEscolha === normCorreta);
+            if (acertou) acertos++;
+            detalhes.push({
+                questao: d.querySelector('p').innerText,
+                escolha: escolha,
+                correta: correta,
+                resolucao: d.querySelector('.resolucao').innerHTML,
+                acertou: acertou
+            });
+        });
+
+        const totalAcertos = acertos;
+        const percentual = Math.round((acertos/total)*100);
+
+        // Preenche selects originais (para submissão opcional)
+        perguntaDivs.forEach((d,i) => {
+            const sel = d.querySelector('select');
+            const resposta = respostasDoUsuario[i];
+            if (!resposta) return;
+            // Procura uma option que case após normalização e usa o valor exato dela
+            const opt = Array.from(sel.options).find(o => normalize(o.value) === normalize(resposta));
+            if (opt) sel.value = opt.value;
+            else sel.value = resposta; // fallback
+        });
+
+        // Atualiza e mostra o banner de resumo no topo (não modal)
+        summaryBanner.style.display = '';
+        summaryBanner.innerHTML = `
+            <div style="font-size:28px; font-weight:800; margin-bottom:6px;">Parabéns! 🎉</div>
+            Resultado: <span style="color:#5CFF76; margin-left:8px; font-size:22px">${totalAcertos}/${total}</span>
+            <div style="margin-top:8px; font-size:16px;">${percentual}% de acertos</div>
+            <div style="height:14px;background:rgba(224,224,224,0.08);border-radius:10px;overflow:hidden;margin-top:10px;">
+                <div style="width:${percentual}%;height:100%;background:${percentual>=70? '#5CFF76':'#f44336'}"></div>
+            </div>
+        `;
+
+        // Esconde o painel de pergunta/alternativas e botões
+        try{ viewer.style.display = 'none'; }catch(e){}
+        try{ debugToggle.style.display = 'none'; }catch(e){}
+        try{ debugContainer.style.display = 'none'; }catch(e){}
+        try{ const formBtn = quizForm.querySelector('button[type="submit"]'); if (formBtn) formBtn.style.display = 'none'; }catch(e){}
+
+        // adiciona animação no banner (pulso)
+        summaryBanner.style.transition = 'transform 600ms ease, opacity 600ms ease, box-shadow 400ms ease';
+        summaryBanner.style.transform = 'translateY(-10px) scale(0.98)';
+        summaryBanner.style.opacity = '0';
+        summaryBanner.style.boxShadow = '0 0 0 rgba(0,0,0,0)';
+        setTimeout(() => {
+            summaryBanner.style.transform = 'translateY(0) scale(1)';
+            summaryBanner.style.opacity = '1';
+            summaryBanner.style.boxShadow = '0 8px 20px rgba(0,0,0,0.08)';
+            // pulso sutil
+            summaryBanner.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.02)' },
+                { transform: 'scale(1)' }
+            ], { duration: 800, easing: 'ease', iterations: 1 });
+        }, 20);
+
+        // dispara animação de confete em tela cheia
+        (function showConfetti(){
+            const colors = ['#5CFF76','#34d95c','#ffeb3b','#2196f3','#ff9800','#e91e63'];
+            const count = 64;
+            const confRoot = document.createElement('div');
+            confRoot.style.position = 'fixed';
+            confRoot.style.left = '0';
+            confRoot.style.top = '0';
+            confRoot.style.width = '100vw';
+            confRoot.style.height = '100vh';
+            confRoot.style.pointerEvents = 'none';
+            confRoot.style.overflow = 'visible';
+            confRoot.style.zIndex = '9999';
+            confRoot.id = 'confetti-root';
+            document.body.appendChild(confRoot);
+
+            const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+            for (let i=0;i<count;i++){
+                const el = document.createElement('div');
+                const w = Math.random()*10+6;
+                const h = Math.random()*8+6;
+                el.style.position = 'absolute';
+                el.style.width = w + 'px';
+                el.style.height = h + 'px';
+                el.style.background = colors[Math.floor(Math.random()*colors.length)];
+                // start at random x across the viewport
+                el.style.left = (Math.random()*100) + 'vw';
+                // start slightly above the viewport
+                el.style.top = (-5 - Math.random()*10) + 'vh';
+                el.style.opacity = '1';
+                el.style.borderRadius = (Math.random()>0.5? '2px':'50%');
+                el.style.transform = `rotate(${Math.random()*360}deg)`;
+                el.style.willChange = 'transform, opacity';
+                confRoot.appendChild(el);
+
+                // animate: fall + sway + rotate
+                const duration = 4000 + Math.random()*4000; // aumentar duração (mais tempo)
+                const translateX = (Math.random()*80-40); // in vw relative later
+                const translateY = vh + 50 + Math.random()*200; // px
+                setTimeout(()=>{
+                    el.style.transition = `transform ${duration}ms cubic-bezier(.2,.7,.2,1), opacity ${duration}ms linear`;
+                    el.style.transform = `translate(${translateX}vw, ${translateY}px) rotate(${Math.random()*1080}deg)`;
+                    el.style.opacity = '0';
+                }, Math.random()*300);
+            }
+            // remove after animation (dar mais tempo)
+            setTimeout(()=>{ if (confRoot && confRoot.parentNode) confRoot.parentNode.removeChild(confRoot); }, 10000);
+        })();
+
+        // Renderiza detalhes abaixo do viewer
+        let resultsArea = document.getElementById('quiz-results');
+        if (!resultsArea) {
+            resultsArea = document.createElement('div');
+            resultsArea.id = 'quiz-results';
+            resultsArea.style.marginTop = '20px';
+            container.appendChild(resultsArea);
+        }
+
+        resultsArea.innerHTML = `<h4>Desempenho: ${totalAcertos}/${total} (${percentual}%)</h4><h3 style="margin-top:12px;">Aqui está toda a resolução:</h3>` + detalhes.map((d,i) => `
+                        <div class="resultado-item" style="border:1px solid #e0e0e0; padding:10px; margin-bottom:8px; border-radius:6px; opacity:0; transform:translateY(6px)">
+                                <div style="font-weight:600;">${i+1}. ${d.questao}</div>
+                                <div>Sua resposta: <span style="color:${d.acertou? 'green':'red'}">${d.escolha || '<i>Sem resposta</i>'}</span></div>
+                                <div>Resposta correta: <strong>${d.correta}</strong></div>
+                                <div style="margin-top:6px;"><strong>Resolução:</strong> ${d.resolucao}</div>
+                        </div>
+                `).join('');
+
+        // anima entrada dos itens
+        Array.from(resultsArea.querySelectorAll('.resultado-item')).forEach((el, idx) => {
+            setTimeout(()=>{
+                el.style.transition = 'opacity 420ms ease, transform 420ms ease';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 80 * idx);
+        });
+
+        // Mostra botão para enviar ao servidor
+        const enviarBtn = document.createElement('button');
+        enviarBtn.className = 'btn btn-primary';
+        enviarBtn.innerText = 'Enviar ao servidor';
+        enviarBtn.style.marginTop = '10px';
+        enviarBtn.addEventListener('click', function() {
+            Swal.fire({title:'Enviando...', allowOutsideClick:false, didOpen: ()=>Swal.showLoading()});
+            quizForm.submit();
+        });
+
+        // Remove botão anterior se existir e adiciona
+        const existing = document.getElementById('enviar-servidor-btn');
+        if (existing) existing.remove();
+        enviarBtn.id = 'enviar-servidor-btn';
+        resultsArea.appendChild(enviarBtn);
+    });
+
+    // Inicializa
+    renderQuestion(current);
+
+});
 </script>
 {% endblock %}

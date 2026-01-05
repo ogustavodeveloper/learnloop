@@ -2,7 +2,7 @@ from app.routes import redacao_bp
 from app import db
 from flask import render_template, redirect, session, jsonify, request
 
-from openai import AzureOpenAI
+from openai import AzureOpenAI, OpenAI
 import uuid
 
 import os
@@ -11,6 +11,12 @@ from app.models import Corrections, Avaliacao
 import uuid
 import json
 from datetime import datetime
+
+client = OpenAI(
+        api_key=os.environ.get("API_KEY"),
+            base_url="https://api.groq.com/openai/v1",
+            )
+
 
 # azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 # if azure_endpoint is None:
@@ -54,7 +60,7 @@ def gerarAvaliacaoPorIa():
 
         # Fazendo a chamada à API do Azure OpenAI
         chat_completion = client.chat.completions.create(
-    model="gpt-4o",  # Nome do deployment configurado no Azure
+    model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
     messages=[
         {"role": "system", "content": """
            Você é um corretor de redações do ENEM. Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 2 frases) por competência.
@@ -198,13 +204,13 @@ def redacaoGuiada():
         # Fazendo a chamada à API do Azure OpenAI, incluindo o estágio informado pelo usuário
         sistema = (
             "Você é um assistente na produção de redações para o ENEM. Irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema e o estágio informado. "
-            "Responda objetivamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos."
+            "Responda objetivamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos. E o mais importante: não use markdown (negrito etc.)"
         )
 
         user_msg = f"Tema: {tema}. Estágio declarado pelo usuário: {estagio}. Redação atual: {texto}"
 
         chat_completion = client.chat.completions.create(
-                model="gpt-4o-mini",  # Nome do deployment configurado no Azure
+                model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
                 messages=[
                     {"role": "system", "content": sistema},
                     {"role": "user", "content": user_msg}
@@ -250,7 +256,7 @@ def recorrigir_competencia():
         prompt = f"Avalie apenas a {prompts[competencia-1]} do ENEM para o texto abaixo, pois o estudante achou algum erro. Dê uma nota de 0 a 200 e um comentário breve (máx. 2 frases). Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
 
         chat_completion = client.chat.completions.create(
-            model="gpt-4o",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
                 {"role": "user", "content": prompt}
@@ -286,7 +292,7 @@ def recorrigir_competencia():
             f"Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
         )
         chat_final = client.chat.completions.create(
-            model="gpt-4o",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
                 {"role": "user", "content": prompt_final}

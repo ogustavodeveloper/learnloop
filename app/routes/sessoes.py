@@ -7,7 +7,7 @@ import uuid
 import markdown
 import os
 import datetime
-from openai import AzureOpenAI
+from openai import AzureOpenAI, OpenAI
 from azure.storage.blob import BlobServiceClient
 import json 
 
@@ -17,6 +17,12 @@ import json
     # api_version="2024-07-01-preview",
     # azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
 # )
+
+client = OpenAI(
+        api_key=os.environ.get("API_KEY"),
+            base_url="https://api.groq.com/openai/v1",
+            )
+
 
 def upload_to_azure_blob(container_name, file_path, blob_name):
     try:
@@ -186,7 +192,7 @@ def getResumo():
 
         # Usando o Azure OpenAI para gerar o resumo
         chat_completion = client.chat.completions.create(
-            model="gpt-4o",  # model = "deployment_name"
+            model="openai/gpt-oss-120b",  # model = "deployment_name"
             messages=[
                 {"role": "system", "content": "Você é uma Inteligência Artificial para estudos. Com base nas anotações que o usuário enviar, você deverá criar um resumo bem estruturado do que ele aprendeu."},
                 user_message
@@ -211,7 +217,7 @@ def gerarQuiz():
         assunto = request.form.get("assunto")
 
         chat_completion = client.chat.completions.create(
-            model="gpt-4o",  # Nome do deployment configurado no Azure
+            model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
             messages=[
                 {"role": "system", "content": """
                 Você é um gerador de simulado para ENEM.
