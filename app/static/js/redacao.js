@@ -3,10 +3,11 @@ function redacao() {
   var tema = document.getElementById("tema_custom");
   var conteudo = document.getElementById("conteudo");
 
-  if (titulo && titulo.value.length < 5) {
+  // Título é opcional: só valida se o usuário preencher algum valor
+  if (titulo && titulo.value.trim().length > 0 && titulo.value.trim().length < 5) {
     Swal.fire({
       title: "Erro",
-      text: "O título da redação deve ter no mínimo 5 caracteres.",
+      text: "O título da redação, se fornecido, deve ter no mínimo 5 caracteres.",
       icon: "error"
     });
     return;
@@ -43,7 +44,18 @@ function redacao() {
     tema: tema.value
   }).then((r) => {
     if (r.data.msg === "success") {
-      window.location.href = '/correcao/' + r.data.response;
+      try {
+        // Fecha o modal de carregamento antes de mostrar os confetes
+        try { Swal.close(); } catch(e){/* ignore */}
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 200,
+            spread: 160,
+            origin: { y: 0.6 }
+          });
+        }
+      } catch (e) { console.warn('Confetti failed', e); }
+      setTimeout(function() { window.location.href = '/correcao/' + r.data.response; }, 1400);
     } else {
       Swal.fire({
         title: "Erro ao corrigir sua redação",

@@ -7,9 +7,25 @@
         .competencia strong { display: block; margin-bottom: 0.5em; }
         .nota, .analise { margin-left: 1em; }
         .descricao { font-style: italic; color: #555; }
-        h3{
-            line-height: 0.9em;
-        }
+        h3{ line-height: 0.9em; }
+
+        /* Summary styles aligned with base.css variables */
+                .summary { display:flex; gap:1.2em; align-items:center; margin:1em 0; padding:0.9em; border-radius:8px; background: var(--corFundo); color: var(--corFonte); }
+                .final { display:flex; flex-direction:column; align-items:center; gap:0.25em; }
+                .final-note { font-size:2.2em; font-weight:800; color: var(--corFonteBtn); background: var(--corDestaque); padding:0.5em 0.8em; border-radius:10px; min-width:88px; text-align:center; box-shadow: 0 6px 18px rgba(0,0,0,0.45); font-family: var(--fontTitle); }
+                .final-text { color: var(--corFonte); font-size:0.95em; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; }
+
+                /* Responsive: stack summary elements on small screens - bars go below the final note */
+                @media screen and (max-width: 720px) {
+                    .summary { flex-direction: column; align-items: stretch; }
+                    .final { align-items: center; margin-bottom: 0.6em; }
+                    .competence-bars { width: 100%; }
+                }
+        .competence-bars { flex:1; }
+        .comp { margin-bottom:0.6em; }
+        .comp-label { font-size:0.9em; color: var(--corFonte); margin-bottom:0.25em; font-weight:600; }
+        .bar { height:12px; background:#111; border-radius:8px; overflow:hidden; border: 1px solid rgba(255,255,255,0.04); }
+        .bar-fill { height:100%; background: linear-gradient(90deg, var(--corDestaque) 0%, rgba(92,255,118,0.9) 60%, rgba(92,255,118,0.05) 85%, rgba(92,255,118,0) 100%); transition: width .6s ease; }
     </style>
 {% endblock %}
 
@@ -17,12 +33,46 @@
 <div class="container">
     <h3>Correção Detalhada</h3>
 
+    {% set competencias = [correcao.cp1, correcao.cp2, correcao.cp3, correcao.cp4, correcao.cp5] %}
+    {% set final_nota, final_analise = correcao.final.split('\\') %}
+
+    <div class="summary">
+        <div class="final">
+            <div class="final-text">Nota Final</div>
+            <div id="final-note" class="final-note" data-final="{{ final_nota }}">1</div>
+        </div>
+
+        <div class="competence-bars">
+            {% for i in range(competencias|length) %}
+                {% if competencias[i] %}
+                    {% set nota_i, analise_i = competencias[i].split('\\') %}
+                    {% set nota_clean = nota_i|replace(',','.')|trim %}
+                    {% set nota_float = nota_clean|float %}
+                    {% if nota_float <= 10 %}
+                        {% set percent = ((nota_float / 10) * 100)|round(0) %}
+                    {% elif nota_float <= 100 %}
+                        {% set percent = nota_float|round(0) %}
+                    {% elif nota_float <= 200 %}
+                        {% set percent = ((nota_float / 200) * 100)|round(0) %}
+                    {% else %}
+                        {% set percent = 100 %}
+                    {% endif %}
+                    {% if percent < 0 %}{% set percent = 0 %}{% endif %}
+                    {% if percent > 100 %}{% set percent = 100 %}{% endif %}
+                    <div class="comp">
+                        <div class="comp-label">Competência {{ i+1 }} — {{ nota_clean }}</div>
+                        <div class="bar"><div class="bar-fill" style="width:0%;" data-percent="{{ percent }}"></div></div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
     {% if error %}
         <p>{{ error }}</p>
     {% else %}
         <h3>Tema: {{ correcao.tema }}</h3>
-        <p><strong>Texto:</strong> {{ correcao.texto }}</p>
-        
+
         <h4>Análise de Competências</h4>
 
         {% set competencias = [correcao.cp1, correcao.cp2, correcao.cp3, correcao.cp4, correcao.cp5] %}
@@ -44,11 +94,15 @@
                 </div>
             {% endif %}
         {% endfor %}
-        
+
         <h4>Nota Final</h4>
         {% set final_nota, final_analise = correcao.final.split('\\') %}
         <p><strong>Nota Final:</strong> <span id="nota-final">{{ final_nota }}</span></p>
         <p><strong>Análise Final:</strong> <span id="analise-final">{{ final_analise }}</span></p>
+
+        <hr>
+        <h4>Redação</h4>
+        <p><strong>Texto:</strong> {{ correcao.texto }}</p>
     {% endif %}
 
     <br> <br>
@@ -152,5 +206,39 @@ function avaliarRedacao() {
         }
     })
 }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate bar fills from 0% to data-percent
+    const barFills = document.querySelectorAll('.bar-fill[data-percent]');
+    setTimeout(() => {
+        barFills.forEach(b => {
+            const p = Number(b.dataset.percent) || 0;
+            b.style.width = p + '%';
+        });
+    }, 120);
+
+    // Animate final note counting from 1 to target
+    const finalEl = document.getElementById('final-note');
+    if (finalEl) {
+        const raw = finalEl.dataset.final || '0';
+        const target = parseFloat(String(raw).replace(',','.')) || 0;
+        const start = 1;
+        const duration = 1200;
+        const decimals = String(raw).indexOf('.') !== -1 || String(raw).indexOf(',') !== -1;
+        const startTime = performance.now();
+        function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+        function step(now){
+            const elapsed = now - startTime;
+            let t = Math.min(elapsed / duration, 1);
+            t = easeOutCubic(t);
+            const current = start + (target - start) * t;
+            finalEl.textContent = decimals ? current.toFixed(1) : Math.round(current);
+            if (elapsed < duration) requestAnimationFrame(step);
+        }
+        finalEl.textContent = start;
+        requestAnimationFrame(step);
+    }
+});
 </script>
 {% endblock %}
