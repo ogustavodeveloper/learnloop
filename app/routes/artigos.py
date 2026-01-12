@@ -1,6 +1,7 @@
 # Importação dos módulos e classes necessárias
 from flask import render_template, redirect, session, jsonify, request, make_response, send_file
 from app.routes import artigos_bp
+from app.functions.serializers import models_to_list
 from app.models import Artigo, User, buscas, Corrections, SessionStudie, Simulado, Revisoes
 from app import db
 from passlib.hash import bcrypt_sha256
@@ -165,7 +166,7 @@ def buscar_artigo_categoria(categoria):
     artigos = Artigo.query.filter_by(categoria=categoria).all()
 
     if artigos:
-        return jsonify(artigos)
+        return jsonify(models_to_list(artigos))
     else:
         response = make_response(jsonify({"message": "Nenhum artigo encontrado para esta categoria"}), 404)
         return response

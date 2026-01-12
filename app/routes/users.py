@@ -5,6 +5,7 @@ from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
 from app.routes import users_bp
+from app.functions.serializers import model_to_dict
 
 # Função de criptografia de senha
 def crip(dado):
@@ -51,7 +52,9 @@ def logout():
 def user():
     user_id = session.get("user")
     user = User.query.filter_by(id=user_id).first()
-    return jsonify({"user": user})
+    if not user:
+        return jsonify({"user": None})
+    return jsonify({"user": model_to_dict(user)})
 
 # Rota para excluir o usuário
 @users_bp.route("/api/delete-user", methods=["POST"])
@@ -73,9 +76,31 @@ def update_user():
     data = request.get_json()
     user_id = session.get("user")
     user = User.query.filter_by(id=user_id).first()
-    user.username = data["username"]
-    user.password = data["password"]
+    if not user:
+        return jsonify({"msg": "Usuário não encontrado"}), 404
+
+    username = data.get("username")
+    email = data.get("email")
+    password = data.get("password")
+
+    if username:
+        user.username = username
+    if email:
+        user.email = email
+    if password:
+        user.password = crip(password)
+
     db.session.commit()
     return jsonify({"msg": "usuário atualizado com sucesso"})
+
+
+# Rota para renderizar a página de configurações
+@users_bp.route('/settings')
+def settings_page():
+    user_id = session.get('user')
+    user = User.query.filter_by(id=user_id).first()
+    if not user:
+        return redirect('/login')
+    return render_template('settings.html', user=model_to_dict(user))
 
 

@@ -1,9 +1,96 @@
 {% extends 'base.html' %}
 
 {% block styled %}
+<style>
+	.settings-card{
+		max-width: 980px;
+		margin: 2.5rem auto;
+		background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.25));
+		border-radius: 12px;
+		padding: 1.5rem;
+		box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+		border: 1px solid rgba(255,255,255,0.04);
+	}
 
+	.settings-header{ display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1rem }
+	.settings-header h3{ margin:0; font-size:1.4rem }
+	.settings-sub{ color: #bfbfbf; font-size:0.9rem }
+
+	.form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:1rem }
+	.field{ display:flex; flex-direction:column; gap:0.4rem }
+	label{ font-weight:700; font-size:0.85rem }
+	input[type="text"], input[type="email"], input[type="password"]{
+		padding: 0.75rem 0.9rem; border-radius:8px; border:1px solid rgba(0,0,0,0.1); background: #fff; color:#000;
+		box-shadow: inset 0 1px 0 rgba(0,0,0,0.03);
+	}
+
+	.actions{ display:flex; gap:1rem; margin-top:1rem }
+	.btn{ padding:0.7rem 1rem; border-radius:8px; border:none; cursor:pointer; font-weight:700 }
+	.btn-primary{ background: var(--corDestaque); color: var(--corFonteBtn); }
+	.btn-secondary{ background: transparent; color: var(--corFonte); border:1px solid rgba(255,255,255,0.06) }
+	.btn-danger{ background:#ff4d4d; color:#fff }
+
+	.note{ font-size:0.9rem; color:#9b9b9b; margin-top:0.4rem }
+
+	@media (max-width:800px){ .form-grid{ grid-template-columns: 1fr } .settings-card{ margin:1rem } }
+</style>
 {% endblock %}
 
 {% block content %}
+
+<div class="settings-card">
+	<div class="settings-header">
+		<div>
+			<h3>Configurações da conta</h3>
+			<div class="settings-sub">Atualize seu nome, e-mail ou senha. As alterações são aplicadas imediatamente.</div>
+		</div>
+	</div>
+
+	<form id="settings-form">
+		<div class="form-grid">
+			<div class="field">
+				<label for="username">Nome de usuário</label>
+				<input type="text" id="username" name="username" placeholder="Seu nome de usuário" autocomplete="username">
+			</div>
+
+			<div class="field">
+				<label for="email">E-mail</label>
+				<input type="email" id="email" name="email" placeholder="seu@email.com" autocomplete="email">
+			</div>
+
+			<div class="field">
+				<label for="password">Nova senha</label>
+				<input type="password" id="password" name="password" placeholder="Deixe em branco para manter" autocomplete="new-password">
+				<div class="note">Mínimo recomendado: 8 caracteres.</div>
+			</div>
+
+			<div class="field">
+				<label for="password-confirm">Confirmar senha</label>
+				<input type="password" id="password-confirm" name="password-confirm" placeholder="Confirme a nova senha" autocomplete="new-password">
+			</div>
+		</div>
+
+		<div class="actions">
+			<button class="btn btn-primary" type="submit" id="save-btn">Salvar alterações</button>
+			<button class="btn btn-secondary" type="button" onclick="location.reload()">Cancelar</button>
+		</div>
+	</form>
+
+	<hr style="margin:1.25rem 0; border-color: rgba(255,255,255,0.04)">
+
+	<div>
+		<h4 style="margin:0 0 0.5rem 0">Excluir conta</h4>
+		<p class="note">A exclusão é permanente. Todos os seus dados serão removidos.</p>
+		<div style="margin-top:0.75rem">
+			<button id="delete-account" class="btn btn-danger">Excluir minha conta</button>
+		</div>
+	</div>
+
+</div>
+
+<script>
+	window.CURRENT_USER = {{ user|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 
 {% endblock %}

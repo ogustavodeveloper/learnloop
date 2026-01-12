@@ -153,13 +153,16 @@
           <span class="nav-text">Corrigir Redação</span>
         </a>
 
+        {% if session['user'] %}
+          <a href="/settings" title="Configurações">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="nav-text">Configurações</span>
+          </a>
+        {% endif %}
+
         
      
         {% if session['user'] %}
-          <a onclick="excluirConta()" title="Excluir conta">
-            <span class="material-symbols-outlined">person_remove</span>
-            <span class="nav-text">Excluir conta</span>
-          </a>
           <a href="/api/logout" title="Sair">
             <span class="material-symbols-outlined">logout</span>
             <span class="nav-text">Sair</span>
@@ -222,11 +225,13 @@ info
         </div>
         {% if session['user'] %}
           <div>
-            <a onclick="excluirConta()" title="Excluir conta">
-              <span class="material-symbols-outlined">person_remove</span>
-              <span class="nav-text">Excluir conta</span>
+            <a href="/settings" title="Configurações">
+              <span class="material-symbols-outlined">settings</span>
+              <span class="nav-text">Configurações</span>
             </a>
           </div>
+        {% endif %}
+        {% if session['user'] %}
           <div>
             <a href="/api/logout" title="Sair">
               <span class="material-symbols-outlined">logout</span>
