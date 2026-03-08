@@ -1,32 +1,55 @@
 from app.routes import redacao_bp
 from app import db
 from flask import render_template, redirect, session, jsonify, request
-
-from openai import AzureOpenAI, OpenAI
-import uuid
-
-import os
-
-from app.models import Corrections, Avaliacao 
+from openai import OpenAI
 import uuid
 import json
+import os
 from datetime import datetime
 
+from app.models import Corrections, Avaliacao
+
 client = OpenAI(
-        api_key=os.environ.get("API_KEY"),
-            base_url="https://api.groq.com/openai/v1",
-            )
+    api_key=os.environ.get("API_KEY"),
+    base_url="https://api.groq.com/openai/v1",
+)
 
 
-# azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-# if azure_endpoint is None:
-  #  raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is not set.")
+# Helper functions
+def clean_json_response(content):
+    """Remove markdown artifacts from JSON response"""
+    return content.replace('\n', '').replace('json', '').replace('`', '')
 
-#client = AzureOpenAI(
-  #  api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-   # api_version="2024-07-01-preview",
-  #  azure_endpoint=azure_endpoint
-#)
+
+def extract_competency_score(response_data, competency_key):
+    """Extract and format competency score from response data"""
+    data = response_data.get(competency_key, {})
+    nota = data.get('nota', 0)
+    analise = data.get('analise', '')
+    return f"{nota}\\{analise}"
+
+
+def extract_scores_from_corrections(correcoes):
+    """Extract scores and dates from corrections"""
+    notas = []
+    datas = []
+    for c in correcoes:
+        try:
+            nota = int(str(c.final).split("\\")[0])
+            notas.append(nota)
+            datas.append(c.data)
+        except Exception:
+            continue
+    return notas, datas
+
+
+def parse_ai_response(content):
+    """Parse and validate AI response JSON"""
+    try:
+        cleaned = clean_json_response(content)
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        return None
 
 @redacao_bp.route("/avaliar-redacao")
 def redacionPage():
@@ -51,19 +74,13 @@ def gerarAvaliacaoPorIa():
         conteudo = data.get("content")
         titulo = data.get("title")
 
-        # Verifica se todos os campos necessários foram preenchidos
         if not all([nivel, tema, conteudo]):
             return jsonify({"msg": "error", "details": "Dados insuficientes para avaliação"}), 400
         
         if len(conteudo) < 60:
             return jsonify({"msg": "error", "details": "Sua redação precisa ser maior!"})
 
-        # Fazendo a chamada à API do Azure OpenAI
-        chat_completion = client.chat.completions.create(
-    model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
-    messages=[
-        {"role": "system", "content": """
-           Você é um corretor de redações do ENEM. Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 2 frases) por competência.
+        system_prompt = """Você é um corretor de redações do ENEM. Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 2 frases) por competência.
 
 Retorne o resultado em JSON com este formato:
 {
@@ -74,49 +91,38 @@ Retorne o resultado em JSON com este formato:
   "competencia5": {"nota": int, "analise": str},
   "notaFinal": {"nota": int, "analise": str}
 }
-Seja direto e objetivo.                
-        """},
-        {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
-    ],
-    temperature=0.1,
-    top_p=1.0
-)
+Seja direto e objetivo."""
+
+        chat_completion = client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
+            ],
+            temperature=0.1,
+            top_p=1.0
+        )
 
         content = chat_completion.choices[0].message.content
-        if content is None:
+        if not content:
             return jsonify({"msg": "error", "details": "A resposta da IA está vazia."}), 500
-        assistant_response = content.replace('\n', '').replace('json', '').replace('`','')
-        print(assistant_response)
 
-
-
-        # Converte o JSON de resposta em um dicionário de forma segura
-        try:
-            response_data = json.loads(assistant_response)
-            print(response_data)
-        except json.JSONDecodeError:
+        response_data = parse_ai_response(content)
+        if not response_data:
             return jsonify({"msg": "error", "details": "Erro ao processar a resposta da IA"}), 500
 
-        # Formata cada competência como "nota\analise"
-        cp1 = f"{response_data.get('competencia1', {}).get('nota', 0)}\\{response_data.get('competencia1', {}).get('analise', '')}"
-        cp2 = f"{response_data.get('competencia2', {}).get('nota', 0)}\\{response_data.get('competencia2', {}).get('analise', '')}"
-        cp3 = f"{response_data.get('competencia3', {}).get('nota', 0)}\\{response_data.get('competencia3', {}).get('analise', '')}"
-        cp4 = f"{response_data.get('competencia4', {}).get('nota', 0)}\\{response_data.get('competencia4', {}).get('analise', '')}"
-        cp5 = f"{response_data.get('competencia5', {}).get('nota', 0)}\\{response_data.get('competencia5', {}).get('analise', '')}"
-        final = f"{response_data.get('notaFinal', {}).get('nota', 0)}\\{response_data.get('notaFinal', {}).get('analise', '')}"
+        corrections_data = {
+            f"cp{i}": extract_competency_score(response_data, f"competencia{i}")
+            for i in range(1, 6)
+        }
+        corrections_data["final"] = extract_competency_score(response_data, "notaFinal")
 
-        # Cria uma nova entrada de correção no banco de dados
         new_correction = Corrections(
             id=str(uuid.uuid4()),
             user=user,
             tema=tema,
             texto=conteudo,
-            cp1=cp1,
-            cp2=cp2,
-            cp3=cp3,
-            cp4=cp4,
-            cp5=cp5,
-            final=final,
+            **corrections_data,
             data=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         
@@ -129,34 +135,22 @@ Seja direto e objetivo.
         })
 
     except Exception as e:
-        # Log da exceção para depuração
         return jsonify({"msg": "error", "details": str(e)}), 500
 
 @redacao_bp.route('/redacao')
 def redacaoPage():
     try:
         correcoes = Corrections.query.filter_by(user=session['user']).all()
-
-        # Estatísticas
-        total = len(correcoes)
-        datas = []
-        notas = []
-        for c in correcoes:
-            try:
-                nota = int(str(c.final).split("\\")[0])
-                notas.append(nota)
-                datas.append(c.data)
-            except Exception:
-                continue
+        notas, datas = extract_scores_from_corrections(correcoes)
 
         maior_nota = max(notas) if notas else 0
         menor_nota = min(notas) if notas else 0
-        media_nota = round(sum(notas)/len(notas), 2) if notas else 0
+        media_nota = round(sum(notas) / len(notas), 2) if notas else 0
 
         return render_template(
             'redacoes.html',
             redacoes=correcoes,
-            total_redacoes=total,
+            total_redacoes=len(correcoes),
             maior_nota=maior_nota,
             menor_nota=menor_nota,
             media_nota=media_nota,
@@ -191,46 +185,36 @@ def redacaoGuiada():
             return redirect('/login')
         
         data = request.get_json()
-
         texto = data.get("texto")
         tema = data.get("tema")
         estagio = data.get("estagio")
-        print(estagio)
 
-        # Verifica se todos os campos necessários foram preenchidos
         if not all([texto, tema, estagio]):
             return jsonify({"msg": "error", "details": "Dados insuficientes para avaliação"}), 400
 
-        # Fazendo a chamada à API do Azure OpenAI, incluindo o estágio informado pelo usuário
         sistema = (
             "Você é um assistente na produção de redações para o ENEM. Irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema e o estágio informado. "
             "Responda objetivamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos. E o mais importante: não use markdown (negrito etc.)"
         )
 
-        user_msg = f"Tema: {tema}. Estágio declarado pelo usuário: {estagio}. Redação atual: {texto}"
-
         chat_completion = client.chat.completions.create(
-                model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
-                messages=[
-                    {"role": "system", "content": sistema},
-                    {"role": "user", "content": user_msg}
-                ]
-            )
+            model="openai/gpt-oss-120b",
+            messages=[
+                {"role": "system", "content": sistema},
+                {"role": "user", "content": f"Tema: {tema}. Estágio declarado pelo usuário: {estagio}. Redação atual: {texto}"}
+            ]
+        )
 
         assistant_response = chat_completion.choices[0].message.content
-        print(assistant_response)
         return jsonify({
             "msg": "success",
             "guia": assistant_response
         })
     except Exception as e:
-        print(str(e))
         return jsonify({
             "msg": "error",
             "error": str(e)
         })
-
-from flask import request, jsonify
 
 @redacao_bp.route("/api/recorrigir-competencia", methods=["POST"])
 def recorrigir_competencia():
@@ -243,71 +227,65 @@ def recorrigir_competencia():
         if not correcao:
             return jsonify({"msg": "error", "details": "Correção não encontrada."}), 404
 
-        if competencia not in [1,2,3,4,5]:
+        if competencia not in [1, 2, 3, 4, 5]:
             return jsonify({"msg": "error", "details": "Competência inválida."}), 400
 
-        prompts = [
-            "Competência 1: Demonstre o domínio da norma culta da língua escrita.",
-            "Competência 2: Compreenda a proposta de redação e aplique conceitos de várias áreas para desenvolver o tema.",
-            "Competência 3: Selecione, relacione, organize e interprete informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
-            "Competência 4: Demonstre conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
-            "Competência 5: Elabore proposta de intervenção para o problema abordado, respeitando os direitos humanos."
-        ]
-        prompt = f"Avalie apenas a {prompts[competencia-1]} do ENEM para o texto abaixo, pois o estudante achou algum erro. Dê uma nota de 0 a 200 e um comentário breve (máx. 2 frases). Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
+        competency_prompts = {
+            1: "Competência 1: Demonstre o domínio da norma culta da língua escrita.",
+            2: "Competência 2: Compreenda a proposta de redação e aplique conceitos de várias áreas para desenvolver o tema.",
+            3: "Competência 3: Selecione, relacione, organize e interprete informações, fatos, opiniões e argumentos em defesa de um ponto de vista.",
+            4: "Competência 4: Demonstre conhecimento dos mecanismos linguísticos necessários para a construção da argumentação.",
+            5: "Competência 5: Elabore proposta de intervenção para o problema abordado, respeitando os direitos humanos."
+        }
+
+        system_prompt = "Você é um corretor de redações do ENEM. Seja direto e objetivo."
+        user_prompt = f"Avalie apenas a {competency_prompts[competencia]} do ENEM para o texto abaixo, pois o estudante achou algum erro. Dê uma nota de 0 a 200 e um comentário breve (máx. 2 frases). Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
 
         chat_completion = client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=[
-                {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
             ],
             temperature=0.1,
             top_p=1.0
         )
-        content = chat_completion.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
-        import json
-        try:
-            result = json.loads(content)
-            nota = str(result.get("nota", 0))
-            analise = result.get("analise", "")
-        except Exception:
+
+        result = parse_ai_response(chat_completion.choices[0].message.content)
+        if not result:
             return jsonify({"msg": "error", "details": "Erro ao processar resposta da IA."}), 500
 
-        # Atualiza a competência recorrigida no banco
-        campo = f"cp{competencia}"
-        setattr(correcao, campo, f"{nota}\\{analise}")
+        nota = str(result.get("nota", 0))
+        analise = result.get("analise", "")
+        setattr(correcao, f"cp{competencia}", f"{nota}\\{analise}")
 
-        # Recalcula a nota final e pede nova análise final para a IA
+        # Recalculate final score
         notas = []
         for i in range(1, 6):
             valor = getattr(correcao, f"cp{i}")
             nota_comp = int(valor.split("\\")[0]) if valor else 0
             notas.append(nota_comp)
-        nova_nota_final = sum(notas)
 
-        # Gera nova análise final com a IA
+        # Generate new final analysis
         prompt_final = (
             f"Estas são as notas das competências do ENEM para a redação abaixo: "
             f"{notas}. Some as notas para dar a nota final (máx. 1000) e faça uma análise geral em até 2 frases. "
             f"Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
         )
+
         chat_final = client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=[
-                {"role": "system", "content": "Você é um corretor de redações do ENEM. Seja direto e objetivo."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt_final}
             ],
             temperature=0.1,
             top_p=1.0
         )
-        content_final = chat_final.choices[0].message.content.replace('\n', '').replace('json', '').replace('`','')
-        try:
-            result_final = json.loads(content_final)
-            nota_final = str(result_final.get("nota", nova_nota_final))
-            analise_final = result_final.get("analise", "")
-        except Exception:
-            nota_final = str(nova_nota_final)
-            analise_final = "Análise final não disponível."
+
+        result_final = parse_ai_response(chat_final.choices[0].message.content)
+        nota_final = str(result_final.get("nota", sum(notas))) if result_final else str(sum(notas))
+        analise_final = result_final.get("analise", "Análise final não disponível.") if result_final else "Análise final não disponível."
 
         correcao.final = f"{nota_final}\\{analise_final}"
         db.session.commit()

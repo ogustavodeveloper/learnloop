@@ -1,9 +1,23 @@
-from flask import render_template, request, session, jsonify, redirect, make_response, Response
+from flask import render_template, request, session, jsonify, make_response, Response
 from app import db
-from app.models import User, Artigo, Redacao, buscas, Corrections
+from app.models import User, Artigo, buscas, Corrections, Revisoes, Simulado, SessionStudie
 from app.routes import geral_bp
 from datetime import datetime
-import markdown
+
+@geral_bp.route("/")
+def homepage():
+    
+    try:
+        user = session['user']
+        correcoes_count = Corrections.query.filter_by(user=user).count()
+        sessoes_count = SessionStudie.query.filter_by(user=user).count()
+        quiz_count = Simulado.query.filter_by(user=user).count()
+        revisoes_pendentes = Revisoes.query.filter_by(user=user, data=datetime.now().date()).with_entities(Revisoes.assunto, Revisoes.id_session).all()
+        revisoes_pendentes = [{"assunto": r.assunto, "session_id": r.id_session} for r in revisoes_pendentes]
+
+        return render_template("index.html", user=user, correcoes=str(correcoes_count), sessoes=str(sessoes_count), quiz=quiz_count, revisoes=revisoes_pendentes)
+    except Exception:
+        return render_template("login.html")
 
 # Rota para termos de uso
 @geral_bp.route("/termos-de-uso")

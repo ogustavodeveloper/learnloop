@@ -5,8 +5,5 @@ users_bp = Blueprint('users', __name__)
 sessoes_bp = Blueprint('sessoes', __name__)
 redacao_bp = Blueprint('redacao', __name__)
 geral_bp = Blueprint('geral', __name__)
-estudaplay_bp = Blueprint('estudaplay', __name__)
-revisoes_bp = Blueprint('revisoes', __name__)
-repertorio_bp = Blueprint('repertorio', __name__)
 
-from app.routes import artigos, sessoes, users, redacao, geral, estudaplay, revisoes, repertorio
+from app.routes import artigos, sessoes, users, redacao, geral

@@ -1,58 +1,16 @@
 # Importação dos módulos e classes necessárias
-from flask import render_template, redirect, session, jsonify, request, make_response, send_file
+from flask import render_template, redirect, session, jsonify, request, send_file
 from app.routes import artigos_bp
-from app.functions.serializers import models_to_list
-from app.models import Artigo, User, buscas, Corrections, SessionStudie, Simulado, Revisoes
+from app.models import Artigo, User, buscas
 from app import db
-from passlib.hash import bcrypt_sha256
 import uuid
 import markdown
 import os
-from docx import Document
-from sqlalchemy import desc
-import google.generativeai as genai
-from openai import AzureOpenAI
 from dotenv import load_dotenv
-import datetime
+from passlib.hash import bcrypt_sha256
+from datetime import datetime
 
 load_dotenv()
-
-# client = AzureOpenAI(
-    # api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
-  #   api_version="2024-07-01-preview",
-   #  azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-# )
-
-
-@artigos_bp.route("/")
-def homepage():
-    
-    try:
-        user = session['user']
-        correcoes = Corrections.query.filter_by(user=user).all()
-        sessoes = SessionStudie.query.filter_by(user=user).all()
-        quiz = Simulado.query.filter_by(user=user).all()
-        print(len(sessoes))
-        revisoes = Revisoes.query.filter_by(user=user).all()
-        revisoes_pendentes = []
-        for revisao in revisoes:
-            print(revisao.data)
-            print(datetime.now().date())
-            if revisao.data == datetime.now().date():
-            
-             
-                revisoes_pendentes.append({
-                            "assunto": revisao.assunto,
-                            "session_id": revisao.id_session
-                        })
-
-        print(revisoes_pendentes)
-
-        return render_template("index.html", user=user, correcoes=str(len(correcoes)), sessoes=str(len(sessoes)), quiz=len(quiz), revisoes=revisoes_pendentes)
-    except Exception:
-        return render_template("login.html")
-
-from datetime import datetime
 
 @artigos_bp.route("/create-artigo", methods=["POST", "GET"])
 def criarArtigo():
@@ -67,7 +25,7 @@ def criarArtigo():
 
         try:
             user = session["user"]
-        except:
+        except KeyError:
             user = "visit"
 
         if user == "visit":
@@ -94,7 +52,7 @@ def criarArtigo():
 
     try:
         user = session['user']
-    except:
+    except KeyError:
         return redirect("/login")
 
     return render_template("create-artigo.html")
@@ -117,32 +75,11 @@ def deleteArtigo(id):
     else:
         return "Artigo Não Existe"
 
-@artigos_bp.route("/delete-artigo/<id>/admin", methods=["GET"])
-def deleteArtigoAdm(id):
-    artigo = Artigo.query.filter_by(id=id).first()
-    db.session.delete(artigo)
-    db.session.commit()
-    return 'ok'
-
-@artigos_bp.route("/add-like/<id>")
-def likePost(id):
-    artigo = Artigo.query.filter_by(id=id).first()
-    artigo.likes = artigo.likes + 1
-    db.session.commit()
-    return redirect("/artigo/"+id)
-
-@artigos_bp.route("/delete-like/<id>")
-def deslikePost(id):
-    artigo = Artigo.query.filter_by(id=id).first()
-    artigo.likes = artigo.likes - 1
-    db.session.commit()
-    return redirect("/artigo/"+id)
-
 @artigos_bp.route("/artigo/<id>")
 def artigoPage(id):
     try:
         user = session['user']
-    except:
+    except KeyError:
         user = 'visit'
 
     artigo = Artigo.query.filter_by(id=id).first()
@@ -160,16 +97,6 @@ def pageSearch():
     categorias = Artigo.query.with_entities(Artigo.categoria).distinct().all()
     nomesCategorias = [categoria[0] for categoria in categorias]
     return render_template("search.html", categorys=nomesCategorias)
-
-@artigos_bp.route("/search/category/<categoria>")
-def buscar_artigo_categoria(categoria):
-    artigos = Artigo.query.filter_by(categoria=categoria).all()
-
-    if artigos:
-        return jsonify(models_to_list(artigos))
-    else:
-        response = make_response(jsonify({"message": "Nenhum artigo encontrado para esta categoria"}), 404)
-        return response
 
 def search_word_files(directory, search_terms):
     results = set()
@@ -225,18 +152,10 @@ def download_file(filename):
     else:
         return "Arquivo não encontrado", 404
 
-@artigos_bp.route("/feed/projetos-feciba")
-def feed_projetos_feciba():
-    directory_path = "app/static/feciba"
-    projetos_feciba = [{"file_name": filename} for filename in os.listdir(directory_path) if filename.endswith(".docx")]
-    return render_template("feed.html", artigos=None, feciba_results=projetos_feciba)
-
 @artigos_bp.route("/feed/artigos")
 def feed_artigos():
     artigos = Artigo.query.all()
     return render_template("feed.html", artigos=artigos, feciba_results=None)
-
-
 
 @artigos_bp.route("/api/gerar-artigo-ai", methods=["POST"])
 def gerarArtigoPorIa():

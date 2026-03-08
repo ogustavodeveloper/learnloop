@@ -1,22 +1,14 @@
 # Importação dos módulos e classes necessárias
-from flask import render_template, redirect, session, jsonify, request, send_file
+from flask import render_template, redirect, session, jsonify, request
 from app.routes import sessoes_bp
 from app.models import SessionStudie, User, Documento, Simulado, Pergunta, Revisoes
 from app import db
 import uuid
-import markdown
 import os
 import datetime
-from openai import AzureOpenAI, OpenAI
+from openai import OpenAI
 from azure.storage.blob import BlobServiceClient
 import json 
-
-
-# client = AzureOpenAI(
-    # api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    # api_version="2024-07-01-preview",
-    # azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-# )
 
 client = OpenAI(
         api_key=os.environ.get("API_KEY"),
@@ -97,19 +89,6 @@ def feedSession():
     sessions = SessionStudie.query.filter_by(user=session["user"])
     return render_template("feed-sessions.html", sessions=sessions)
 
-@sessoes_bp.route("/download-db")
-def download_file():
-    # Diretório onde os documentos do Word estão localizados
-    directory_path = os.path.abspath("instance")
-
-    file_path = os.path.join(directory_path, "data-learn3.db")
-
-    # Verifica se o arquivo existe e retorna-o para download
-    if os.path.exists(file_path):
-        return send_file(file_path, as_attachment=True)
-    else:
-        return "Arquivo não encontrado", 404
-
 @sessoes_bp.route("/save-session", methods=["POST"])
 def saveSession():
     try:
@@ -124,25 +103,8 @@ def saveSession():
             print(f"Dia seguinte: {dia_seguinte.strftime('%Y-%m-%d %H:%M:%S')}")
             
             data_session = datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            resumo = markdown.markdown(request.form.get("resumo"))
             assunto = request.form.get("assunto")
 
-            #user_message = {"role": "user", "content": f"Tema: {assunto}. Minhas anotações: {resumo}"}
-
-                    # Usando o Azure OpenAI para gerar o resumo
-            # chat_completion = client.chat.completions.create(
-                                  #      model="gpt-4o",  # model = "deployment_name"
-                                    #    messages=[
-                                        #    {"role": "system", "content": "Você é uma Inteligência Artificial voltada para auxiliar nos estudos. "
-                                       #                     "Quando o usuário fornecer anotações, reestruture o conteúdo de forma clara, coerente e bem organizada, sem usar markdown. "
-                                               #                             "Caso o conteúdo esteja em branco, identifique o tema indicado e crie uma nova anotação explicativa. "
-                                                  #                                          "Essa nova anotação deve ensinar os conceitos fundamentais que o estudante precisa saber para compreender o assunto, "
-                                                        #                                                    "e também incluir uma parte dedicada especificamente ao tema central proposto."},
-                                   #         user_message
-                                   #     ]
-                                  #  )
-
-           # resposta = chat_completion.choices[0].message.content
 
             newSession = SessionStudie(user=user_db.id, assunto=assunto, resumo="", data=data_session, id=str(uuid.uuid4()), revisao=0)
             db.session.add(newSession)
@@ -181,30 +143,6 @@ def removeSession(id):
     db.session.commit()
 
     return redirect("/feed-session")
-
-@sessoes_bp.route("/api/get-resumo-ia", methods=["POST"])
-def getResumo():
-    try:
-        user = session["user"]
-        data = request.get_json()
-        anotacoes = data["notes"]
-        user_message = {"role": "user", "content": f"Minhas anotações: {anotacoes}"}
-
-        # Usando o Azure OpenAI para gerar o resumo
-        chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",  # model = "deployment_name"
-            messages=[
-                {"role": "system", "content": "Você é uma Inteligência Artificial para estudos. Com base nas anotações que o usuário enviar, você deverá criar um resumo bem estruturado do que ele aprendeu."},
-                user_message
-            ]
-        )
-
-        resposta = chat_completion.choices[0].message.content
-
-        return jsonify({"msg": resposta})
-
-    except Exception as e:
-        return jsonify({"msg": f"deu erro: {e}"})
     
 @sessoes_bp.route("/api/gerar-quiz", methods=["POST"])
 def gerarQuiz():
