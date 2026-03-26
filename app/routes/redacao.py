@@ -14,7 +14,6 @@ client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
 )
 
-
 # Helper functions
 def clean_json_response(content):
     """Remove markdown artifacts from JSON response"""
@@ -28,7 +27,6 @@ def extract_competency_score(response_data, competency_key):
     analise = data.get('analise', '')
     return f"{nota}\\{analise}"
 
-
 def extract_scores_from_corrections(correcoes):
     """Extract scores and dates from corrections"""
     notas = []
@@ -41,7 +39,6 @@ def extract_scores_from_corrections(correcoes):
         except Exception:
             continue
     return notas, datas
-
 
 def parse_ai_response(content):
     """Parse and validate AI response JSON"""

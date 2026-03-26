@@ -110,6 +110,8 @@ def saveSession():
             db.session.add(newSession)
             db.session.commit()
 
+            print("Sessão salva com sucesso")
+
             revisoes = [1, 7, 14, 30]
 
             for revisao in revisoes:
@@ -123,6 +125,21 @@ def saveSession():
 
     except Exception as e:
         return jsonify({"msg": f"deu erro: {e}"})
+
+@sessoes_bp.route("/api/get-session/<id>")
+def getSession(id):
+    sessiondb = SessionStudie.query.filter_by(id=id).first()
+    if not sessiondb:
+        return jsonify({"msg": "Sessão não encontrada"}), 404
+    
+    return jsonify({
+        "id": sessiondb.id,
+        "assunto": sessiondb.assunto,
+        "resumo": sessiondb.resumo,
+        "data": sessiondb.data
+    })
+
+
 
 @sessoes_bp.route("/update-anotacao", methods=["POST"])
 def updateAnotacao():
@@ -155,7 +172,7 @@ def gerarQuiz():
         assunto = request.form.get("assunto")
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",  # Nome do deployment configurado no Azure
+            model="openai/gpt-oss-120b",  
             messages=[
                 {"role": "system", "content": """
                 Você é um gerador de simulado para ENEM.

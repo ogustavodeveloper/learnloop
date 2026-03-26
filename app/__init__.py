@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 load_dotenv()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("BANCO_DE_DADOS")
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///learnloop.db"  # Substitua pelo caminho do seu banco de dados
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = '123'
 app.config['SESSION_PERMANENT'] = True  # Sessão permanente
