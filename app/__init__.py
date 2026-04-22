@@ -27,3 +27,4 @@ app.register_blueprint(users_bp)
 app.register_blueprint(sessoes_bp)
 app.register_blueprint(redacao_bp)
 app.register_blueprint(geral_bp)
+

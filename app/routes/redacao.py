@@ -323,5 +323,5 @@ def avaliar_redacao():
         db.session.commit()
         
         return jsonify({"msg": "success"})
-    except Exception as e:
+    except Exception as e:  
         return jsonify({"msg": "error", "details": str(e)}), 500

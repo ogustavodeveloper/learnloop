@@ -81,9 +81,6 @@ def addDoc():
     except Exception as e:
       return jsonify({"msg": f"deu erro: {e}"})
     
-
-    
-
 @sessoes_bp.route("/caderno-digital")
 def feedSession():
     sessions = SessionStudie.query.filter_by(user=session["user"])
@@ -138,8 +135,6 @@ def getSession(id):
         "resumo": sessiondb.resumo,
         "data": sessiondb.data
     })
-
-
 
 @sessoes_bp.route("/update-anotacao", methods=["POST"])
 def updateAnotacao():
@@ -209,7 +204,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta1"]["pergunta"],
             resposta_certa=assistant_response["pergunta1"]["respostaCerta"],
             alternativas=assistant_response["pergunta1"]["alternativas"],
-            resolucao=assistant_response["pergunta1"]["resolucao"],  # <-- Adicione esta linha
+            resolucao=assistant_response["pergunta1"]["resolucao"],  
             quiz=newQuiz.id
         )
 
@@ -221,7 +216,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta2"]["pergunta"],
             resposta_certa=assistant_response["pergunta2"]["respostaCerta"],
             alternativas=assistant_response["pergunta2"]["alternativas"],
-            resolucao=assistant_response["pergunta2"]["resolucao"],  # <-- Adicione esta linha
+            resolucao=assistant_response["pergunta2"]["resolucao"], 
             quiz=newQuiz.id
         )
 
@@ -233,7 +228,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta3"]["pergunta"],
             resposta_certa=assistant_response["pergunta3"]["respostaCerta"],
             alternativas=assistant_response["pergunta3"]["alternativas"],
-            resolucao=assistant_response["pergunta3"]["resolucao"],  # <-- Adicione esta linha
+            resolucao=assistant_response["pergunta3"]["resolucao"],  
             quiz=newQuiz.id
         )
 
@@ -245,7 +240,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta4"]["pergunta"],
             resposta_certa=assistant_response["pergunta4"]["respostaCerta"],
             alternativas=assistant_response["pergunta4"]["alternativas"],
-            resolucao=assistant_response["pergunta4"]["resolucao"],  # <-- Adicione esta linha
+            resolucao=assistant_response["pergunta4"]["resolucao"],  
             quiz=newQuiz.id
         )
 
@@ -257,7 +252,7 @@ def gerarQuiz():
             questao=assistant_response["pergunta5"]["pergunta"],
             resposta_certa=assistant_response["pergunta5"]["respostaCerta"],
             alternativas=assistant_response["pergunta5"]["alternativas"],
-            resolucao=assistant_response["pergunta5"]["resolucao"],  # <-- Adicione esta linha
+            resolucao=assistant_response["pergunta5"]["resolucao"],
             quiz=newQuiz.id
         )
 
