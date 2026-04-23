@@ -214,3 +214,6 @@ class Avaliacao(db.Model):
     self.comentario = comentario
     self.user = user
     self.correcao_id = correcao_id 
+
+with app.app_context():
+    db.create_all()  
