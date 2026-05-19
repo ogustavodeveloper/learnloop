@@ -11,7 +11,7 @@ from app.models import Corrections, Avaliacao
 
 client = OpenAI(
     api_key=os.environ.get("API_KEY"),
-    base_url="https://api.groq.com/openai/v1",
+    base_url="https://estudae-ia.openai.azure.com/",
 )
 
 # Helper functions
@@ -91,7 +91,7 @@ Retorne o resultado em JSON com este formato:
 Seja direto e objetivo."""
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="qwen/qwen3-32b ",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
@@ -191,7 +191,7 @@ def redacaoGuiada():
 
         sistema = (
             "Você é um assistente na produção de redações para o ENEM. Irá ajudar o usuário a saber o que escrever nas próximas linhas com base no que já foi escrito e de acordo com o tema e o estágio informado. "
-            "Responda objetivamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos. E o mais importante: não use markdown (negrito etc.)"
+            "Responda objetivamente e resumidamente, indicando o que o estudante pode escrever a seguir, mencionando recursos de repertório quando relevante. Não escreva a redação inteira; dê apenas as próximas linhas, dicas práticas e sugestões de argumentos. E o mais importante: não use markdown (negrito etc.)"
         )
 
         chat_completion = client.chat.completions.create(
