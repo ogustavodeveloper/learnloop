@@ -11,7 +11,7 @@ from app.models import Corrections, Avaliacao
 
 client = OpenAI(
     api_key=os.environ.get("API_KEY"),
-    base_url="https://estudae-ia.openai.azure.com/",
+    base_url="https://api.groq.com/openai/v1",
 )
 
 # Helper functions
@@ -91,7 +91,7 @@ Retorne o resultado em JSON com este formato:
 Seja direto e objetivo."""
 
         chat_completion = client.chat.completions.create(
-            model="qwen/qwen3-32b ",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
