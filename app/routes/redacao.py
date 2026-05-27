@@ -11,7 +11,7 @@ from app.models import Corrections, Avaliacao
 
 client = OpenAI(
     api_key=os.environ.get("API_KEY"),
-    base_url="https://api.groq.com/openai/v1",
+    base_url="https://estudae-ia.openai.azure.com/openai/v1",
 )
 
 # Helper functions
@@ -91,7 +91,7 @@ Retorne o resultado em JSON com este formato:
 Seja direto e objetivo."""
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="gpt-4.1",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
@@ -195,7 +195,7 @@ def redacaoGuiada():
         )
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": sistema},
                 {"role": "user", "content": f"Tema: {tema}. Estágio declarado pelo usuário: {estagio}. Redação atual: {texto}"}
