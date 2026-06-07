@@ -239,7 +239,7 @@ def recorrigir_competencia():
         user_prompt = f"Avalie apenas a {competency_prompts[competencia]} do ENEM para o texto abaixo, pois o estudante achou algum erro. Dê uma nota de 0 a 200 e um comentário breve (máx. 2 frases). Responda em JSON: {{'nota': int, 'analise': str}}. Tema: {correcao.tema}. Redação: {correcao.texto}"
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -271,7 +271,7 @@ def recorrigir_competencia():
         )
 
         chat_final = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt_final}
