@@ -33,13 +33,23 @@ def login():
     username = request.args.get("username")
     password = request.args.get("password")
     user = User.query.filter_by(username=username).first()
+    if not user:
+        error_message = {
+            "title": "Usuário não encontrado",
+            "description": "O nome de usuário fornecido não corresponde a nenhum registro em nosso sistema. Por favor, verifique o nome de usuário e tente novamente. Se não tem uma conta, crie uma para acessar todos os recursos do Estudaê!"
+        }
+        return render_template('error-base.html', error_message=error_message)
     if user and bcrypt_sha256.verify(password, user.password):
         session["user"] = user.id
         session.permanent = True
 
         return redirect("/")
     else:
-        return "<h1>Usuário ou senha incorretos</h1>"
+        error_message = {
+            "title": "Credenciais inválidas",
+            "description": "O nome de usuário ou senha fornecidos estão incorretos. Por favor, verifique suas credenciais e tente novamente."
+        }
+        return render_template('error-base.html', error_message=error_message)
 
 # Rota para logout
 @users_bp.route("/api/logout")
@@ -102,5 +112,3 @@ def settings_page():
     if not user:
         return redirect('/login')
     return render_template('settings.html', user=model_to_dict(user))
-
-

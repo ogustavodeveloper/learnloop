@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Estudaê - Ocorreu um erro{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ error_message.title }}</h1>
+    <p>{{ error_message.description }}</p>
+
+    {% if error_message.title == "Usuário não encontrado" %}
+        <button onclick="window.location.href='/signup'">Criar conta</button>
+    {% endif %}
+
+    <button onclick="window.location.href='/login'">Tentar novamente</button>
+</div>
+{% endblock %}

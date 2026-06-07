@@ -8,12 +8,14 @@ from datetime import datetime
 def homepage():
     
     try:
-        user = session['user']
-        correcoes_count = Corrections.query.filter_by(user=user).count()
-        sessoes_count = SessionStudie.query.filter_by(user=user).count()
-        quiz_count = Simulado.query.filter_by(user=user).count()
-        revisoes_pendentes = Revisoes.query.filter_by(user=user, data=datetime.now().date()).with_entities(Revisoes.assunto, Revisoes.id_session).all()
-        revisoes_pendentes = [{"assunto": r.assunto, "session_id": r.id_session} for r in revisoes_pendentes]
+        user = session.get("user_id")
+        if not user:
+            user = "Visitante"
+        correcoes_count = Corrections.query.filter_by(user=user).count() if user != "Visitante" else 0
+        sessoes_count = SessionStudie.query.filter_by(user=user).count() if user != "Visitante" else 0
+        quiz_count = Simulado.query.filter_by(user=user).count() if user != "Visitante" else 0
+        revisoes_pendentes = Revisoes.query.filter_by(user=user, data=datetime.now().date()).with_entities(Revisoes.assunto, Revisoes.id_session).all() if user != "Visitante" else []
+        revisoes_pendentes = [{"assunto": r.assunto, "session_id": r.id_session} for r in revisoes_pendentes] if user != "Visitante" else []
 
         return render_template("index.html", user=user, correcoes=str(correcoes_count), sessoes=str(sessoes_count), quiz=quiz_count, revisoes=revisoes_pendentes)
     except Exception:
