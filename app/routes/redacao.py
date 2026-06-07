@@ -77,7 +77,7 @@ def gerarAvaliacaoPorIa():
         if len(conteudo) < 60:
             return jsonify({"msg": "error", "details": "Sua redação precisa ser maior!"})
 
-        system_prompt = """Você é um corretor de redações do ENEM. Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 2 frases) por competência.
+        system_prompt = """Você é um corretor de redações disserativa-argumentativa do Exame Nacional do Ensino Médio (ENEM). Avalie a redação com base nas 5 competências do ENEM, atribuindo nota (0–200) e um comentário breve (máx. 4 frases) por competência.
 
 Retorne o resultado em JSON com este formato:
 {
@@ -94,7 +94,7 @@ Seja direto e objetivo."""
             model="gpt-4.1",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Título: {titulo}. Tema: {tema}. Redação: {conteudo}"}
+                {"role": "user", "content": f"Título da redação(opcional): {titulo if titulo else 'Não informado'}. Tema: {tema}. Redação completa: {conteudo}"}
             ],
             temperature=0.1,
             top_p=1.0
