@@ -8,7 +8,7 @@ from datetime import datetime
 def homepage():
     
     try:
-        user = session.get("user_id")
+        user = session.get("user")
         if not user:
             user = "Visitante"
         correcoes_count = Corrections.query.filter_by(user=user).count() if user != "Visitante" else 0
