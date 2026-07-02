@@ -183,8 +183,12 @@
 <div class="container">
   <h3>Olá, Estudante!</h3>
 
- 
+  {% if session["user"] %}
+  <div class="container">
+    <a href="https://google.com" target="_blank"><img src="{{ url_for('static', filename='img/banner.png') }}" alt="Banner"></a>
+  </div>
 
+  {% endif %}
   
   <div class="dados">
     <h3>Seu desempenho</h3>
