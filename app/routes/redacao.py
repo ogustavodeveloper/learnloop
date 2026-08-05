@@ -5,6 +5,7 @@ from openai import OpenAI
 import uuid
 import json
 import os
+import base64
 from datetime import datetime
 
 from app.models import Corrections, Avaliacao
@@ -47,6 +48,74 @@ def parse_ai_response(content):
         return json.loads(cleaned)
     except json.JSONDecodeError:
         return None
+
+@redacao_bp.route("/api/carregar-redacao", methods=["POST"])
+def carregar_redacao():
+    try:
+        if 'foto' not in request.files:
+            return jsonify({"msg": "error", "details": "Nenhuma imagem enviada."}), 400
+
+        foto = request.files['foto']
+        if foto.filename == '':
+            return jsonify({"msg": "error", "details": "Arquivo inválido."}), 400
+
+        mime_type = foto.mimetype or 'image/png'
+        file_bytes = foto.read()
+        if not file_bytes:
+            return jsonify({"msg": "error", "details": "Imagem vazia."}), 400
+
+        image_base64 = base64.b64encode(file_bytes).decode('utf-8')
+        image_data_url = f"data:{mime_type};base64,{image_base64}"
+
+        system_prompt = (
+            "Você é um transcritor de texto manuscrito. "
+            "Leia cuidadosamente a imagem enviada e retorne apenas o texto escrito, "
+            "sem markdown, sem explicações e sem nenhum comentário adicional."
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_data_url,
+                            "detail": "high"
+                        }
+                    }
+                ]
+            }
+        ]
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages,
+            temperature=0.0,
+            top_p=1.0
+        )
+
+        assistant_response = chat_completion.choices[0].message.content
+        if not assistant_response:
+            return jsonify({"msg": "error", "details": "O GPT não retornou texto."}), 500
+
+        if isinstance(assistant_response, list):
+            extracted_text = ''.join(
+                part.get('text', '') if isinstance(part, dict) else str(part)
+                for part in assistant_response
+            ).strip()
+        else:
+            extracted_text = str(assistant_response).strip()
+
+        if not extracted_text:
+            return jsonify({"msg": "error", "details": "Nenhum texto foi extraído da imagem."}), 500
+
+        return jsonify({"msg": "success", "redacao": extracted_text})
+
+    except Exception as e:
+        return jsonify({"msg": "error", "details": str(e)}), 500
+
 
 @redacao_bp.route("/avaliar-redacao")
 def redacionPage():

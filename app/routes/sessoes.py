@@ -6,14 +6,19 @@ from app import db
 import uuid
 import os
 import datetime
+import re
+import unicodedata
+import base64
+from io import BytesIO
+from urllib.parse import urlparse, unquote
 from openai import OpenAI
 from azure.storage.blob import BlobServiceClient
 import json 
 
 client = OpenAI(
-        api_key=os.environ.get("API_KEY"),
-            base_url="https://api.groq.com/openai/v1",
-            )
+    api_key=os.environ.get("API_KEY"),
+    base_url="https://estudae-ia.openai.azure.com/openai/v1",
+)
 
 
 def upload_to_azure_blob(container_name, file_path, blob_name):
@@ -46,6 +51,150 @@ def upload_to_azure_blob(container_name, file_path, blob_name):
         print(f"Erro ao enviar o arquivo: {e}")
         return None
 
+MAX_FILE_SIZE = 5 * 1024 * 1024
+ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif'}
+
+
+def normalize_text(text):
+    if text is None:
+        return ""
+    text = str(text)
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def is_valid_file_type(filename, mimetype=""):
+    if not filename:
+        return False
+    extension = os.path.splitext(filename.lower())[1]
+    if extension in ALLOWED_EXTENSIONS:
+        return True
+    return mimetype.startswith("image/")
+
+
+def extract_letter(answer_text):
+    if not answer_text:
+        return None
+    match = re.match(r"^\s*([a-zA-Z])\)\s*", answer_text)
+    if match:
+        return match.group(1).lower()
+    return None
+
+
+def download_blob_bytes_from_url(blob_url):
+    try:
+        connection_string = os.getenv('CONECTION')
+        if not connection_string:
+            return None
+
+        parsed = urlparse(blob_url)
+        path = parsed.path.lstrip('/')
+        parts = path.split('/', 1)
+        if len(parts) != 2:
+            return None
+
+        container_name, blob_name = parts
+        blob_name = unquote(blob_name)
+
+        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+        return blob_client.download_blob().readall()
+    except Exception:
+        return None
+
+
+def extract_text_from_bytes(filename, file_bytes, content_type=""):
+    if not file_bytes:
+        return ""
+
+    filename = filename.lower()
+    is_image = any(filename.endswith(ext) for ext in (".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif")) or content_type.startswith("image/")
+    is_pdf = filename.endswith(".pdf") or content_type == "application/pdf"
+
+    if is_image:
+        mime_type = content_type or "image/png"
+        image_data_url = f"data:{mime_type};base64,{base64.b64encode(file_bytes).decode('utf-8')}"
+
+        system_prompt = (
+            "Você é um transcritor de texto manuscrito. "
+            "Leia cuidadosamente a imagem enviada e retorne apenas o texto escrito, "
+            "sem markdown, sem explicações e sem nenhum comentário adicional."
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_data_url,
+                            "detail": "high"
+                        }
+                    }
+                ]
+            }
+        ]
+
+        chat_completion = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=messages,
+            temperature=0.0,
+            top_p=1.0
+        )
+
+        assistant_response = chat_completion.choices[0].message.content
+        if isinstance(assistant_response, list):
+            return ''.join(
+                part.get('text', '') if isinstance(part, dict) else str(part)
+                for part in assistant_response
+            ).strip()
+        return str(assistant_response).strip()
+
+    if is_pdf:
+        try:
+            from PyPDF2 import PdfReader
+        except ImportError:
+            return ""
+
+        try:
+            reader = PdfReader(BytesIO(file_bytes))
+            return "\n".join(page.extract_text() or "" for page in reader.pages).strip()
+        except Exception:
+            return ""
+
+    return ""
+
+
+def extract_text_from_uploaded_file(uploaded_file):
+    if not uploaded_file or not uploaded_file.filename:
+        return ""
+
+    if not is_valid_file_type(uploaded_file.filename, uploaded_file.mimetype or ""):
+        return ""
+
+    file_bytes = uploaded_file.read()
+    if not file_bytes or len(file_bytes) > MAX_FILE_SIZE:
+        return ""
+
+    return extract_text_from_bytes(uploaded_file.filename, file_bytes, uploaded_file.mimetype or "")
+
+
+def extract_text_from_document(doc):
+    if not doc or not doc.url or not doc.filename:
+        return ""
+
+    if not is_valid_file_type(doc.filename):
+        return ""
+
+    file_bytes = download_blob_bytes_from_url(doc.url)
+    if not file_bytes or len(file_bytes) > MAX_FILE_SIZE:
+        return ""
+    return extract_text_from_bytes(doc.filename, file_bytes)
+
+
 @sessoes_bp.route("/caderno/<id>")
 def planPage(id):
     try:
@@ -55,7 +204,19 @@ def planPage(id):
     sessao = SessionStudie.query.filter_by(id=id).first()
     documentos = Documento.query.filter_by(sessao=id).all()
     quizzes = Simulado.query.filter_by(sessao=id).all()
-    return render_template("session.html", documentos=documentos, sessao=sessao, quizzes=quizzes)
+    quiz_result = request.args.get("quiz_result")
+    quiz_result_id = request.args.get("quiz_id")
+    last_quiz = None
+    if quiz_result_id:
+        last_quiz = Simulado.query.filter_by(id=quiz_result_id).first()
+    return render_template(
+        "session.html",
+        documentos=documentos,
+        sessao=sessao,
+        quizzes=quizzes,
+        last_quiz=last_quiz,
+        quiz_result=quiz_result,
+    )
 
 @sessoes_bp.route("/add-doc", methods=["POST"])
 def addDoc():
@@ -163,15 +324,61 @@ def gerarQuiz():
         sessao = request.form.get("sessao")
         print(sessao)
         sessaodb = SessionStudie.query.filter_by(id=sessao).first()
-        anotacao = request.form.get("anotacao")
+        anotacao = request.form.get("anotacao") or ""
         assunto = request.form.get("assunto")
+        arquivo = request.files.get("arquivo_quiz")
+        arquivo_texto = ""
+
+        if arquivo and arquivo.filename:
+            if not is_valid_file_type(arquivo.filename, arquivo.mimetype or ""):
+                return jsonify({"msg": "error", "details": "Formato de arquivo inválido. Use PDF ou imagem."})
+            arquivo.seek(0, os.SEEK_END)
+            arquivo_size = arquivo.tell()
+            arquivo.seek(0)
+            if arquivo_size > MAX_FILE_SIZE:
+                return jsonify({"msg": "error", "details": "Arquivo muito grande. Máximo 5 MB."})
+
+        documentos = Documento.query.filter_by(sessao=sessao).all()
+        documentos_texto = []
+        for documento in documentos:
+            documento_texto = extract_text_from_document(documento)
+            if documento_texto:
+                documentos_texto.append(f"Documento {documento.filename}:\n{documento_texto}")
+
+        if arquivo and arquivo.filename:
+            usuario_texto = extract_text_from_uploaded_file(arquivo)
+            if usuario_texto:
+                documentos_texto.insert(0, f"Arquivo enviado pelo usuário {arquivo.filename}:\n{usuario_texto}")
+
+        if documentos_texto:
+            arquivo_texto = "\n\n".join(documentos_texto)
+            arquivo_texto = arquivo_texto[:2500] + ("\n... (texto truncado)" if len(arquivo_texto) > 2500 else "")
+
+        anotacao_limp = normalize_text(anotacao)
+        if not anotacao_limp and not arquivo_texto:
+            return jsonify({"msg": "error", "details": "Envie uma anotação ou um arquivo válido para gerar o quiz."})
+        if anotacao_limp and len(anotacao_limp) < 20 and not arquivo_texto:
+            return jsonify({"msg": "error", "details": "Anotação muito curta. Escreva pelo menos 20 caracteres ou envie um arquivo válido."})
+
+        prompt_content = [
+            f"Assunto: {assunto}.",
+            f"Anotação: {anotacao}."
+        ]
+        if arquivo and arquivo.filename:
+            prompt_content.append(f"Arquivo enviado: {arquivo.filename}.")
+        if documentos and not arquivo_texto:
+            prompt_content.append(f"{len(documentos)} arquivo(s) já estão salvos na sessão e devem ser considerados para a criação do quiz.")
+        if arquivo_texto:
+            prompt_content.append("Conteúdo extraído dos arquivos:")
+            prompt_content.append(arquivo_texto)
+        prompt_content.append("Use todas as informações disponíveis — especialmente a anotação do aluno — para criar questões de múltipla escolha no estilo ENEM com resolução detalhada.")
 
         chat_completion = client.chat.completions.create(
-            model="openai/gpt-oss-120b",  
+            model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": """
                 Você é um gerador de simulado para ENEM.
-                Sua função é criar 5 perguntas com base na anotação que o usuário mandar, e retornar nesse formato em JSON:
+                Sua função é criar 5 perguntas com base nas informações que o usuário mandar, e retornar nesse formato em JSON:
                  
                  {
                     "pergunta1": {
@@ -184,7 +391,7 @@ def gerarQuiz():
                  }
                  Atenção: cada pergunta deve obrigatoriamente conter uma resolução clara e detalhada no campo "resolucao".
                 """},
-                {"role": "user", "content": f"Assunto: {assunto}. Anotação: {anotacao}"}
+                {"role": "user", "content": " ".join(prompt_content)}
             ],
             temperature=0.1,
             top_p=1.0
@@ -282,6 +489,65 @@ def pageQuiz(id):
     perguntas = Pergunta.query.filter_by(quiz=quiz.id).all()
 
     return render_template("quiz.html", perguntas=perguntas, quiz=quiz)
+
+
+@sessoes_bp.route("/enviar_respostas/<id>", methods=["POST"])
+def enviar_respostas(id):
+    quiz = Simulado.query.filter_by(id=id).first()
+    if not quiz:
+        return "Quiz não encontrado", 404
+
+    perguntas = Pergunta.query.filter_by(quiz=quiz.id).all()
+    respostas = {}
+    for key, value in request.form.items():
+        if key.startswith("resposta[") and key.endswith("]"):
+            try:
+                index = int(key[len("resposta["):-1])
+            except ValueError:
+                continue
+            respostas[index] = value
+
+    total_acertos = 0
+    for idx, pergunta in enumerate(perguntas):
+        resposta_enviada = respostas.get(idx, "").strip()
+        if not resposta_enviada:
+            continue
+
+        correta = pergunta.resposta_certa or ""
+        options = [opt.strip() for opt in pergunta.alternativas.split("/") if opt.strip()]
+        norm_correta = normalize_text(correta)
+        norm_resposta = normalize_text(resposta_enviada)
+
+        acertou = False
+        if norm_resposta and norm_resposta == norm_correta:
+            acertou = True
+        else:
+            correta_letra = extract_letter(correta)
+            if not correta_letra:
+                for index, opt in enumerate(options):
+                    if normalize_text(opt) == norm_correta:
+                        correta_letra = extract_letter(opt) or chr(97 + index)
+                        break
+
+            resposta_letra = extract_letter(resposta_enviada)
+            if not resposta_letra:
+                for index, opt in enumerate(options):
+                    if normalize_text(opt) == norm_resposta:
+                        resposta_letra = extract_letter(opt) or chr(97 + index)
+                        break
+
+            if resposta_letra and correta_letra and resposta_letra == correta_letra:
+                acertou = True
+
+        if acertou:
+            total_acertos += 1
+
+    quiz.acertos = total_acertos
+    quiz.views = (quiz.views or 0) + 1
+    db.session.commit()
+
+    return redirect(f"/caderno/{quiz.sessao}?quiz_result={total_acertos}&quiz_id={quiz.id}")
+
 
 @sessoes_bp.route("/api/delete-doc/<id>", methods=["POST"])
 def delete_doc(id):

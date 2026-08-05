@@ -44,20 +44,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{{url_for('static', filename='js/duvidas.js')}}"></script>
     <style>
-      /* Footer fixo */
+      /* Footer no final da página */
       footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
         width: 100%;
         background: var(--corDestaque);
         color: #000;
         text-align: center;
         padding: 1em 0;
-        z-index: 100;
       }
       main {
-        padding-bottom: 80px; /* espaço para o footer */
+        padding-bottom: 0;
       }
       .nav-text {
         text-decoration: none;

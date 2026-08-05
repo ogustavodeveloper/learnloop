@@ -5,16 +5,59 @@
 #documentos {
    display: flex;
    flex-direction: column;
-   gap: 0.5em;
+   gap: 0.8em;
 }
 
 #doc {
-   padding: 9px;
-   border: 0.5px solid #fff;
-   border-radius: 6px;
+   padding: 12px 14px;
+   border: 1px solid rgba(255,255,255,0.12);
+   border-radius: 10px;
+   background: rgba(255,255,255,0.04);
 }
 
-a{
+.quiz-card {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 1rem;
+   padding: 14px 16px;
+   border: 1px solid rgba(92,255,118,0.3);
+   border-radius: 12px;
+   background: rgba(255,255,255,0.03);
+}
+
+.quiz-card a {
+   font-weight: 600;
+   color: #fff;
+   text-decoration: none;
+}
+
+.quiz-card button,
+#resumo-action,
+#quiz-result-card button {
+   padding: 10px 16px;
+   border: none;
+   border-radius: 10px;
+   cursor: pointer;
+   background: linear-gradient(90deg, #5CFF76, #34d95c);
+   color: #000;
+   font-weight: 700;
+}
+
+#quiz-result-card {
+   margin-top: 20px;
+   padding: 18px;
+   border-radius: 14px;
+   background: rgba(92,255,118,0.08);
+   border: 1px solid rgba(92,255,118,0.25);
+}
+
+#quiz-result-card h2,
+#quiz-result-card p {
+   margin: 0 0 10px 0;
+}
+
+a {
    color: #fff;
    text-decoration: none;
 }
@@ -35,6 +78,12 @@ a{
       <button onclick="abrirModalArquivo('{{sessao.id}}')">Adicionar</button>
    </div>
 <br>
+   <div class="quiz-file-upload" style="margin-bottom:18px;">
+      <label for="quiz-file" style="display:block; margin-bottom:6px; font-weight:700;">Arquivo de apoio para o quiz (imagem ou PDF):</label>
+      <input type="file" id="quiz-file" accept="image/*,application/pdf" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color:#fff;" />
+      <small style="display:block; margin-top:6px; color:#bbb;">O sistema usará o texto do arquivo junto com a anotação para criar as perguntas.</small>
+   </div>
+<br>
    <div id="documentos">
       <h2>Documentos salvos na sessão:</h2>
       {% if documentos %}
@@ -53,14 +102,28 @@ a{
    <div id="documentos">
       <h2>Quizzes criados na sessão:</h2>
       {% if quizzes %}
+      <div style="display:flex; flex-direction:column; gap:0.8em;">
       {% for quiz in quizzes %}
-      <a id="doc" href="/quiz/{{quiz.id}}">{{quiz.titulo}}</a>
+      <div class="quiz-card">
+         <a href="/quiz/{{quiz.id}}">{{quiz.titulo}}</a>
+      </div>
       {% endfor %}
-
+      </div>
       {% else %}
       <p>Nenhum.</p>
       {% endif %}
    </div>
+
+   {% if last_quiz and quiz_result %}
+   <div id="quiz-result-card">
+      <h2>Último resultado do quiz</h2>
+      <p><strong>Quiz:</strong> {{ last_quiz.titulo }}</p>
+      <p><strong>Acertos:</strong> {{ quiz_result }} / 5</p>
+      <p><strong>Percentual:</strong> {{ (quiz_result|int * 20) }}%</p>
+      <p><strong>Tentativas registradas:</strong> {{ last_quiz.views }}</p>
+      <button type="button" onclick="window.location.href='/quiz/{{ last_quiz.id }}'">Refazer este quiz</button>
+   </div>
+   {% endif %}
 
    <div>
       <button onclick="gerarQuiz('{{sessao.id}}')">Gerar Quiz</button>

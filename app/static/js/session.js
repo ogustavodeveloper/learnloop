@@ -38,8 +38,33 @@ function updateAnotacao(sessao) {
 
 function gerarQuiz(session) {
     const formData = new FormData()
-    const anotacao = document.getElementById("resumo").value
+    const anotacao = document.getElementById("resumo").value.trim()
     const assunto = document.getElementById("assunto").textContent
+    const arquivo = document.getElementById("quiz-file")?.files[0]
+
+    const MAX_SIZE = 5 * 1024 * 1024
+    const allowedTypes = ["application/pdf", "image/png", "image/jpg", "image/jpeg", "image/webp", "image/bmp", "image/gif"]
+
+    if (!anotacao && !arquivo) {
+        Swal.fire({title:'Atenção', text:'Envie uma anotação ou selecione um arquivo para gerar o quiz.', icon:'warning'});
+        return;
+    }
+    if (anotacao && anotacao.length < 20 && !arquivo) {
+        Swal.fire({title:'Atenção', text:'A anotação está muito curta. Escreva pelo menos 20 caracteres ou envie um arquivo.', icon:'warning'});
+        return;
+    }
+    if (arquivo) {
+        if (!allowedTypes.includes(arquivo.type)) {
+            Swal.fire({title:'Atenção', text:'Formato de arquivo inválido. Use PDF ou imagem.', icon:'warning'});
+            return;
+        }
+        if (arquivo.size > MAX_SIZE) {
+            Swal.fire({title:'Atenção', text:'Arquivo muito grande. O limite é 5 MB.', icon:'warning'});
+            return;
+        }
+        formData.append("arquivo_quiz", arquivo)
+    }
+
     formData.append("sessao", session)
     formData.append("anotacao", anotacao)
     formData.append("assunto", assunto)

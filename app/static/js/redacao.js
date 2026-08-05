@@ -84,27 +84,43 @@ function carregarFoto() {
     title: "Carregar Foto",
     description: "Faça o upload da foto de seu caderno aqui",
     html: `
-      <input type="file" id="foto" >
+      <input type="file" id="foto" accept="image/*">
     `,
     preConfirm: () => {
       const formData = new FormData();
       var foto = document.getElementById("foto");
+
+      if (!foto || !foto.files || foto.files.length === 0) {
+        Swal.showValidationMessage('Selecione uma imagem antes de enviar.');
+        return false;
+      }
+
       formData.append("foto", foto.files[0]);
 
-      return axios.post("/api/carregar-redacao", formData, {
-        headers: {
-          "Content-Type": `multipart/form-data; boundary=${formData._boundary}`
-        }
-      }).then((f) => {
+      return axios.post("/api/carregar-redacao", formData).then((f) => {
         if (f.data.msg === "success") {
-          document.getElementById("conteudo").value += f.data.redacao;
+          const textarea = document.getElementById("conteudo");
+          if (textarea) {
+            textarea.value = textarea.value ? `${textarea.value}\n${f.data.redacao}` : f.data.redacao;
+          }
+          Swal.fire({
+            title: 'Texto extraído com sucesso!',
+            text: 'A redação manuscrita foi convertida e adicionada ao campo de texto.',
+            icon: 'success'
+          });
+        } else {
+          Swal.fire({
+            title: "Erro ao carregar sua foto",
+            text: f.data.details || 'Ocorreu um problema ao processar a imagem.',
+            icon: "error"
+          });
         }
       }).catch((error) => {
         Swal.fire({
           title: "Erro ao carregar sua foto",
-          text: "Verifique se o arquivo está nos formatos: '.png, .jpeg, jpg' e tente novamente.",
+          text: "Verifique se o arquivo está nos formatos: '.png, .jpeg, .jpg' e tente novamente.",
           icon: "error"
-        })
+        });
       });
     }
   });

@@ -6,28 +6,51 @@
     .container { background: #050505; color: #fff; padding: 18px; border-radius: 8px; }
     /* Estilo das alternativas (cartões) */
     .alternativa-label {
-        display: block;
-        border: 1px solid #5CFF76;
-        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(92,255,118,0.45);
+        padding: 14px 18px;
         margin: 10px 0;
-        border-radius: 10px;
+        border-radius: 14px;
         cursor: pointer;
-        position: relative;
-        transition: transform 160ms ease, box-shadow 200ms ease, background-color 200ms ease;
-        background: #0b0b0b;
+        transition: transform 160ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease;
+        background: #090909;
     }
-    .alternativa-label:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
-    .alternativa-label input[type="radio"] { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0; width: 0; height: 0; }
-    .alternativa-label .alt-text { display: inline-block; margin-left: 36px; color: #ffffff; }
-    .alternativa-label input[type="radio"]:checked + .alt-text {
-        background: linear-gradient(90deg,#5CFF76,#34d95c);
-        color: #000;
-        padding: 8px 12px;
-        border-radius: 8px;
-        box-shadow: 0 10px 30px rgba(92,255,118,0.14);
+    .alternativa-label:hover { transform: translateY(-2px); box-shadow: 0 12px 22px rgba(0,0,0,0.35); border-color: #5CFF76; }
+    .alternativa-label input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .alternativa-label .alt-letter {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #5CFF76;
+        background: rgba(92,255,118,0.12);
+        flex-shrink: 0;
+    }
+    .alternativa-label .alt-text {
+        display: block;
+        color: #ffffff;
+        line-height: 1.4;
+        flex: 1;
+    }
+    .alternativa-label input[type="radio"]:checked ~ .alt-letter {
+        background: #5CFF76;
+        color: #07120c;
+        box-shadow: 0 8px 20px rgba(92,255,118,0.24);
+    }
+    .alternativa-label input[type="radio"]:checked ~ .alt-text {
+        color: #e7f7e7;
+    }
+    .alternativa-label.selected {
+        border-color: #5CFF76;
+        box-shadow: 0 14px 28px rgba(92,255,118,0.18);
     }
     /* quando estiver sem seleção */
-    .alternativa-label .alt-text { padding: 6px 8px; border-radius: 6px; }
+    .alternativa-label .alt-text { padding: 4px 0; }
 
     /* Estilo do banner de resumo */
     #quiz-summary { color: #fff; }
@@ -161,8 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
         questaoText.innerText = `Pergunta ${idx+1} de ${total}: ${questao}`;
         alternativasList.innerHTML = alternativas.map((alt,i) => {
             const checked = (respostasDoUsuario[idx] && respostasDoUsuario[idx] === alt) ? 'checked' : '';
+            const selectedClass = checked ? ' selected' : '';
             const name = `view_opt_${idx}`;
-            return `<label class="alternativa-label"><input type="radio" name="${name}" data-idx="${idx}" value="${alt}" ${checked}><span class="alt-text">${alt}</span></label>`;
+            return `<label class="alternativa-label${selectedClass}"><input type="radio" name="${name}" data-idx="${idx}" value="${alt}" ${checked}><span class="alt-letter">${String.fromCharCode(97 + i)}</span><span class="alt-text">${alt}</span></label>`;
         }).join('');
 
         progressText.innerText = `Progresso: ${idx+1}/${total}`;
@@ -177,8 +201,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target && e.target.matches('input[type="radio"][data-idx]')) {
             const idx = parseInt(e.target.dataset.idx, 10);
             respostasDoUsuario[idx] = e.target.value;
+            Array.from(alternativasList.querySelectorAll('.alternativa-label')).forEach(label => label.classList.remove('selected'));
             const label = e.target.closest('label');
             if (label) {
+                label.classList.add('selected');
                 label.style.transition = 'transform 220ms ease';
                 label.style.transform = 'scale(1.02)';
                 setTimeout(()=> label.style.transform = 'scale(1)', 220);
