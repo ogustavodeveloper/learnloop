@@ -160,7 +160,7 @@ Retorne o resultado em JSON com este formato:
 Seja direto e objetivo."""
 
         chat_completion = client.chat.completions.create(
-            model="gpt-4.1",
+            model="gpt-5",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Título da redação(opcional): {titulo if titulo else 'Não informado'}. Tema: {tema}. Redação completa: {conteudo}"}
