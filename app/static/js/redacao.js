@@ -1,4 +1,28 @@
+function mostrarConfetti() {
+  try {
+    if (typeof window.confetti !== 'function') {
+      console.warn('Confetti library is unavailable');
+      return null;
+    }
+
+    return window.confetti({
+      particleCount: 200,
+      spread: 160,
+      origin: { y: 0.6 },
+      zIndex: 2000
+    });
+  } catch (error) {
+    console.warn('Confetti failed', error);
+    return null;
+  }
+}
+
 function redacao() {
+  const clickConfetti = mostrarConfetti();
+  if (clickConfetti && typeof clickConfetti.catch === 'function') {
+    clickConfetti.catch((error) => console.warn('Confetti failed', error));
+  }
+
   var titulo = document.getElementById("titulo");
   var tema = document.getElementById("tema_custom");
   var conteudo = document.getElementById("conteudo");
@@ -44,18 +68,20 @@ function redacao() {
     tema: tema.value
   }).then((r) => {
     if (r.data.msg === "success") {
-      try {
-        // Fecha o modal de carregamento antes de mostrar os confetes
-        try { Swal.close(); } catch(e){/* ignore */}
-        if (typeof confetti === 'function') {
-          confetti({
-            particleCount: 200,
-            spread: 160,
-            origin: { y: 0.6 }
-          });
-        }
-      } catch (e) { console.warn('Confetti failed', e); }
-      setTimeout(function() { window.location.href = '/correcao/' + r.data.response; }, 1400);
+      const redirectToCorrection = () => {
+        window.location.href = '/correcao/' + r.data.response;
+      };
+
+      Swal.close();
+      const redirectConfetti = mostrarConfetti();
+      if (redirectConfetti && typeof redirectConfetti.then === 'function') {
+        redirectConfetti.then(redirectToCorrection).catch((error) => {
+          console.warn('Confetti failed', error);
+          redirectToCorrection();
+        });
+        return;
+      }
+      redirectToCorrection();
     } else {
       Swal.fire({
         title: "Erro ao corrigir sua redação",
